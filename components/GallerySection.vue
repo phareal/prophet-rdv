@@ -26,7 +26,13 @@ const photos = [
           :class="['gallery__item', p.span === 'wide' ? 'gallery__item--wide' : '']"
         >
           <div class="gallery__img-wrap">
-            <img :src="p.src" :alt="p.caption" class="gallery__img"
+            <img
+              :src="p.src"
+              :alt="p.caption"
+              class="gallery__img"
+              loading="lazy"
+              width="400"
+              height="240"
               @error="(e: Event) => ((e.target as HTMLImageElement).parentElement!.querySelector('.gallery__placeholder') as HTMLElement).style.display = 'flex'"
             />
             <div class="gallery__placeholder">
