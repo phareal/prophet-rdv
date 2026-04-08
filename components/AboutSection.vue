@@ -32,7 +32,7 @@ const gifts = [
             </div>
             <!-- Photo par-dessus, cachée si erreur -->
             <img
-              src="/images/prophet-main.jpg"
+              src="/images/prophet-main-2.jpeg"
               alt="Prophète Jeremiah Nahoum"
               class="about__portrait-img"
               @error="(e: Event) => ((e.target as HTMLImageElement).style.display='none')"

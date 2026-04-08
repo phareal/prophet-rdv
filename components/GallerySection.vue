@@ -1,11 +1,11 @@
 <script setup lang="ts">
 const photos = [
-  { src: '/images/gallery-1.jpg', caption: 'Croisade prophétique — Abidjan, 2024', span: 'wide' },
-  { src: '/images/gallery-2.jpg', caption: 'Consultation privée', span: 'normal' },
-  { src: '/images/gallery-3.jpg', caption: 'Séminaire des leaders — Paris', span: 'normal' },
-  { src: '/images/gallery-4.jpg', caption: 'Prière prophétique nationale', span: 'normal' },
-  { src: '/images/gallery-5.jpg', caption: 'Retraite spirituelle — Lagos', span: 'normal' },
-  { src: '/images/gallery-6.jpg', caption: 'Conférence internationale', span: 'wide' },
+  { src: '/images/prophet-main.jpg',   caption: 'Prophète Jeremiah Nahoum',          span: 'normal' },
+  { src: '/images/prophet-main-2.jpeg', caption: 'Consultation prophétique',           span: 'normal' },
+  { src: '/images/prophet-main-3.jpeg', caption: 'Le Conseiller des Rois',             span: 'normal' },
+  { src: '/images/prophet-main.jpg',   caption: 'Ministère international',            span: 'wide' },
+  { src: '/images/prophet-main-2.jpeg', caption: 'Prière et intercession',             span: 'normal' },
+  { src: '/images/prophet-main-3.jpeg', caption: 'Parole prophétique aux nations',     span: 'normal' },
 ]
 </script>
 
