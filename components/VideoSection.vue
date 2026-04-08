@@ -24,10 +24,11 @@ const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
 
       <!-- Skeleton pendant le chargement -->
       <div v-if="pending" class="video-section__grid">
-        <div v-for="n in 3" :key="n" class="vcard vcard--skeleton">
+        <div v-for="n in 3" :key="n" class="vcard vcard--skeleton" :style="`--delay:${(n-1)*0.18}s`">
           <div class="vcard__thumb vcard__thumb--skeleton" />
           <div class="vcard__body">
-            <span class="vcard__skeleton-line vcard__skeleton-line--short" />
+            <span class="vcard__skeleton-line vcard__skeleton-line--badge" />
+            <span class="vcard__skeleton-line vcard__skeleton-line--title" />
             <span class="vcard__skeleton-line" />
             <span class="vcard__skeleton-line vcard__skeleton-line--long" />
           </div>
@@ -249,28 +250,34 @@ const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
 
 /* Skeleton */
 @keyframes shimmer {
-  0%   { background-position: -600px 0; }
-  100% { background-position:  600px 0; }
+  0%   { background-position: -800px 0; }
+  100% { background-position:  800px 0; }
+}
+
+.vcard--skeleton .vcard__thumb--skeleton,
+.vcard--skeleton .vcard__skeleton-line {
+  animation-delay: var(--delay, 0s);
 }
 
 .vcard__thumb--skeleton {
-  background: linear-gradient(90deg, #EDE9E0 25%, #E0DBD0 50%, #EDE9E0 75%);
-  background-size: 600px 100%;
-  animation: shimmer 1.4s infinite linear;
+  background: linear-gradient(90deg, #EDE9E0 0%, #EDE9E0 30%, #D8D3C8 50%, #EDE9E0 70%, #EDE9E0 100%);
+  background-size: 800px 100%;
+  animation: shimmer 1.6s infinite ease-in-out;
 }
 
 .vcard__skeleton-line {
   display: block;
-  height: 0.75rem;
+  height: 0.7rem;
   border-radius: 3px;
-  background: linear-gradient(90deg, #EDE9E0 25%, #E0DBD0 50%, #EDE9E0 75%);
-  background-size: 600px 100%;
-  animation: shimmer 1.4s infinite linear;
+  background: linear-gradient(90deg, #EDE9E0 0%, #EDE9E0 30%, #D8D3C8 50%, #EDE9E0 70%, #EDE9E0 100%);
+  background-size: 800px 100%;
+  animation: shimmer 1.6s infinite ease-in-out;
   width: 75%;
 }
 
-.vcard__skeleton-line--short { width: 35%; }
-.vcard__skeleton-line--long  { width: 90%; }
+.vcard__skeleton-line--badge  { width: 28%; height: 0.55rem; }
+.vcard__skeleton-line--title  { width: 85%; height: 1rem; border-radius: 4px; }
+.vcard__skeleton-line--long   { width: 90%; }
 
 @media (max-width: 900px) {
   .video-section__grid { grid-template-columns: repeat(2, 1fr); }

@@ -1,0 +1,27 @@
+{
+	email {$ACME_EMAIL}
+	admin off
+}
+
+{$DOMAIN} {
+	encode zstd gzip
+
+	header {
+		X-Frame-Options SAMEORIGIN
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		-Server
+	}
+
+	# Cache immuable pour les assets Nuxt (js, css, images, fonts)
+	@static path_regexp \.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?|ttf|eot|webp)$
+	header @static Cache-Control "public, max-age=31536000, immutable"
+
+	# Tout → Nuxt
+	reverse_proxy app:3000 {
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+	}
+}

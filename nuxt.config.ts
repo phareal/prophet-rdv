@@ -13,6 +13,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     // Serveur uniquement
+    apiBridgeUrl: process.env.API_BRIDGE_URL || '',
     youtubeApiKey: process.env.YOUTUBE_API_KEY || '',
     youtubeChannelId: process.env.YOUTUBE_CHANNEL_ID || '',
     googleApiKey: process.env.GOOGLE_API_KEY || '',

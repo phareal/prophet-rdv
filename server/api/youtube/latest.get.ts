@@ -27,34 +27,18 @@ const MOCK_VIDEOS = [
 
 export default defineEventHandler(async () => {
   const config = useRuntimeConfig()
+  const bridgeUrl = config.apiBridgeUrl
 
-  if (!config.youtubeApiKey || !config.youtubeChannelId) {
-    console.warn('[YouTube] Clés API manquantes — retour des données mock')
+  if (!bridgeUrl) {
+    console.warn('[YouTube] API_BRIDGE_URL non défini — retour des données mock')
     return MOCK_VIDEOS
   }
 
-  const params = new URLSearchParams({
-    key: config.youtubeApiKey,
-    channelId: config.youtubeChannelId,
-    part: 'snippet',
-    order: 'date',
-    maxResults: '3',
-    type: 'video',
-  })
-
-  const res = await $fetch<{ items: any[] }>(
-    `https://www.googleapis.com/youtube/v3/search?${params}`
-  )
-
-  return res.items.map((item: any) => ({
-    id: item.id.videoId,
-    title: item.snippet.title,
-    desc: item.snippet.description,
-    thumbnail:
-      item.snippet.thumbnails?.high?.url ||
-      item.snippet.thumbnails?.medium?.url ||
-      `https://img.youtube.com/vi/${item.id.videoId}/hqdefault.jpg`,
-    type: item.snippet.liveBroadcastContent === 'live' ? 'En direct' : 'Vidéo',
-    duration: '',
-  }))
+  try {
+    const data = await $fetch<typeof MOCK_VIDEOS>(`${bridgeUrl}/youtube/latest`)
+    return data
+  } catch (err: any) {
+    console.warn('[YouTube] Bridge indisponible, retour des données mock:', err?.message)
+    return MOCK_VIDEOS
+  }
 })

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
-import { CalendarIcon, Loader2, Send } from 'lucide-vue-next'
+import { CalendarIcon, Loader2, Send, CalendarDays, MapPin, Clock } from 'lucide-vue-next'
 import { appointmentSchema, HEURES, MODES_PAIEMENT } from '@/lib/validations'
 import { formatDateFr, buildWhatsAppUrl } from '@/lib/utils'
 import { useToast } from '@/components/ui/toast/use-toast'
@@ -14,9 +14,31 @@ const { toast } = useToast()
 const isSubmitting = ref(false)
 const calendarOpen = ref(false)
 
+// ── Contexte événement (query params) ────────────────────────
+const route = useRoute()
+const eventContext = computed(() => {
+  const { event, eventDate, eventLieu, eventHeure } = route.query
+  if (!event) return null
+  return {
+    title: event as string,
+    date: eventDate ? new Date(eventDate as string) : null,
+    lieu: eventLieu as string ?? '',
+    heure: eventHeure as string ?? '',
+  }
+})
+
 const { handleSubmit, errors, values, setFieldValue, defineField } = useForm({
   validationSchema: toTypedSchema(appointmentSchema),
   initialValues: { nom:'', prenom:'', email:'', telephone:'', pays:'', heure:'', typeConsultation:'', modePaiement: undefined, message:'' },
+})
+
+onMounted(() => {
+  const ctx = eventContext.value
+  if (!ctx) return
+  if (ctx.date) setFieldValue('date', ctx.date)
+  setFieldValue('typeConsultation', `Inscription — ${ctx.title}`)
+  const detail = [ctx.title, ctx.lieu].filter(Boolean).join(' — ')
+  setFieldValue('message', `Inscription pour : ${detail}`)
 })
 
 const [nom, nomAttrs]         = defineField('nom')
@@ -75,15 +97,27 @@ const onSubmit = handleSubmit(async (vals) => {
 
       <!-- ── EN-TÊTE ── -->
       <header class="fp__header">
-        <p class="fp__eyebrow">Rendez-vous</p>
+        <p class="fp__eyebrow">{{ eventContext ? 'Inscription événement' : 'Rendez-vous' }}</p>
         <h2 class="fp__heading">
-          Demander une<br>
-          <span class="fp__heading-accent">consultation</span>
+          {{ eventContext ? 'Réserver ma' : 'Demander une' }}<br>
+          <span class="fp__heading-accent">{{ eventContext ? 'place' : 'consultation' }}</span>
         </h2>
         <p class="fp__subheading">
           Remplissez le formulaire. Vous recevrez une confirmation par email et WhatsApp.
         </p>
       </header>
+
+      <!-- ── BANDEAU ÉVÉNEMENT ── -->
+      <div v-if="eventContext" class="fp__event-banner">
+        <CalendarDays :size="14" class="fp__event-banner__icon" />
+        <div class="fp__event-banner__body">
+          <span class="fp__event-banner__title">{{ eventContext.title }}</span>
+          <span class="fp__event-banner__meta">
+            <MapPin :size="11" />{{ eventContext.lieu }}
+            <Clock :size="11" />{{ eventContext.heure }}
+          </span>
+        </div>
+      </div>
 
       <form @submit.prevent="onSubmit" novalidate class="fp__form">
 
@@ -92,11 +126,16 @@ const onSubmit = handleSubmit(async (vals) => {
           <legend class="fp__section-legend">
             Type de consultation <span class="fp__required">*</span>
           </legend>
-          <ConsultationPicker
-            :model-value="selectedConsultation"
-            @update:model-value="setFieldValue('typeConsultation', $event)"
-          />
-          <p v-if="errors.typeConsultation" class="fp__error">{{ errors.typeConsultation }}</p>
+          <template v-if="eventContext">
+            <div class="fp__consultation-badge">{{ selectedConsultation }}</div>
+          </template>
+          <template v-else>
+            <ConsultationPicker
+              :model-value="selectedConsultation"
+              @update:model-value="setFieldValue('typeConsultation', $event)"
+            />
+            <p v-if="errors.typeConsultation" class="fp__error">{{ errors.typeConsultation }}</p>
+          </template>
         </fieldset>
 
         <div class="fp__rule" />
@@ -155,7 +194,8 @@ const onSubmit = handleSubmit(async (vals) => {
             <Popover v-model:open="calendarOpen">
               <PopoverTrigger as-child>
                 <button type="button"
-                        :class="['fp__input fp__input--btn', !selectedDate && 'fp__input--placeholder', errors.date && 'fp__input--err']">
+                        :disabled="!!eventContext?.date"
+                        :class="['fp__input fp__input--btn', !selectedDate && 'fp__input--placeholder', errors.date && 'fp__input--err', eventContext?.date && 'fp__input--locked']">
                   <CalendarIcon class="fp__cal-icon" :size="15" />
                   <span>{{ dateLabel }}</span>
                 </button>
@@ -295,6 +335,50 @@ const onSubmit = handleSubmit(async (vals) => {
   margin-top: 0.3rem;
 }
 
+/* ── Bandeau événement ───────────────────────────────────── */
+.fp__event-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: var(--r2);
+  background: rgba(176,122,20,0.06);
+  border: 1px solid rgba(176,122,20,0.22);
+  margin-bottom: 0.25rem;
+}
+.fp__event-banner__icon { color: #B07A14; flex-shrink: 0; margin-top: 2px; }
+.fp__event-banner__body { display: flex; flex-direction: column; gap: 0.25rem; }
+.fp__event-banner__title {
+  font-family: var(--f-display);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #0C1528;
+  letter-spacing: 0.02em;
+}
+.fp__event-banner__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.6rem;
+  color: #5C5752;
+  letter-spacing: 0.05em;
+}
+.fp__event-banner__meta svg { opacity: 0.6; }
+
+.fp__consultation-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--r2);
+  border: 1px solid rgba(176,122,20,0.3);
+  background: rgba(176,122,20,0.06);
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: #B07A14;
+}
+
 /* ── Formulaire ──────────────────────────────────────────── */
 .fp__form {
   flex: 1;
@@ -392,6 +476,7 @@ const onSubmit = handleSubmit(async (vals) => {
   font-size: 0.88rem;
 }
 .fp__input--placeholder { color: var(--text-faint) !important; font-style: italic; }
+.fp__input--locked { opacity: 0.7; cursor: default; background: #F6F4EF !important; }
 .fp__input--textarea {
   resize: none;
   line-height: 1.45;
