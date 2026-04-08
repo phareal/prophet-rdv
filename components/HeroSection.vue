@@ -1,69 +1,100 @@
 <script setup lang="ts">
-import { ChevronDown, MessageCircle, Calendar } from 'lucide-vue-next'
+import { ChevronDown, Calendar, Play } from 'lucide-vue-next'
 </script>
 
 <template>
   <section id="accueil" class="hero">
-    <!-- Arrière-plan animé -->
+    <!-- Arrière-plan -->
     <div class="hero__bg">
       <div class="hero__bg-radial hero__bg-radial--gold" />
-      <div class="hero__bg-radial hero__bg-radial--green" />
-      <div class="hero__bg-grid" />
+      <div class="hero__bg-radial hero__bg-radial--ivory" />
     </div>
 
     <!-- Lignes décoratives -->
     <div class="hero__deco hero__deco--tl" />
     <div class="hero__deco hero__deco--br" />
 
-    <!-- Contenu centré -->
-    <div class="hero__content">
-      <!-- Badge -->
-      <div class="hero__badge">
-        <span class="hero__badge-dot" />
-        <span>Consultation Prophétique Internationale</span>
+    <div class="hero__inner">
+      <!-- Colonne gauche : texte -->
+      <div class="hero__text">
+        <div class="hero__badge">
+          <span class="hero__badge-dot" />
+          <span>Consultation Prophétique Internationale</span>
+        </div>
+
+        <h1 class="hero__title">
+          <span class="hero__title-pre">Prophète</span>
+          <span class="hero__title-name">Jeremiah<br>Nahoum</span>
+        </h1>
+
+        <p class="hero__subtitle">"Le Conseiller des Rois"</p>
+
+        <blockquote class="hero__verse">
+          <p>"Il révèle les choses profondes et cachées ; il connaît ce qui est dans les ténèbres, et la lumière demeure avec lui."</p>
+          <cite>— Daniel 2:22</cite>
+        </blockquote>
+
+        <div class="hero__actions">
+          <a href="/rdv" class="hero__btn hero__btn--primary">
+            <Calendar :size="16" />
+            <span>Prendre Rendez-vous</span>
+          </a>
+          <a href="#video" class="hero__btn hero__btn--ghost">
+            <Play :size="14" />
+            <span>Voir le ministère</span>
+          </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="hero__stats">
+          <div class="hero__stat">
+            <span class="hero__stat-num">40+</span>
+            <span class="hero__stat-label">Nations</span>
+          </div>
+          <div class="hero__stat-sep" />
+          <div class="hero__stat">
+            <span class="hero__stat-num">15+</span>
+            <span class="hero__stat-label">Ans de ministère</span>
+          </div>
+          <div class="hero__stat-sep" />
+          <div class="hero__stat">
+            <span class="hero__stat-num">10K+</span>
+            <span class="hero__stat-label">Consultations</span>
+          </div>
+        </div>
       </div>
 
-      <!-- Titre principal -->
-      <h1 class="hero__title">
-        <span class="hero__title-pre">Prophète</span>
-        <span class="hero__title-name">Jeremiah<br>Nahoum</span>
-      </h1>
-
-      <!-- Sous-titre -->
-      <p class="hero__subtitle">"Le Conseiller des Rois"</p>
-
-      <!-- Verset -->
-      <blockquote class="hero__verse">
-        <p>"Il révèle les choses profondes et cachées ; il connaît ce qui est dans les ténèbres,<br>et la lumière demeure avec lui."</p>
-        <cite>— Daniel 2:22</cite>
-      </blockquote>
-
-      <!-- Actions -->
-      <div class="hero__actions">
-        <a href="/rdv" class="hero__btn hero__btn--primary">
-          <Calendar :size="16" />
-          <span>Prendre Rendez-vous</span>
-        </a>
-        <a href="#apropos" class="hero__btn hero__btn--ghost">
-          <span>Découvrir le ministère</span>
-        </a>
-      </div>
-
-      <!-- Stats rapides -->
-      <div class="hero__quick-stats">
-        <div class="hero__qs-item">
-          <span class="hero__qs-num">40+</span>
-          <span class="hero__qs-label">Nations</span>
+      <!-- Colonne droite : portrait -->
+      <div class="hero__portrait-wrap">
+        <div class="hero__portrait-frame">
+          <div class="hero__portrait-corner hero__portrait-corner--tl" />
+          <div class="hero__portrait-corner hero__portrait-corner--br" />
+          <div class="hero__portrait">
+            <img
+              src="/images/prophet-main.jpg"
+              alt="Prophète Jeremiah Nahoum"
+              class="hero__portrait-img"
+              @error="(e: Event) => ((e.target as HTMLImageElement).style.display = 'none')"
+            />
+            <div class="hero__portrait-placeholder">
+              <svg viewBox="0 0 200 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="200" height="260" fill="#F6F4EF"/>
+                <ellipse cx="100" cy="88" rx="42" ry="45" fill="#EDE9E0" stroke="#D4C9A8" stroke-width="1"/>
+                <path d="M22 250 C22 180 58 148 100 148 C142 148 178 180 178 250" fill="#EDE9E0" stroke="#D4C9A8" stroke-width="1"/>
+              </svg>
+              <p class="hero__portrait-hint">400 × 500 px</p>
+            </div>
+          </div>
+          <div class="hero__portrait-badge">
+            <span class="hero__portrait-badge-cross">✦</span>
+            <span>Prophète Jeremiah Nahoum</span>
+          </div>
         </div>
-        <div class="hero__qs-sep" />
-        <div class="hero__qs-item">
-          <span class="hero__qs-num">15+</span>
-          <span class="hero__qs-label">Ans de ministère</span>
-        </div>
-        <div class="hero__qs-sep" />
-        <div class="hero__qs-item">
-          <span class="hero__qs-num">10K+</span>
-          <span class="hero__qs-label">Consultations</span>
+
+        <!-- Carte flottante verset -->
+        <div class="hero__float-card">
+          <p class="hero__float-verse">"Avant que je te forme dans le ventre de ta mère, je te connaissais"</p>
+          <span class="hero__float-ref">— Jérémie 1:5</span>
         </div>
       </div>
     </div>
@@ -80,15 +111,14 @@ import { ChevronDown, MessageCircle, Calendar } from 'lucide-vue-next'
 .hero {
   position: relative;
   min-height: 100vh;
+  background: #FDFCF9;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  overflow: hidden;
-  background: #080D1A;
 }
 
-/* ── Arrière-plan ─────────────────────────────────── */
+/* Fond */
 .hero__bg {
   position: absolute;
   inset: 0;
@@ -98,72 +128,64 @@ import { ChevronDown, MessageCircle, Calendar } from 'lucide-vue-next'
 .hero__bg-radial {
   position: absolute;
   border-radius: 50%;
-  filter: blur(100px);
-  opacity: 0.12;
+  filter: blur(90px);
 }
 
 .hero__bg-radial--gold {
-  width: 700px;
-  height: 700px;
-  top: -200px;
-  left: -200px;
-  background: radial-gradient(circle, #C8921C 0%, transparent 70%);
-  animation: pulse-slow 8s ease-in-out infinite;
-}
-
-.hero__bg-radial--green {
   width: 600px;
   height: 600px;
-  bottom: -150px;
-  right: -150px;
-  background: radial-gradient(circle, #0EAA72 0%, transparent 70%);
-  animation: pulse-slow 10s ease-in-out infinite 2s;
+  top: -150px;
+  right: -100px;
+  background: radial-gradient(circle, rgba(200, 146, 28, 0.08) 0%, transparent 70%);
 }
 
-.hero__bg-grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
-  background-size: 60px 60px;
+.hero__bg-radial--ivory {
+  width: 500px;
+  height: 500px;
+  bottom: -100px;
+  left: -100px;
+  background: radial-gradient(circle, rgba(176, 122, 20, 0.06) 0%, transparent 70%);
 }
 
-/* ── Décorations ──────────────────────────────────── */
+/* Décorations */
 .hero__deco {
   position: absolute;
   pointer-events: none;
 }
 
 .hero__deco--tl {
-  top: 6rem;
-  left: 4rem;
-  width: 120px;
-  height: 120px;
-  border-top: 1px solid rgba(200, 146, 28, 0.18);
-  border-left: 1px solid rgba(200, 146, 28, 0.18);
+  top: 8rem;
+  left: 3rem;
+  width: 100px;
+  height: 100px;
+  border-top: 1px solid rgba(176, 122, 20, 0.2);
+  border-left: 1px solid rgba(176, 122, 20, 0.2);
 }
 
 .hero__deco--br {
-  bottom: 6rem;
-  right: 4rem;
-  width: 80px;
-  height: 80px;
-  border-bottom: 1px solid rgba(14, 170, 114, 0.18);
-  border-right: 1px solid rgba(14, 170, 114, 0.18);
+  bottom: 5rem;
+  right: 3rem;
+  width: 70px;
+  height: 70px;
+  border-bottom: 1px solid rgba(12, 21, 40, 0.1);
+  border-right: 1px solid rgba(12, 21, 40, 0.1);
 }
 
-/* ── Contenu ──────────────────────────────────────── */
-.hero__content {
+/* Layout */
+.hero__inner {
   position: relative;
   z-index: 2;
-  text-align: center;
-  max-width: 760px;
-  padding: 8rem 2rem 4rem;
-  animation: fade-up 0.7s var(--ease) both;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 8rem 2rem 5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: center;
 }
 
-/* ── Badge ────────────────────────────────────────── */
+/* --- Texte --- */
 .hero__badge {
   display: inline-flex;
   align-items: center;
@@ -172,95 +194,88 @@ import { ChevronDown, MessageCircle, Calendar } from 'lucide-vue-next'
   font-size: 0.6rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(200, 146, 28, 0.7);
-  border: 1px solid rgba(200, 146, 28, 0.18);
+  color: #B07A14;
+  border: 1px solid rgba(176, 122, 20, 0.25);
+  background: rgba(176, 122, 20, 0.05);
   padding: 0.4rem 0.9rem;
   border-radius: 2px;
-  margin-bottom: 2rem;
+  margin-bottom: 1.75rem;
 }
 
 .hero__badge-dot {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #C8921C;
+  background: #B07A14;
   animation: blink 2.5s ease-in-out infinite;
 }
 
-/* ── Titre ────────────────────────────────────────── */
 .hero__title {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 0;
-  margin-bottom: 1.1rem;
+  margin-bottom: 0.85rem;
 }
 
 .hero__title-pre {
   font-family: var(--f-display);
   font-weight: 400;
-  font-size: clamp(0.9rem, 2vw, 1.15rem);
+  font-size: clamp(0.85rem, 1.5vw, 1rem);
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: rgba(232, 228, 220, 0.35);
+  color: #9B9590;
   line-height: 1;
 }
 
 .hero__title-name {
   font-family: var(--f-display);
   font-weight: 700;
-  font-size: clamp(3.2rem, 8vw, 6.5rem);
-  letter-spacing: 0.04em;
-  line-height: 0.9;
-  color: #F4F0EB;
-  text-shadow: 0 0 80px rgba(200, 146, 28, 0.12);
+  font-size: clamp(2.8rem, 5.5vw, 4.8rem);
+  letter-spacing: 0.03em;
+  line-height: 0.92;
+  color: #0C1528;
 }
 
-/* ── Sous-titre ───────────────────────────────────── */
 .hero__subtitle {
   font-family: var(--f-serif);
   font-style: italic;
-  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
-  color: rgba(200, 146, 28, 0.65);
-  margin-bottom: 2rem;
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  color: #B07A14;
+  margin-bottom: 1.75rem;
 }
 
-/* ── Verset ───────────────────────────────────────── */
 .hero__verse {
-  max-width: 540px;
-  margin: 0 auto 2.5rem;
-  padding: 1rem 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-left: 2px solid rgba(200, 146, 28, 0.3);
-  background: rgba(255, 255, 255, 0.02);
+  max-width: 420px;
+  padding: 0.9rem 1.1rem;
+  border-left: 2px solid rgba(176, 122, 20, 0.35);
+  background: rgba(176, 122, 20, 0.04);
   border-radius: 0 4px 4px 0;
-  text-align: left;
+  margin-bottom: 2rem;
 }
 
 .hero__verse p {
   font-family: var(--f-serif);
   font-style: italic;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   line-height: 1.65;
-  color: rgba(232, 228, 220, 0.5);
-  margin-bottom: 0.5rem;
+  color: #6B6560;
+  margin-bottom: 0.4rem;
 }
 
 .hero__verse cite {
   font-family: var(--f-mono);
   font-size: 0.58rem;
   letter-spacing: 0.1em;
-  color: rgba(200, 146, 28, 0.45);
+  color: #B07A14;
   font-style: normal;
 }
 
-/* ── Actions ──────────────────────────────────────── */
+/* Actions */
 .hero__actions {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 3rem;
+  gap: 0.85rem;
+  margin-bottom: 2.25rem;
   flex-wrap: wrap;
 }
 
@@ -273,80 +288,183 @@ import { ChevronDown, MessageCircle, Calendar } from 'lucide-vue-next'
   letter-spacing: 0.1em;
   text-transform: uppercase;
   text-decoration: none;
-  padding: 0.85rem 1.8rem;
+  padding: 0.85rem 1.6rem;
   border-radius: 2px;
-  transition: opacity var(--t), transform var(--t), background var(--t);
+  transition: opacity var(--t), transform var(--t);
 }
 
 .hero__btn--primary {
-  background: linear-gradient(135deg, #F0C040 0%, #C8921C 100%);
-  color: #080D1A;
+  background: #0C1528;
+  color: #FDFCF9;
   font-weight: 600;
-  box-shadow: 0 8px 32px rgba(200, 146, 28, 0.22);
+  box-shadow: 0 4px 20px rgba(12, 21, 40, 0.18);
 }
 
 .hero__btn--primary:hover {
-  opacity: 0.9;
+  opacity: 0.88;
   transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(200, 146, 28, 0.3);
 }
 
 .hero__btn--ghost {
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: rgba(232, 228, 220, 0.6);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid #D4CFC6;
+  color: #4B4540;
+  background: #fff;
 }
 
 .hero__btn--ghost:hover {
-  border-color: rgba(255, 255, 255, 0.25);
-  color: rgba(232, 228, 220, 0.9);
-  background: rgba(255, 255, 255, 0.06);
+  border-color: #B07A14;
+  color: #B07A14;
+  transform: translateY(-1px);
 }
 
-/* ── Stats rapides ────────────────────────────────── */
-.hero__quick-stats {
+/* Stats */
+.hero__stats {
   display: inline-flex;
   align-items: center;
-  gap: 2rem;
-  padding: 1rem 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.025);
+  gap: 1.75rem;
 }
 
-.hero__qs-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.15rem;
-}
+.hero__stat { display: flex; flex-direction: column; gap: 0.1rem; }
 
-.hero__qs-num {
+.hero__stat-num {
   font-family: var(--f-display);
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: var(--gold);
+  color: #B07A14;
   line-height: 1;
 }
 
-.hero__qs-label {
+.hero__stat-label {
   font-family: var(--f-mono);
   font-size: 0.55rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(232, 228, 220, 0.3);
+  color: #9B9590;
 }
 
-.hero__qs-sep {
+.hero__stat-sep {
   width: 1px;
-  height: 32px;
-  background: rgba(255, 255, 255, 0.08);
+  height: 30px;
+  background: #E5E2DB;
 }
 
-/* ── Scroll ───────────────────────────────────────── */
+/* --- Portrait --- */
+.hero__portrait-wrap {
+  position: relative;
+}
+
+.hero__portrait-frame {
+  position: relative;
+  padding: 0.75rem;
+}
+
+.hero__portrait-corner {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  pointer-events: none;
+}
+
+.hero__portrait-corner--tl {
+  top: 0; left: 0;
+  border-top: 1px solid #B07A14;
+  border-left: 1px solid #B07A14;
+}
+
+.hero__portrait-corner--br {
+  bottom: 0; right: 0;
+  border-bottom: 1px solid rgba(12, 21, 40, 0.2);
+  border-right: 1px solid rgba(12, 21, 40, 0.2);
+}
+
+.hero__portrait {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  border: 1px solid #E5E2DB;
+  aspect-ratio: 4/5;
+  background: #F6F4EF;
+}
+
+.hero__portrait-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hero__portrait-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.hero__portrait-placeholder svg { width: 100%; height: 100%; }
+
+.hero__portrait-hint {
+  position: absolute;
+  bottom: 1rem;
+  font-family: var(--f-mono);
+  font-size: 0.55rem;
+  color: #C4BAA0;
+}
+
+.hero__portrait-badge {
+  position: absolute;
+  bottom: -0.65rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--f-display);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #1A1714;
+  background: #fff;
+  padding: 0.45rem 1rem;
+  border: 1px solid #E5E2DB;
+  border-radius: 2px;
+  white-space: nowrap;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.hero__portrait-badge-cross { color: #B07A14; }
+
+.hero__float-card {
+  margin-top: 1.75rem;
+  padding: 0.9rem 1.1rem;
+  background: #fff;
+  border: 1px solid #E5E2DB;
+  border-radius: 4px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+}
+
+.hero__float-verse {
+  font-family: var(--f-serif);
+  font-style: italic;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #6B6560;
+  margin-bottom: 0.35rem;
+}
+
+.hero__float-ref {
+  font-family: var(--f-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.1em;
+  color: #B07A14;
+}
+
+/* Scroll */
 .hero__scroll {
   position: absolute;
-  bottom: 2.5rem;
+  bottom: 2rem;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -354,12 +472,12 @@ import { ChevronDown, MessageCircle, Calendar } from 'lucide-vue-next'
   align-items: center;
   gap: 0.3rem;
   text-decoration: none;
-  color: rgba(232, 228, 220, 0.25);
+  color: #C4BAA0;
   transition: color var(--t);
   z-index: 2;
 }
 
-.hero__scroll:hover { color: rgba(232, 228, 220, 0.5); }
+.hero__scroll:hover { color: #9B9590; }
 
 .hero__scroll-label {
   font-family: var(--f-mono);
@@ -370,12 +488,7 @@ import { ChevronDown, MessageCircle, Calendar } from 'lucide-vue-next'
 
 .hero__scroll-icon { animation: bounce 2s ease-in-out infinite; }
 
-/* ── Keyframes ────────────────────────────────────── */
-@keyframes pulse-slow {
-  0%, 100% { opacity: 0.10; transform: scale(1); }
-  50% { opacity: 0.16; transform: scale(1.08); }
-}
-
+/* Keyframes */
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.3; }
@@ -386,11 +499,20 @@ import { ChevronDown, MessageCircle, Calendar } from 'lucide-vue-next'
   50% { transform: translateY(5px); }
 }
 
-/* ── Responsive ───────────────────────────────────── */
-@media (max-width: 640px) {
-  .hero__content { padding: 7rem 1.5rem 3rem; }
-  .hero__quick-stats { gap: 1.2rem; padding: 0.85rem 1.25rem; }
-  .hero__verse { text-align: center; }
-  .hero__deco--tl, .hero__deco--br { display: none; }
+/* Responsive */
+@media (max-width: 900px) {
+  .hero__inner {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    padding: 7rem 1.5rem 4rem;
+    text-align: center;
+  }
+  .hero__badge { margin-left: auto; margin-right: auto; }
+  .hero__title { align-items: center; }
+  .hero__verse { text-align: left; max-width: 100%; }
+  .hero__actions { justify-content: center; }
+  .hero__stats { justify-content: center; }
+  .hero__portrait-wrap { max-width: 340px; margin: 0 auto; }
+  .hero__deco { display: none; }
 }
 </style>

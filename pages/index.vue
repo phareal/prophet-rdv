@@ -4,10 +4,13 @@ import HeroSection from '@/components/HeroSection.vue'
 import StatsBar from '@/components/StatsBar.vue'
 import AboutSection from '@/components/AboutSection.vue'
 import ServicesSection from '@/components/ServicesSection.vue'
+import VideoSection from '@/components/VideoSection.vue'
+import EventsSection from '@/components/EventsSection.vue'
 import TestimonialsSection from '@/components/TestimonialsSection.vue'
 import GallerySection from '@/components/GallerySection.vue'
 import CtaSection from '@/components/CtaSection.vue'
 import AppFooter from '@/components/AppFooter.vue'
+import FloatingWhatsApp from '@/components/FloatingWhatsApp.vue'
 
 useSeoMeta({
   title: 'Prophète Jeremiah Nahoum — Le Conseiller des Rois',
@@ -25,11 +28,14 @@ useSeoMeta({
       <StatsBar />
       <AboutSection />
       <ServicesSection />
+      <VideoSection />
+      <EventsSection />
       <TestimonialsSection />
       <GallerySection />
       <CtaSection />
     </main>
     <AppFooter />
+    <FloatingWhatsApp />
   </div>
 </template>
 
@@ -39,8 +45,8 @@ html {
 }
 
 .site {
-  background: #080D1A;
-  color: #E8E4DC;
+  background: #FDFCF9;
+  color: #1A1714;
   min-height: 100vh;
 }
 </style>

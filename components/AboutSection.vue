@@ -21,14 +21,18 @@ const gifts = [
           <div class="about__frame-corner about__frame-corner--tl" />
           <div class="about__frame-corner about__frame-corner--br" />
           <div class="about__portrait">
-            <!-- Placeholder portrait -->
+            <img
+              src="/images/prophet-main.jpg"
+              alt="Prophète Jeremiah Nahoum"
+              class="about__portrait-img"
+              @error="(e: Event) => ((e.target as HTMLImageElement).style.display='none')"
+            />
             <div class="about__portrait-placeholder">
-              <svg viewBox="0 0 160 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="160" height="200" fill="rgba(12,21,40,1)"/>
-                <ellipse cx="80" cy="68" rx="34" ry="36" fill="rgba(200,146,28,0.07)" stroke="rgba(200,146,28,0.18)" stroke-width="1"/>
-                <path d="M20 190 C20 140 48 115 80 115 C112 115 140 140 140 190" fill="rgba(14,170,114,0.05)" stroke="rgba(14,170,114,0.14)" stroke-width="1"/>
-                <text x="80" y="155" text-anchor="middle" font-family="serif" font-size="10" fill="rgba(200,146,28,0.3)">photo prophète</text>
-                <text x="80" y="170" text-anchor="middle" font-family="serif" font-size="9" fill="rgba(255,255,255,0.12)">400 × 500 px</text>
+              <svg viewBox="0 0 160 200" fill="none">
+                <rect width="160" height="200" fill="#F6F4EF"/>
+                <ellipse cx="80" cy="68" rx="34" ry="36" fill="#EDE9E0" stroke="#D4C9A8" stroke-width="1"/>
+                <path d="M20 190 C20 140 48 115 80 115 C112 115 140 140 140 190" fill="#EDE9E0" stroke="#D4C9A8" stroke-width="1"/>
+                <text x="80" y="160" text-anchor="middle" font-family="serif" font-size="9" fill="#B8AD95">photo prophète</text>
               </svg>
             </div>
             <div class="about__portrait-badge">
@@ -38,7 +42,6 @@ const gifts = [
           </div>
         </div>
 
-        <!-- Verset flottant -->
         <div class="about__float-verse">
           <p class="about__float-text">"Avant que je te forme dans le ventre de ta mère, je te connaissais"</p>
           <span class="about__float-ref">— Jérémie 1:5</span>
@@ -68,7 +71,6 @@ const gifts = [
           </p>
         </div>
 
-        <!-- Dons et capacités -->
         <div class="about__gifts">
           <p class="about__gifts-title">Domaines de ministère</p>
           <ul class="about__gifts-list">
@@ -88,9 +90,8 @@ const gifts = [
 
 <style scoped>
 .about {
-  background: #080D1A;
+  background: #FDFCF9;
   padding: 7rem 2rem;
-  overflow: hidden;
 }
 
 .about__inner {
@@ -102,11 +103,7 @@ const gifts = [
   align-items: center;
 }
 
-/* ── Visual ────────────────────────────────────────── */
-.about__visual {
-  position: relative;
-}
-
+/* Visual */
 .about__frame {
   position: relative;
   padding: 1rem;
@@ -114,37 +111,42 @@ const gifts = [
 
 .about__frame-corner {
   position: absolute;
-  width: 50px;
-  height: 50px;
+  width: 48px;
+  height: 48px;
   pointer-events: none;
 }
 
 .about__frame-corner--tl {
-  top: 0;
-  left: 0;
-  border-top: 1px solid rgba(200, 146, 28, 0.3);
-  border-left: 1px solid rgba(200, 146, 28, 0.3);
+  top: 0; left: 0;
+  border-top: 1px solid #B07A14;
+  border-left: 1px solid #B07A14;
 }
 
 .about__frame-corner--br {
-  bottom: 0;
-  right: 0;
-  border-bottom: 1px solid rgba(14, 170, 114, 0.3);
-  border-right: 1px solid rgba(14, 170, 114, 0.3);
+  bottom: 0; right: 0;
+  border-bottom: 1px solid #D4CFC6;
+  border-right: 1px solid #D4CFC6;
 }
 
 .about__portrait {
   position: relative;
   overflow: hidden;
   border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid #E5E2DB;
+  background: #F6F4EF;
+}
+
+.about__portrait-img {
+  width: 100%;
+  display: block;
+  aspect-ratio: 4/5;
+  object-fit: cover;
 }
 
 .about__portrait-placeholder {
   display: block;
   width: 100%;
-  aspect-ratio: 4 / 5;
-  background: #0C1528;
+  aspect-ratio: 4/5;
 }
 
 .about__portrait-placeholder svg {
@@ -162,28 +164,27 @@ const gifts = [
   align-items: center;
   gap: 0.4rem;
   font-family: var(--f-display);
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(232, 228, 220, 0.7);
-  background: rgba(8, 13, 26, 0.85);
+  color: #1A1714;
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(8px);
   padding: 0.45rem 0.9rem;
-  border: 1px solid rgba(200, 146, 28, 0.2);
+  border: 1px solid #E5E2DB;
   border-radius: 2px;
   white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
-.about__badge-cross {
-  color: var(--gold);
-  font-size: 0.65rem;
-}
+.about__badge-cross { color: #B07A14; font-size: 0.65rem; }
 
 .about__float-verse {
   margin-top: 1.25rem;
   padding: 0.85rem 1rem;
-  border-left: 2px solid rgba(14, 170, 114, 0.3);
-  background: rgba(14, 170, 114, 0.04);
+  border-left: 2px solid rgba(176, 122, 20, 0.3);
+  background: rgba(176, 122, 20, 0.04);
+  border-radius: 0 4px 4px 0;
 }
 
 .about__float-text {
@@ -191,7 +192,7 @@ const gifts = [
   font-style: italic;
   font-size: 0.82rem;
   line-height: 1.55;
-  color: rgba(232, 228, 220, 0.45);
+  color: #6B6560;
   margin-bottom: 0.35rem;
 }
 
@@ -199,18 +200,17 @@ const gifts = [
   font-family: var(--f-mono);
   font-size: 0.57rem;
   letter-spacing: 0.1em;
-  color: rgba(14, 170, 114, 0.4);
+  color: #B07A14;
 }
 
-/* ── Texte ─────────────────────────────────────────── */
+/* Texte */
 .about__section-label {
   display: inline-block;
   font-family: var(--f-mono);
   font-size: 0.58rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--gold);
-  opacity: 0.65;
+  color: #B07A14;
   margin-bottom: 1rem;
 }
 
@@ -220,14 +220,14 @@ const gifts = [
   font-size: clamp(1.8rem, 3vw, 2.6rem);
   line-height: 1.15;
   letter-spacing: 0.04em;
-  color: #F4F0EB;
+  color: #0C1528;
   margin-bottom: 1.5rem;
 }
 
 .about__title em {
   font-family: var(--f-serif);
   font-style: italic;
-  color: rgba(200, 146, 28, 0.7);
+  color: #B07A14;
 }
 
 .about__body {
@@ -241,21 +241,17 @@ const gifts = [
   font-family: var(--f-serif);
   font-size: 1rem;
   line-height: 1.75;
-  color: rgba(232, 228, 220, 0.55);
+  color: #6B6560;
 }
 
-.about__body strong {
-  color: rgba(232, 228, 220, 0.8);
-  font-weight: 600;
-}
+.about__body strong { color: #1A1714; font-weight: 600; }
 
-/* Gifts */
 .about__gifts-title {
   font-family: var(--f-mono);
   font-size: 0.58rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.22);
+  color: #9B9590;
   margin-bottom: 0.75rem;
 }
 
@@ -273,18 +269,17 @@ const gifts = [
   align-items: flex-start;
   gap: 0.6rem;
   font-family: var(--f-serif);
-  font-size: 0.88rem;
-  color: rgba(232, 228, 220, 0.55);
+  font-size: 0.9rem;
+  color: #4B4540;
   line-height: 1.4;
 }
 
 .about__gift-icon {
-  color: #0EAA72;
+  color: #0A9060;
   flex-shrink: 0;
   margin-top: 0.1rem;
 }
 
-/* CTA */
 .about__cta {
   display: inline-flex;
   align-items: center;
@@ -292,30 +287,21 @@ const gifts = [
   font-size: 0.72rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: #0C1528;
   text-decoration: none;
   padding-bottom: 0.3rem;
-  border-bottom: 1px solid rgba(200, 146, 28, 0.3);
+  border-bottom: 1px solid #0C1528;
   transition: color var(--t), border-color var(--t);
 }
 
 .about__cta:hover {
-  color: #F0C040;
-  border-color: rgba(240, 192, 64, 0.5);
+  color: #B07A14;
+  border-color: #B07A14;
 }
 
-/* ── Responsive ────────────────────────────────────── */
 @media (max-width: 900px) {
-  .about__inner {
-    grid-template-columns: 1fr;
-    gap: 3rem;
-  }
-  .about__visual {
-    max-width: 380px;
-    margin: 0 auto;
-  }
-  .about {
-    padding: 5rem 1.5rem;
-  }
+  .about__inner { grid-template-columns: 1fr; gap: 3rem; }
+  .about__visual { max-width: 380px; margin: 0 auto; }
+  .about { padding: 5rem 1.5rem; }
 }
 </style>

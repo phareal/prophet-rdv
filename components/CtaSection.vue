@@ -4,28 +4,18 @@ import { buildWhatsAppUrl } from '@/lib/utils'
 
 const config = useRuntimeConfig()
 const phone1 = config.public.prophetPhone1 as string
-
 const waUrl = buildWhatsAppUrl(phone1, 'Bonjour Prophète Jeremiah Nahoum, je souhaite prendre rendez-vous.')
 </script>
 
 <template>
   <section class="cta">
-    <!-- Fond animé -->
-    <div class="cta__bg">
-      <div class="cta__bg-glow cta__bg-glow--left" />
-      <div class="cta__bg-glow cta__bg-glow--right" />
-      <div class="cta__bg-lines" />
-    </div>
-
     <div class="cta__inner">
-      <!-- Verset -->
       <blockquote class="cta__verse">
         <span class="cta__verse-cross">✦</span>
         <p>"Appelez-moi, et je vous répondrai ; je vous annoncerai de grandes choses, des choses cachées, que vous ne connaissez pas."</p>
         <cite>— Jérémie 33:3</cite>
       </blockquote>
 
-      <!-- Titre -->
       <h2 class="cta__title">
         Votre rendez-vous<br>
         <em>avec Dieu vous attend</em>
@@ -36,7 +26,6 @@ const waUrl = buildWhatsAppUrl(phone1, 'Bonjour Prophète Jeremiah Nahoum, je so
         Prenez votre rendez-vous prophétique aujourd'hui.
       </p>
 
-      <!-- Actions -->
       <div class="cta__actions">
         <a href="/rdv" class="cta__btn cta__btn--primary">
           <Calendar :size="16" />
@@ -48,64 +37,24 @@ const waUrl = buildWhatsAppUrl(phone1, 'Bonjour Prophète Jeremiah Nahoum, je so
         </a>
       </div>
 
-      <!-- Note -->
       <p class="cta__note">Disponible 7j/7 · Consultation internationale · Réponse en 24h</p>
     </div>
   </section>
 </template>
 
 <style scoped>
+/* CTA garde un fond sombre pour le contraste final avant le footer */
 .cta {
-  position: relative;
-  background: #0A0F1E;
+  background: #0C1528;
   padding: 8rem 2rem;
-  overflow: hidden;
   text-align: center;
-  border-top: 1px solid rgba(200, 146, 28, 0.1);
-  border-bottom: 1px solid rgba(200, 146, 28, 0.1);
 }
 
-/* Fond */
-.cta__bg { position: absolute; inset: 0; pointer-events: none; }
-
-.cta__bg-glow {
-  position: absolute;
-  width: 600px;
-  height: 600px;
-  border-radius: 50%;
-  filter: blur(100px);
-}
-
-.cta__bg-glow--left {
-  top: -200px;
-  left: -200px;
-  background: radial-gradient(circle, rgba(200, 146, 28, 0.08) 0%, transparent 70%);
-}
-
-.cta__bg-glow--right {
-  bottom: -200px;
-  right: -200px;
-  background: radial-gradient(circle, rgba(14, 170, 114, 0.07) 0%, transparent 70%);
-}
-
-.cta__bg-lines {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(200, 146, 28, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(200, 146, 28, 0.025) 1px, transparent 1px);
-  background-size: 80px 80px;
-}
-
-/* Inner */
 .cta__inner {
-  position: relative;
-  z-index: 2;
-  max-width: 680px;
+  max-width: 640px;
   margin: 0 auto;
 }
 
-/* Verset */
 .cta__verse {
   display: flex;
   flex-direction: column;
@@ -114,29 +63,25 @@ const waUrl = buildWhatsAppUrl(phone1, 'Bonjour Prophète Jeremiah Nahoum, je so
   margin-bottom: 2.5rem;
 }
 
-.cta__verse-cross {
-  font-size: 1rem;
-  color: rgba(200, 146, 28, 0.45);
-}
+.cta__verse-cross { font-size: 1rem; color: rgba(200, 146, 28, 0.5); }
 
 .cta__verse p {
   font-family: var(--f-serif);
   font-style: italic;
   font-size: 1rem;
   line-height: 1.65;
-  color: rgba(232, 228, 220, 0.45);
-  max-width: 500px;
+  color: rgba(232, 228, 220, 0.42);
+  max-width: 480px;
 }
 
 .cta__verse cite {
   font-family: var(--f-mono);
   font-size: 0.58rem;
   letter-spacing: 0.12em;
-  color: rgba(200, 146, 28, 0.4);
+  color: rgba(176, 122, 20, 0.5);
   font-style: normal;
 }
 
-/* Titre */
 .cta__title {
   font-family: var(--f-display);
   font-weight: 400;
@@ -150,18 +95,17 @@ const waUrl = buildWhatsAppUrl(phone1, 'Bonjour Prophète Jeremiah Nahoum, je so
 .cta__title em {
   font-family: var(--f-serif);
   font-style: italic;
-  color: rgba(200, 146, 28, 0.75);
+  color: #C8921C;
 }
 
 .cta__sub {
   font-family: var(--f-serif);
   font-size: 1rem;
   line-height: 1.7;
-  color: rgba(232, 228, 220, 0.42);
+  color: rgba(232, 228, 220, 0.4);
   margin-bottom: 2.5rem;
 }
 
-/* Actions */
 .cta__actions {
   display: flex;
   align-items: center;
@@ -182,20 +126,19 @@ const waUrl = buildWhatsAppUrl(phone1, 'Bonjour Prophète Jeremiah Nahoum, je so
   text-decoration: none;
   padding: 0.9rem 2rem;
   border-radius: 2px;
-  transition: opacity var(--t), transform var(--t);
   font-weight: 600;
+  transition: opacity var(--t), transform var(--t);
 }
 
 .cta__btn--primary {
   background: linear-gradient(135deg, #F0C040 0%, #C8921C 100%);
   color: #080D1A;
-  box-shadow: 0 8px 36px rgba(200, 146, 28, 0.25);
+  box-shadow: 0 8px 32px rgba(200, 146, 28, 0.22);
 }
 
 .cta__btn--primary:hover {
   opacity: 0.9;
   transform: translateY(-2px);
-  box-shadow: 0 12px 44px rgba(200, 146, 28, 0.35);
 }
 
 .cta__btn--wa {
@@ -205,20 +148,17 @@ const waUrl = buildWhatsAppUrl(phone1, 'Bonjour Prophète Jeremiah Nahoum, je so
 }
 
 .cta__btn--wa:hover {
-  background: rgba(37, 211, 102, 0.15);
+  background: rgba(37, 211, 102, 0.16);
   transform: translateY(-2px);
 }
 
-/* Note */
 .cta__note {
   font-family: var(--f-mono);
   font-size: 0.56rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(232, 228, 220, 0.2);
+  color: rgba(232, 228, 220, 0.18);
 }
 
-@media (max-width: 640px) {
-  .cta { padding: 6rem 1.5rem; }
-}
+@media (max-width: 640px) { .cta { padding: 6rem 1.5rem; } }
 </style>

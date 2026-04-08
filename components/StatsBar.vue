@@ -20,9 +20,9 @@ const stats = [
 
 <style scoped>
 .stats {
-  background: linear-gradient(135deg, #0C1528 0%, #0A1020 100%);
-  border-top: 1px solid rgba(200, 146, 28, 0.12);
-  border-bottom: 1px solid rgba(200, 146, 28, 0.12);
+  background: #fff;
+  border-top: 1px solid #EAE7E0;
+  border-bottom: 1px solid #EAE7E0;
 }
 
 .stats__inner {
@@ -30,7 +30,6 @@ const stats = [
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  padding: 0;
 }
 
 .stats__item {
@@ -40,18 +39,18 @@ const stats = [
   justify-content: center;
   gap: 0.3rem;
   padding: 2.2rem 1rem;
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  border-right: 1px solid #EAE7E0;
   transition: background var(--t);
 }
 
 .stats__item:last-child { border-right: none; }
-.stats__item:hover { background: rgba(255, 255, 255, 0.02); }
+.stats__item:hover { background: #FDFCF9; }
 
 .stats__num {
   font-family: var(--f-display);
   font-size: clamp(1.8rem, 4vw, 2.6rem);
   font-weight: 700;
-  color: var(--gold);
+  color: #B07A14;
   line-height: 1;
   letter-spacing: 0.03em;
 }
@@ -61,13 +60,13 @@ const stats = [
   font-size: 0.58rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(232, 228, 220, 0.35);
+  color: #9B9590;
 }
 
 @media (max-width: 640px) {
   .stats__inner { grid-template-columns: repeat(2, 1fr); }
   .stats__item:nth-child(2) { border-right: none; }
   .stats__item:nth-child(1),
-  .stats__item:nth-child(2) { border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+  .stats__item:nth-child(2) { border-bottom: 1px solid #EAE7E0; }
 }
 </style>

@@ -13,16 +13,11 @@ const photos = [
   <section id="galerie" class="gallery">
     <div class="gallery__inner">
 
-      <!-- Header -->
       <div class="gallery__header">
         <span class="gallery__label">En images</span>
-        <h2 class="gallery__title">
-          Le ministère<br>
-          <em>à travers le monde</em>
-        </h2>
+        <h2 class="gallery__title">Le ministère <em>à travers le monde</em></h2>
       </div>
 
-      <!-- Grille -->
       <div class="gallery__grid">
         <div
           v-for="(p, i) in photos"
@@ -30,17 +25,14 @@ const photos = [
           :class="['gallery__item', p.span === 'wide' ? 'gallery__item--wide' : '']"
         >
           <div class="gallery__img-wrap">
-            <img
-              :src="p.src"
-              :alt="p.caption"
-              class="gallery__img"
+            <img :src="p.src" :alt="p.caption" class="gallery__img"
               @error="(e: Event) => ((e.target as HTMLImageElement).parentElement!.querySelector('.gallery__placeholder') as HTMLElement).style.display = 'flex'"
             />
             <div class="gallery__placeholder">
               <svg viewBox="0 0 24 24" fill="none" width="28" height="28">
-                <rect x="3" y="5" width="18" height="14" rx="2" stroke="rgba(200,146,28,0.25)" stroke-width="1.5"/>
-                <circle cx="8.5" cy="10.5" r="1.5" stroke="rgba(200,146,28,0.25)" stroke-width="1.5"/>
-                <path d="m21 15-5-5L5 19" stroke="rgba(200,146,28,0.25)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="3" y="5" width="18" height="14" rx="2" stroke="#C4BAA0" stroke-width="1.5"/>
+                <circle cx="8.5" cy="10.5" r="1.5" stroke="#C4BAA0" stroke-width="1.5"/>
+                <path d="m21 15-5-5L5 19" stroke="#C4BAA0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
               <span>{{ p.caption }}</span>
             </div>
@@ -57,44 +49,31 @@ const photos = [
 
 <style scoped>
 .gallery {
-  background: #060B16;
+  background: #FDFCF9;
   padding: 7rem 2rem;
 }
 
-.gallery__inner {
-  max-width: 1200px;
-  margin: 0 auto;
-}
+.gallery__inner { max-width: 1200px; margin: 0 auto; }
 
-.gallery__header {
-  text-align: center;
-  margin-bottom: 3.5rem;
-}
+.gallery__header { text-align: center; margin-bottom: 3.5rem; }
 
 .gallery__label {
   display: inline-block;
   font-family: var(--f-mono);
-  font-size: 0.58rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--gold);
-  opacity: 0.65;
-  margin-bottom: 0.85rem;
+  font-size: 0.58rem; letter-spacing: 0.16em;
+  text-transform: uppercase; color: #B07A14; margin-bottom: 0.85rem;
 }
 
 .gallery__title {
   font-family: var(--f-display);
   font-weight: 400;
   font-size: clamp(1.9rem, 4vw, 2.8rem);
-  line-height: 1.1;
-  letter-spacing: 0.04em;
-  color: #F4F0EB;
+  line-height: 1.1; letter-spacing: 0.04em; color: #0C1528;
 }
 
 .gallery__title em {
   font-family: var(--f-serif);
-  font-style: italic;
-  color: rgba(200, 146, 28, 0.65);
+  font-style: italic; color: #B07A14;
 }
 
 .gallery__grid {
@@ -107,21 +86,17 @@ const photos = [
 .gallery__item {
   position: relative;
   overflow: hidden;
-  border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  border: 1px solid #EAE7E0;
   cursor: pointer;
 }
 
 .gallery__item--wide { grid-column: span 2; }
 
-.gallery__img-wrap {
-  position: absolute;
-  inset: 0;
-}
+.gallery__img-wrap { position: absolute; inset: 0; }
 
 .gallery__img {
-  width: 100%;
-  height: 100%;
+  width: 100%; height: 100%;
   object-fit: cover;
   transition: transform 0.5s var(--ease);
 }
@@ -136,11 +111,11 @@ const photos = [
   align-items: center;
   justify-content: center;
   gap: 0.65rem;
-  background: linear-gradient(135deg, #0C1528 0%, #080D1A 100%);
+  background: #F6F4EF;
   font-family: var(--f-serif);
   font-style: italic;
   font-size: 0.75rem;
-  color: rgba(232, 228, 220, 0.22);
+  color: #C4BAA0;
   text-align: center;
   padding: 1rem;
 }
@@ -148,7 +123,7 @@ const photos = [
 .gallery__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(8, 13, 26, 0.88) 0%, transparent 55%);
+  background: linear-gradient(to top, rgba(12, 21, 40, 0.72) 0%, transparent 55%);
   display: flex;
   align-items: flex-end;
   padding: 1.1rem;
@@ -161,23 +136,17 @@ const photos = [
 .gallery__caption {
   font-family: var(--f-serif);
   font-style: italic;
-  font-size: 0.8rem;
-  color: rgba(232, 228, 220, 0.82);
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 @media (max-width: 768px) {
-  .gallery__grid {
-    grid-template-columns: repeat(2, 1fr);
-    grid-auto-rows: 165px;
-  }
+  .gallery__grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 165px; }
   .gallery { padding: 5rem 1.5rem; }
 }
 
 @media (max-width: 480px) {
-  .gallery__grid {
-    grid-template-columns: 1fr;
-    grid-auto-rows: 200px;
-  }
+  .gallery__grid { grid-template-columns: 1fr; grid-auto-rows: 200px; }
   .gallery__item--wide { grid-column: span 1; }
 }
 </style>

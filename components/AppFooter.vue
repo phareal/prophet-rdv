@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MessageCircle, Phone } from 'lucide-vue-next'
+import { MessageCircle, Phone, Youtube, Facebook, Instagram } from 'lucide-vue-next'
 import { buildWhatsAppUrl } from '@/lib/utils'
 
 const config = useRuntimeConfig()
@@ -13,13 +13,20 @@ function wa(phone: string) {
 const navLinks = [
   { label: 'Accueil', href: '/' },
   { label: 'À propos', href: '/#apropos' },
+  { label: 'Services', href: '/#services' },
   { label: 'Galerie', href: '/#galerie' },
   { label: 'Témoignages', href: '/#temoignages' },
+  { label: 'Événements', href: '/#evenements' },
 ]
 
 const serviceLinks = [
-  'Mariage', 'Affaires', 'Carrière politique', 'Santé',
-  'Voyage', 'Appel prophétique',
+  'Mariage', 'Affaires', 'Carrière politique', 'Santé', 'Voyage', 'Appel prophétique',
+]
+
+const socials = [
+  { icon: Youtube,   label: 'YouTube',   href: 'https://www.youtube.com/@ProphetJeremiahNahoum', color: '#FF0000' },
+  { icon: Facebook,  label: 'Facebook',  href: 'https://www.facebook.com/ProphetJeremiahNahoum', color: '#1877F2' },
+  { icon: Instagram, label: 'Instagram', href: 'https://www.instagram.com/ProphetJeremiahNahoum', color: '#E1306C' },
 ]
 </script>
 
@@ -41,6 +48,23 @@ const serviceLinks = [
             Ministère prophétique international dédié à guider les nations, les dirigeants
             et les familles selon la volonté de Dieu depuis plus de 15 ans.
           </p>
+
+          <!-- Réseaux sociaux -->
+          <div class="footer__socials">
+            <a
+              v-for="s in socials"
+              :key="s.label"
+              :href="s.href"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="footer__social"
+              :aria-label="s.label"
+            >
+              <component :is="s.icon" :size="16" />
+            </a>
+          </div>
+
+          <!-- Contacts -->
           <div class="footer__contacts">
             <a :href="wa(phone1)" target="_blank" rel="noopener noreferrer" class="footer__contact">
               <span class="footer__ci footer__ci--wa"><MessageCircle :size="13" /></span>
@@ -85,11 +109,14 @@ const serviceLinks = [
 
       </div>
 
-      <!-- Bottom bar -->
       <div class="footer__bottom">
-        <p class="footer__copy">
-          © {{ new Date().getFullYear() }} Prophète Jeremiah Nahoum · Tous droits réservés
-        </p>
+        <p class="footer__copy">© {{ new Date().getFullYear() }} Prophète Jeremiah Nahoum · Tous droits réservés</p>
+        <div class="footer__bottom-socials">
+          <a v-for="s in socials" :key="s.label" :href="s.href" target="_blank" rel="noopener noreferrer"
+            class="footer__bottom-social" :aria-label="s.label">
+            <component :is="s.icon" :size="14" />
+          </a>
+        </div>
         <p class="footer__love">Conçu pour le Royaume de Dieu</p>
       </div>
     </div>
@@ -98,9 +125,9 @@ const serviceLinks = [
 
 <style scoped>
 .footer {
-  background: #070C1A;
+  background: #0C1528;
   color: rgba(232, 228, 220, 0.5);
-  border-top: 1px solid rgba(200, 146, 28, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .footer__inner {
@@ -116,180 +143,153 @@ const serviceLinks = [
   margin-bottom: 3.5rem;
 }
 
-/* Brand */
 .footer__logo {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.65rem;
-  margin-bottom: 1rem;
+  display: flex; align-items: flex-start;
+  gap: 0.65rem; margin-bottom: 1rem;
 }
 
-.footer__logo-cross {
-  font-size: 1rem;
-  color: rgba(200, 146, 28, 0.6);
-  line-height: 1.4;
-}
+.footer__logo-cross { font-size: 1rem; color: rgba(200, 146, 28, 0.6); line-height: 1.4; }
 
 .footer__brand-name {
   font-family: var(--f-display);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: rgba(244, 240, 235, 0.85);
-  line-height: 1.2;
+  font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 0.08em; color: rgba(244, 240, 235, 0.85); line-height: 1.2;
 }
 
 .footer__brand-sub {
   font-family: var(--f-serif);
-  font-style: italic;
-  font-size: 0.72rem;
-  color: rgba(200, 146, 28, 0.5);
-  margin-top: 0.1rem;
+  font-style: italic; font-size: 0.72rem;
+  color: rgba(200, 146, 28, 0.5); margin-top: 0.1rem;
 }
 
 .footer__brand-desc {
   font-family: var(--f-serif);
-  font-size: 0.85rem;
-  line-height: 1.65;
-  color: rgba(232, 228, 220, 0.28);
-  margin-bottom: 1.25rem;
+  font-size: 0.85rem; line-height: 1.65;
+  color: rgba(232, 228, 220, 0.28); margin-bottom: 1.25rem;
 }
 
-.footer__contacts {
+/* Réseaux sociaux */
+.footer__socials {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 1.1rem;
 }
+
+.footer__social {
+  width: 34px; height: 34px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(232, 228, 220, 0.45);
+  text-decoration: none;
+  transition: background var(--t), color var(--t), border-color var(--t);
+}
+
+.footer__social:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(232, 228, 220, 0.85);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Contacts */
+.footer__contacts { display: flex; flex-direction: column; gap: 0.5rem; }
 
 .footer__contact {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-family: var(--f-mono);
-  font-size: 0.72rem;
-  color: rgba(232, 228, 220, 0.32);
-  text-decoration: none;
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  font-family: var(--f-mono); font-size: 0.72rem;
+  color: rgba(232, 228, 220, 0.32); text-decoration: none;
   transition: color var(--t);
 }
 
 .footer__contact:hover { color: #25D366; }
 
 .footer__ci {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 
 .footer__ci--wa { background: rgba(37, 211, 102, 0.1); color: #25D366; }
 .footer__ci--ph { background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.3); }
 
-/* Col title */
 .footer__col-title {
   font-family: var(--f-mono);
-  font-size: 0.58rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: rgba(255, 255, 255, 0.25);
-  margin-bottom: 1.1rem;
+  font-size: 0.58rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.25); margin-bottom: 1.1rem;
 }
 
-/* Nav */
-.footer__nav {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
+.footer__nav { display: flex; flex-direction: column; gap: 0.6rem; }
 
 .footer__link {
   font-family: var(--f-serif);
-  font-size: 0.88rem;
-  color: rgba(232, 228, 220, 0.3);
-  text-decoration: none;
-  transition: color var(--t);
+  font-size: 0.88rem; color: rgba(232, 228, 220, 0.3);
+  text-decoration: none; transition: color var(--t);
 }
 
 .footer__link:hover { color: rgba(232, 228, 220, 0.7); }
 
-/* RDV col */
 .footer__rdv-desc {
   font-family: var(--f-serif);
-  font-size: 0.85rem;
-  line-height: 1.6;
-  color: rgba(232, 228, 220, 0.3);
-  margin-bottom: 1rem;
+  font-size: 0.85rem; line-height: 1.6;
+  color: rgba(232, 228, 220, 0.3); margin-bottom: 1rem;
 }
 
 .footer__rdv-btn {
   display: inline-block;
   font-family: var(--f-display);
-  font-size: 0.65rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--gold);
-  text-decoration: none;
+  font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: rgba(200, 146, 28, 0.8); text-decoration: none;
   padding-bottom: 0.25rem;
-  border-bottom: 1px solid rgba(200, 146, 28, 0.25);
+  border-bottom: 1px solid rgba(200, 146, 28, 0.2);
   transition: color var(--t), border-color var(--t);
   margin-bottom: 1.5rem;
+  display: block;
 }
 
-.footer__rdv-btn:hover {
-  color: #F0C040;
-  border-color: rgba(240, 192, 64, 0.5);
-}
+.footer__rdv-btn:hover { color: #F0C040; border-color: rgba(240, 192, 64, 0.4); }
 
-.footer__verse {
-  padding-left: 0.75rem;
-  border-left: 1px solid rgba(200, 146, 28, 0.18);
-}
+.footer__verse { padding-left: 0.75rem; border-left: 1px solid rgba(200, 146, 28, 0.18); }
 
 .footer__verse p {
-  font-family: var(--f-serif);
-  font-style: italic;
-  font-size: 0.78rem;
-  line-height: 1.5;
-  color: rgba(232, 228, 220, 0.22);
-  margin-bottom: 0.3rem;
+  font-family: var(--f-serif); font-style: italic;
+  font-size: 0.78rem; line-height: 1.5;
+  color: rgba(232, 228, 220, 0.22); margin-bottom: 0.3rem;
 }
 
 .footer__verse cite {
-  font-family: var(--f-mono);
-  font-size: 0.55rem;
-  color: rgba(200, 146, 28, 0.3);
-  font-style: normal;
+  font-family: var(--f-mono); font-size: 0.55rem;
+  color: rgba(200, 146, 28, 0.3); font-style: normal;
 }
 
 /* Bottom */
 .footer__bottom {
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   padding-top: 1.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 1rem; flex-wrap: wrap;
 }
 
 .footer__copy {
-  font-family: var(--f-mono);
-  font-size: 0.58rem;
-  letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.16);
+  font-family: var(--f-mono); font-size: 0.58rem;
+  letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.16);
 }
+
+.footer__bottom-socials { display: flex; align-items: center; gap: 0.5rem; }
+
+.footer__bottom-social {
+  color: rgba(255, 255, 255, 0.2); text-decoration: none;
+  transition: color var(--t);
+}
+
+.footer__bottom-social:hover { color: rgba(255, 255, 255, 0.5); }
 
 .footer__love {
-  font-family: var(--f-serif);
-  font-style: italic;
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.1);
+  font-family: var(--f-serif); font-style: italic;
+  font-size: 0.72rem; color: rgba(255, 255, 255, 0.1);
 }
 
-/* Responsive */
 @media (max-width: 1024px) {
   .footer__cols { grid-template-columns: 1fr 1fr; }
   .footer__col--brand { grid-column: span 2; }
