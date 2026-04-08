@@ -1,11 +1,7 @@
 <script setup lang="ts">
 import { Play, Youtube } from 'lucide-vue-next'
 
-const videos = [
-  { id: 'YOUTUBE_ID_1', title: 'Prophétie sur les nations — 2026', desc: 'Le Prophète Jeremiah annonce ce que Dieu prépare pour les nations en cette nouvelle saison.', duration: '45 min', type: 'Prophétie' },
-  { id: 'YOUTUBE_ID_2', title: 'Consultation prophétique en direct', desc: 'Session de consultations prophétiques en direct avec des révélations précises et vérifiables.', duration: '1h 12 min', type: 'En direct' },
-  { id: 'YOUTUBE_ID_3', title: 'Témoignages — Prophéties accomplies', desc: 'Des personnes témoignent de la précision des prophéties reçues lors de leurs consultations.', duration: '28 min', type: 'Témoignages' },
-]
+const { data: videos } = await useFetch('/api/youtube/latest')
 
 const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
 </script>
@@ -35,7 +31,7 @@ const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
             class="vcard__thumb"
           >
             <img
-              :src="`https://img.youtube.com/vi/${v.id}/maxresdefault.jpg`"
+              :src="v.thumbnail"
               :alt="v.title"
               class="vcard__img"
               @error="(e: Event) => ((e.target as HTMLImageElement).style.display='none')"
