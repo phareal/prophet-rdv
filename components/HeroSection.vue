@@ -4,13 +4,12 @@ import { ChevronDown, Calendar, Play } from 'lucide-vue-next'
 
 <template>
   <section id="accueil" class="hero">
-    <!-- Arrière-plan -->
     <div class="hero__bg">
       <div class="hero__bg-radial hero__bg-radial--gold" />
       <div class="hero__bg-radial hero__bg-radial--ivory" />
+      <div class="hero__bg-pattern" />
     </div>
 
-    <!-- Lignes décoratives -->
     <div class="hero__deco hero__deco--tl" />
     <div class="hero__deco hero__deco--br" />
 
@@ -36,16 +35,15 @@ import { ChevronDown, Calendar, Play } from 'lucide-vue-next'
 
         <div class="hero__actions">
           <a href="/rdv" class="hero__btn hero__btn--primary">
-            <Calendar :size="16" />
+            <Calendar :size="17" />
             <span>Prendre Rendez-vous</span>
           </a>
           <a href="#video" class="hero__btn hero__btn--ghost">
-            <Play :size="14" />
+            <Play :size="15" fill="currentColor" />
             <span>Voir le ministère</span>
           </a>
         </div>
 
-        <!-- Stats -->
         <div class="hero__stats">
           <div class="hero__stat">
             <span class="hero__stat-num">40+</span>
@@ -81,8 +79,8 @@ import { ChevronDown, Calendar, Play } from 'lucide-vue-next'
                 <rect width="200" height="260" fill="#F6F4EF"/>
                 <ellipse cx="100" cy="88" rx="42" ry="45" fill="#EDE9E0" stroke="#D4C9A8" stroke-width="1"/>
                 <path d="M22 250 C22 180 58 148 100 148 C142 148 178 180 178 250" fill="#EDE9E0" stroke="#D4C9A8" stroke-width="1"/>
+                <text x="100" y="225" text-anchor="middle" font-family="serif" font-size="11" fill="#C4BAA0">photo · 400 × 500 px</text>
               </svg>
-              <p class="hero__portrait-hint">400 × 500 px</p>
             </div>
           </div>
           <div class="hero__portrait-badge">
@@ -91,15 +89,14 @@ import { ChevronDown, Calendar, Play } from 'lucide-vue-next'
           </div>
         </div>
 
-        <!-- Carte flottante verset -->
         <div class="hero__float-card">
+          <span class="hero__float-cross">✦</span>
           <p class="hero__float-verse">"Avant que je te forme dans le ventre de ta mère, je te connaissais"</p>
           <span class="hero__float-ref">— Jérémie 1:5</span>
         </div>
       </div>
     </div>
 
-    <!-- Scroll indicator -->
     <a href="#apropos" class="hero__scroll">
       <span class="hero__scroll-label">Défiler</span>
       <ChevronDown :size="16" class="hero__scroll-icon" />
@@ -118,7 +115,6 @@ import { ChevronDown, Calendar, Play } from 'lucide-vue-next'
   justify-content: center;
 }
 
-/* Fond */
 .hero__bg {
   position: absolute;
   inset: 0;
@@ -128,45 +124,46 @@ import { ChevronDown, Calendar, Play } from 'lucide-vue-next'
 .hero__bg-radial {
   position: absolute;
   border-radius: 50%;
-  filter: blur(90px);
+  filter: blur(100px);
 }
 
 .hero__bg-radial--gold {
-  width: 600px;
-  height: 600px;
-  top: -150px;
-  right: -100px;
-  background: radial-gradient(circle, rgba(200, 146, 28, 0.08) 0%, transparent 70%);
+  width: 700px; height: 700px;
+  top: -200px; right: -150px;
+  background: radial-gradient(circle, rgba(200, 146, 28, 0.09) 0%, transparent 70%);
 }
 
 .hero__bg-radial--ivory {
-  width: 500px;
-  height: 500px;
-  bottom: -100px;
-  left: -100px;
-  background: radial-gradient(circle, rgba(176, 122, 20, 0.06) 0%, transparent 70%);
+  width: 600px; height: 600px;
+  bottom: -150px; left: -150px;
+  background: radial-gradient(circle, rgba(176, 122, 20, 0.07) 0%, transparent 70%);
 }
 
-/* Décorations */
+.hero__bg-pattern {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(176,122,20,0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(176,122,20,0.028) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+}
+
 .hero__deco {
   position: absolute;
   pointer-events: none;
 }
 
 .hero__deco--tl {
-  top: 8rem;
-  left: 3rem;
-  width: 100px;
-  height: 100px;
-  border-top: 1px solid rgba(176, 122, 20, 0.2);
-  border-left: 1px solid rgba(176, 122, 20, 0.2);
+  top: 8rem; left: 3.5rem;
+  width: 110px; height: 110px;
+  border-top: 1px solid rgba(176, 122, 20, 0.22);
+  border-left: 1px solid rgba(176, 122, 20, 0.22);
 }
 
 .hero__deco--br {
-  bottom: 5rem;
-  right: 3rem;
-  width: 70px;
-  height: 70px;
+  bottom: 5rem; right: 3.5rem;
+  width: 80px; height: 80px;
   border-bottom: 1px solid rgba(12, 21, 40, 0.1);
   border-right: 1px solid rgba(12, 21, 40, 0.1);
 }
@@ -178,94 +175,99 @@ import { ChevronDown, Calendar, Play } from 'lucide-vue-next'
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
-  padding: 8rem 2rem 5rem;
+  padding: 9rem 2.5rem 5rem;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.1fr 0.9fr;
   gap: 5rem;
   align-items: center;
 }
 
-/* --- Texte --- */
+/* Badge */
 .hero__badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.55rem;
   font-family: var(--f-mono);
-  font-size: 0.6rem;
+  font-size: 0.68rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: #B07A14;
   border: 1px solid rgba(176, 122, 20, 0.25);
   background: rgba(176, 122, 20, 0.05);
-  padding: 0.4rem 0.9rem;
+  padding: 0.45rem 1rem;
   border-radius: 2px;
-  margin-bottom: 1.75rem;
+  margin-bottom: 2rem;
 }
 
 .hero__badge-dot {
-  width: 5px;
-  height: 5px;
+  width: 6px; height: 6px;
   border-radius: 50%;
   background: #B07A14;
   animation: blink 2.5s ease-in-out infinite;
 }
 
+/* Titre */
 .hero__title {
   display: flex;
   flex-direction: column;
   gap: 0;
-  margin-bottom: 0.85rem;
+  margin-bottom: 1rem;
 }
 
 .hero__title-pre {
   font-family: var(--f-display);
   font-weight: 400;
-  font-size: clamp(0.85rem, 1.5vw, 1rem);
-  letter-spacing: 0.28em;
+  font-size: clamp(0.9rem, 1.5vw, 1.05rem);
+  letter-spacing: 0.32em;
   text-transform: uppercase;
-  color: #9B9590;
+  color: #A09890;
   line-height: 1;
+  margin-bottom: 0.3rem;
 }
 
 .hero__title-name {
   font-family: var(--f-display);
   font-weight: 700;
-  font-size: clamp(2.8rem, 5.5vw, 4.8rem);
-  letter-spacing: 0.03em;
-  line-height: 0.92;
+  font-size: clamp(3.4rem, 6vw, 5.5rem);
+  letter-spacing: 0.025em;
+  line-height: 0.9;
   color: #0C1528;
+  text-shadow: 0 2px 40px rgba(176, 122, 20, 0.06);
 }
 
+/* Sous-titre */
 .hero__subtitle {
   font-family: var(--f-serif);
   font-style: italic;
-  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-size: clamp(1.2rem, 2.2vw, 1.6rem);
   color: #B07A14;
-  margin-bottom: 1.75rem;
+  margin-bottom: 2rem;
+  letter-spacing: 0.01em;
 }
 
+/* Verset */
 .hero__verse {
-  max-width: 420px;
-  padding: 0.9rem 1.1rem;
-  border-left: 2px solid rgba(176, 122, 20, 0.35);
+  max-width: 440px;
+  padding: 1.1rem 1.3rem;
+  border-left: 2px solid rgba(176, 122, 20, 0.4);
   background: rgba(176, 122, 20, 0.04);
-  border-radius: 0 4px 4px 0;
-  margin-bottom: 2rem;
+  border-radius: 0 6px 6px 0;
+  margin-bottom: 2.25rem;
 }
 
 .hero__verse p {
   font-family: var(--f-serif);
   font-style: italic;
-  font-size: 0.88rem;
-  line-height: 1.65;
+  font-size: 1.05rem;
+  line-height: 1.7;
   color: #6B6560;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.5rem;
 }
 
 .hero__verse cite {
   font-family: var(--f-mono);
-  font-size: 0.58rem;
-  letter-spacing: 0.1em;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
   color: #B07A14;
   font-style: normal;
 }
@@ -274,107 +276,112 @@ import { ChevronDown, Calendar, Play } from 'lucide-vue-next'
 .hero__actions {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
-  margin-bottom: 2.25rem;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
   flex-wrap: wrap;
 }
 
 .hero__btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.55rem;
   font-family: var(--f-mono);
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   text-decoration: none;
-  padding: 0.85rem 1.6rem;
-  border-radius: 2px;
-  transition: opacity var(--t), transform var(--t);
+  padding: 0.9rem 1.8rem;
+  border-radius: 3px;
+  transition: opacity var(--t), transform var(--t), box-shadow var(--t);
+  font-weight: 600;
 }
 
 .hero__btn--primary {
   background: #0C1528;
   color: #FDFCF9;
-  font-weight: 600;
-  box-shadow: 0 4px 20px rgba(12, 21, 40, 0.18);
+  box-shadow: 0 4px 20px rgba(12, 21, 40, 0.2);
 }
 
 .hero__btn--primary:hover {
   opacity: 0.88;
   transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(12, 21, 40, 0.25);
 }
 
 .hero__btn--ghost {
   border: 1px solid #D4CFC6;
   color: #4B4540;
   background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 .hero__btn--ghost:hover {
   border-color: #B07A14;
   color: #B07A14;
   transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(176, 122, 20, 0.1);
 }
 
 /* Stats */
 .hero__stats {
   display: inline-flex;
   align-items: center;
-  gap: 1.75rem;
+  gap: 2rem;
+  padding: 1.1rem 1.5rem;
+  background: #fff;
+  border: 1px solid #EAE7E0;
+  border-radius: 6px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.04);
 }
 
-.hero__stat { display: flex; flex-direction: column; gap: 0.1rem; }
+.hero__stat { display: flex; flex-direction: column; gap: 0.12rem; }
 
 .hero__stat-num {
   font-family: var(--f-display);
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 700;
   color: #B07A14;
   line-height: 1;
+  letter-spacing: 0.02em;
 }
 
 .hero__stat-label {
   font-family: var(--f-mono);
-  font-size: 0.55rem;
-  letter-spacing: 0.08em;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #9B9590;
 }
 
 .hero__stat-sep {
-  width: 1px;
-  height: 30px;
-  background: #E5E2DB;
+  width: 1px; height: 36px;
+  background: #EAE7E0;
 }
 
-/* --- Portrait --- */
-.hero__portrait-wrap {
-  position: relative;
-}
+/* Portrait */
+.hero__portrait-wrap { position: relative; }
 
 .hero__portrait-frame {
   position: relative;
-  padding: 0.75rem;
+  padding: 0.85rem;
 }
 
 .hero__portrait-corner {
   position: absolute;
-  width: 40px;
-  height: 40px;
+  width: 46px; height: 46px;
   pointer-events: none;
 }
 
 .hero__portrait-corner--tl {
   top: 0; left: 0;
-  border-top: 1px solid #B07A14;
-  border-left: 1px solid #B07A14;
+  border-top: 2px solid #B07A14;
+  border-left: 2px solid #B07A14;
 }
 
 .hero__portrait-corner--br {
   bottom: 0; right: 0;
-  border-bottom: 1px solid rgba(12, 21, 40, 0.2);
-  border-right: 1px solid rgba(12, 21, 40, 0.2);
+  border-bottom: 1px solid rgba(12, 21, 40, 0.15);
+  border-right: 1px solid rgba(12, 21, 40, 0.15);
 }
 
 .hero__portrait {
@@ -384,79 +391,70 @@ import { ChevronDown, Calendar, Play } from 'lucide-vue-next'
   border: 1px solid #E5E2DB;
   aspect-ratio: 4/5;
   background: #F6F4EF;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.09);
 }
 
 .hero__portrait-img {
-  width: 100%;
-  height: 100%;
+  width: 100%; height: 100%;
   object-fit: cover;
   display: block;
 }
 
 .hero__portrait-placeholder {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+  position: absolute; inset: 0;
 }
 
 .hero__portrait-placeholder svg { width: 100%; height: 100%; }
 
-.hero__portrait-hint {
-  position: absolute;
-  bottom: 1rem;
-  font-family: var(--f-mono);
-  font-size: 0.55rem;
-  color: #C4BAA0;
-}
-
 .hero__portrait-badge {
   position: absolute;
-  bottom: -0.65rem;
+  bottom: -0.85rem;
   left: 50%;
   transform: translateX(-50%);
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.45rem;
   font-family: var(--f-display);
-  font-size: 0.58rem;
+  font-size: 0.62rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #1A1714;
   background: #fff;
-  padding: 0.45rem 1rem;
+  padding: 0.55rem 1.25rem;
   border: 1px solid #E5E2DB;
-  border-radius: 2px;
+  border-radius: 3px;
   white-space: nowrap;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
 }
 
-.hero__portrait-badge-cross { color: #B07A14; }
+.hero__portrait-badge-cross { color: #B07A14; font-size: 0.7rem; }
 
 .hero__float-card {
-  margin-top: 1.75rem;
-  padding: 0.9rem 1.1rem;
+  margin-top: 2rem;
+  padding: 1.1rem 1.3rem;
   background: #fff;
-  border: 1px solid #E5E2DB;
-  border-radius: 4px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+  border: 1px solid #EAE7E0;
+  border-left: 2px solid rgba(176, 122, 20, 0.4);
+  border-radius: 0 6px 6px 0;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
 }
+
+.hero__float-cross { font-size: 0.65rem; color: rgba(176, 122, 20, 0.5); }
 
 .hero__float-verse {
   font-family: var(--f-serif);
   font-style: italic;
-  font-size: 0.82rem;
-  line-height: 1.55;
+  font-size: 1rem;
+  line-height: 1.6;
   color: #6B6560;
-  margin-bottom: 0.35rem;
 }
 
 .hero__float-ref {
   font-family: var(--f-mono);
-  font-size: 0.56rem;
+  font-size: 0.62rem;
   letter-spacing: 0.1em;
   color: #B07A14;
 }
@@ -464,13 +462,10 @@ import { ChevronDown, Calendar, Play } from 'lucide-vue-next'
 /* Scroll */
 .hero__scroll {
   position: absolute;
-  bottom: 2rem;
-  left: 50%;
+  bottom: 2.25rem; left: 50%;
   transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3rem;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 0.3rem;
   text-decoration: none;
   color: #C4BAA0;
   transition: color var(--t);
@@ -481,14 +476,11 @@ import { ChevronDown, Calendar, Play } from 'lucide-vue-next'
 
 .hero__scroll-label {
   font-family: var(--f-mono);
-  font-size: 0.52rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-size: 0.55rem; letter-spacing: 0.16em; text-transform: uppercase;
 }
 
-.hero__scroll-icon { animation: bounce 2s ease-in-out infinite; }
+.hero__scroll-icon { animation: bounce 2.2s ease-in-out infinite; }
 
-/* Keyframes */
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.3; }
@@ -496,15 +488,14 @@ import { ChevronDown, Calendar, Play } from 'lucide-vue-next'
 
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(5px); }
+  50% { transform: translateY(6px); }
 }
 
-/* Responsive */
-@media (max-width: 900px) {
+@media (max-width: 960px) {
   .hero__inner {
     grid-template-columns: 1fr;
-    gap: 3rem;
-    padding: 7rem 1.5rem 4rem;
+    gap: 3.5rem;
+    padding: 8rem 1.75rem 4.5rem;
     text-align: center;
   }
   .hero__badge { margin-left: auto; margin-right: auto; }
@@ -512,7 +503,7 @@ import { ChevronDown, Calendar, Play } from 'lucide-vue-next'
   .hero__verse { text-align: left; max-width: 100%; }
   .hero__actions { justify-content: center; }
   .hero__stats { justify-content: center; }
-  .hero__portrait-wrap { max-width: 340px; margin: 0 auto; }
+  .hero__portrait-wrap { max-width: 360px; margin: 0 auto; }
   .hero__deco { display: none; }
 }
 </style>

@@ -1,29 +1,10 @@
 <script setup lang="ts">
 import { Play, Youtube } from 'lucide-vue-next'
 
-// Remplacer ces IDs par les vrais IDs YouTube du prophète
 const videos = [
-  {
-    id: 'YOUTUBE_ID_1',
-    title: 'Prophétie sur les nations — 2026',
-    desc: 'Le Prophète Jeremiah annonce ce que Dieu prépare pour les nations en cette nouvelle saison.',
-    duration: '45 min',
-    type: 'Prophétie',
-  },
-  {
-    id: 'YOUTUBE_ID_2',
-    title: 'Consultation prophétique en direct',
-    desc: 'Session de consultations prophétiques en direct avec des révélations précises et vérifiables.',
-    duration: '1h 12 min',
-    type: 'En direct',
-  },
-  {
-    id: 'YOUTUBE_ID_3',
-    title: 'Témoignages — Prophéties accomplies',
-    desc: 'Des personnes témoignent de la précision des prophéties reçues lors de leurs consultations.',
-    duration: '28 min',
-    type: 'Témoignages',
-  },
+  { id: 'YOUTUBE_ID_1', title: 'Prophétie sur les nations — 2026', desc: 'Le Prophète Jeremiah annonce ce que Dieu prépare pour les nations en cette nouvelle saison.', duration: '45 min', type: 'Prophétie' },
+  { id: 'YOUTUBE_ID_2', title: 'Consultation prophétique en direct', desc: 'Session de consultations prophétiques en direct avec des révélations précises et vérifiables.', duration: '1h 12 min', type: 'En direct' },
+  { id: 'YOUTUBE_ID_3', title: 'Témoignages — Prophéties accomplies', desc: 'Des personnes témoignent de la précision des prophéties reçues lors de leurs consultations.', duration: '28 min', type: 'Témoignages' },
 ]
 
 const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
@@ -34,6 +15,7 @@ const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
     <div class="video-section__inner">
 
       <div class="video-section__header">
+        <div class="section-ornament"><span>✦</span></div>
         <span class="video-section__label">Ministère en vidéo</span>
         <h2 class="video-section__title">
           Regardez<br>
@@ -46,7 +28,6 @@ const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
 
       <div class="video-section__grid">
         <div v-for="(v, i) in videos" :key="i" class="vcard">
-          <!-- Thumbnail YouTube ou placeholder -->
           <a
             :href="`https://www.youtube.com/watch?v=${v.id}`"
             target="_blank"
@@ -60,14 +41,15 @@ const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
               @error="(e: Event) => ((e.target as HTMLImageElement).style.display='none')"
             />
             <div class="vcard__thumb-placeholder">
-              <Youtube :size="32" class="vcard__yt-icon" />
+              <Youtube :size="36" class="vcard__yt-icon" />
             </div>
             <div class="vcard__play">
-              <Play :size="22" fill="currentColor" />
+              <div class="vcard__play-btn">
+                <Play :size="20" fill="currentColor" />
+              </div>
             </div>
             <span class="vcard__duration">{{ v.duration }}</span>
           </a>
-          <!-- Infos -->
           <div class="vcard__body">
             <span class="vcard__type">{{ v.type }}</span>
             <h3 class="vcard__title">{{ v.title }}</h3>
@@ -76,7 +58,6 @@ const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
         </div>
       </div>
 
-      <!-- Lien chaîne YouTube -->
       <div class="video-section__channel">
         <a :href="channelUrl" target="_blank" rel="noopener noreferrer" class="video-section__channel-btn">
           <Youtube :size="18" />
@@ -91,70 +72,70 @@ const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
 <style scoped>
 .video-section {
   background: #F6F4EF;
-  padding: 7rem 2rem;
+  padding: 8rem 2.5rem;
+  position: relative;
+}
+
+.video-section::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent 0%, rgba(176,122,20,0.3) 30%, rgba(176,122,20,0.3) 70%, transparent 100%);
 }
 
 .video-section__inner { max-width: 1200px; margin: 0 auto; }
 
 .video-section__header {
   text-align: center;
-  max-width: 560px;
-  margin: 0 auto 4rem;
+  max-width: 580px;
+  margin: 0 auto 4.5rem;
 }
 
 .video-section__label {
   display: inline-block;
   font-family: var(--f-mono);
-  font-size: 0.58rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: #B07A14;
-  margin-bottom: 0.85rem;
+  font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: #B07A14; margin-bottom: 1rem;
 }
 
 .video-section__title {
   font-family: var(--f-display);
   font-weight: 400;
-  font-size: clamp(1.9rem, 4vw, 2.8rem);
-  line-height: 1.1;
-  letter-spacing: 0.04em;
-  color: #0C1528;
-  margin-bottom: 1rem;
+  font-size: clamp(2.2rem, 4vw, 3.2rem);
+  line-height: 1.1; letter-spacing: 0.04em;
+  color: #0C1528; margin-bottom: 1.25rem;
 }
 
 .video-section__title em {
-  font-family: var(--f-serif);
-  font-style: italic;
-  color: #B07A14;
+  font-family: var(--f-serif); font-style: italic; color: #B07A14;
 }
 
 .video-section__desc {
-  font-family: var(--f-serif);
-  font-size: 0.95rem;
-  line-height: 1.7;
-  color: #6B6560;
+  font-family: var(--f-serif); font-size: 1.1rem; line-height: 1.75; color: #6B6560;
 }
 
 /* Grid */
 .video-section__grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 3rem;
+  gap: 1.75rem;
+  margin-bottom: 3.5rem;
 }
 
 /* Card */
 .vcard {
   background: #fff;
   border: 1px solid #EAE7E0;
-  border-radius: 6px;
+  border-radius: 8px;
   overflow: hidden;
   transition: box-shadow var(--t), transform var(--t);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
 }
 
 .vcard:hover {
-  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
-  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.09);
+  transform: translateY(-4px);
 }
 
 /* Thumbnail */
@@ -167,8 +148,7 @@ const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
 }
 
 .vcard__img {
-  width: 100%;
-  height: 100%;
+  width: 100%; height: 100%;
   object-fit: cover;
   transition: transform 0.5s var(--ease);
   display: block;
@@ -177,110 +157,88 @@ const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
 .vcard:hover .vcard__img { transform: scale(1.04); }
 
 .vcard__thumb-placeholder {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #EDE9E0;
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #EDE9E0, #E5E0D5);
 }
 
 .vcard__yt-icon { color: #C4BAA0; }
 
 .vcard__play {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(12, 21, 40, 0.35);
-  color: #fff;
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(12, 21, 40, 0.28);
   opacity: 0;
   transition: opacity 0.25s var(--ease);
 }
 
 .vcard__thumb:hover .vcard__play { opacity: 1; }
 
+.vcard__play-btn {
+  width: 54px; height: 54px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.95);
+  display: flex; align-items: center; justify-content: center;
+  color: #0C1528;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  transition: transform var(--t);
+}
+
+.vcard__thumb:hover .vcard__play-btn { transform: scale(1.08); }
+
 .vcard__duration {
-  position: absolute;
-  bottom: 0.6rem;
-  right: 0.6rem;
-  font-family: var(--f-mono);
-  font-size: 0.55rem;
-  letter-spacing: 0.06em;
+  position: absolute; bottom: 0.7rem; right: 0.7rem;
+  font-family: var(--f-mono); font-size: 0.58rem;
   color: #fff;
-  background: rgba(12, 21, 40, 0.75);
-  padding: 0.2rem 0.5rem;
-  border-radius: 2px;
+  background: rgba(12, 21, 40, 0.72);
+  padding: 0.2rem 0.55rem; border-radius: 2px;
 }
 
 /* Body */
 .vcard__body {
-  padding: 1.25rem 1.4rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
+  padding: 1.4rem 1.6rem;
+  display: flex; flex-direction: column; gap: 0.5rem;
 }
 
 .vcard__type {
   font-family: var(--f-mono);
-  font-size: 0.55rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #B07A14;
+  font-size: 0.62rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #B07A14;
 }
 
 .vcard__title {
   font-family: var(--f-display);
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: #0C1528;
-  line-height: 1.3;
+  font-size: 0.9rem; font-weight: 600;
+  letter-spacing: 0.04em; color: #0C1528; line-height: 1.3;
 }
 
 .vcard__desc {
   font-family: var(--f-serif);
-  font-size: 0.82rem;
-  line-height: 1.6;
-  color: #9B9590;
+  font-size: 0.95rem; line-height: 1.65; color: #9B9590;
 }
 
 /* Channel link */
-.video-section__channel {
-  display: flex;
-  justify-content: center;
-}
+.video-section__channel { display: flex; justify-content: center; }
 
 .video-section__channel-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-family: var(--f-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #fff;
-  background: #FF0000;
-  padding: 0.85rem 2rem;
-  border-radius: 2px;
-  text-decoration: none;
-  font-weight: 600;
+  display: inline-flex; align-items: center; gap: 0.65rem;
+  font-family: var(--f-mono); font-size: 0.7rem;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: #fff; background: #FF0000;
+  padding: 0.9rem 2.25rem; border-radius: 3px;
+  text-decoration: none; font-weight: 600;
   transition: opacity var(--t), transform var(--t);
-  box-shadow: 0 4px 18px rgba(255, 0, 0, 0.18);
+  box-shadow: 0 4px 20px rgba(255, 0, 0, 0.2);
 }
 
 .video-section__channel-btn:hover {
-  opacity: 0.88;
-  transform: translateY(-2px);
+  opacity: 0.88; transform: translateY(-2px);
 }
 
 @media (max-width: 900px) {
   .video-section__grid { grid-template-columns: repeat(2, 1fr); }
-  .video-section { padding: 5rem 1.5rem; }
+  .video-section { padding: 6rem 1.75rem; }
 }
 
-@media (max-width: 600px) {
-  .video-section__grid { grid-template-columns: 1fr; }
-}
+@media (max-width: 600px) { .video-section__grid { grid-template-columns: 1fr; } }
 </style>

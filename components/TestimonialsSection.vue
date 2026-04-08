@@ -22,17 +22,19 @@ const testimonials = [
     <div class="testimonials__inner">
 
       <div class="testimonials__header">
+        <div class="section-ornament"><span>✦</span></div>
         <span class="testimonials__label">Ce qu'ils disent</span>
         <h2 class="testimonials__title">Des vies <em>transformées</em></h2>
         <p class="testimonials__desc">
-          Des milliers de personnes à travers le monde ont reçu une parole prophétique précise.
+          Des milliers de personnes à travers le monde ont reçu une parole prophétique précise
+          et vérifiable. Voici quelques témoignages authentiques.
         </p>
       </div>
 
       <div class="testimonials__grid">
         <article v-for="(t, i) in testimonials" :key="i" class="tcard">
           <div class="tcard__top">
-            <Quote :size="18" class="tcard__quote-icon" />
+            <Quote :size="22" class="tcard__quote-icon" />
             <div class="tcard__stars">
               <span v-for="s in t.etoiles" :key="s" class="tcard__star">★</span>
             </div>
@@ -63,35 +65,44 @@ const testimonials = [
 <style scoped>
 .testimonials {
   background: #fff;
-  padding: 7rem 2rem;
+  padding: 8rem 2.5rem;
+  position: relative;
+}
+
+.testimonials::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent 0%, rgba(176,122,20,0.3) 30%, rgba(176,122,20,0.3) 70%, transparent 100%);
 }
 
 .testimonials__inner { max-width: 1200px; margin: 0 auto; }
 
 .testimonials__header {
   text-align: center;
-  max-width: 520px;
-  margin: 0 auto 4rem;
+  max-width: 580px;
+  margin: 0 auto 4.5rem;
 }
 
 .testimonials__label {
   display: inline-block;
   font-family: var(--f-mono);
-  font-size: 0.58rem;
-  letter-spacing: 0.16em;
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #B07A14;
-  margin-bottom: 0.85rem;
+  margin-bottom: 1rem;
 }
 
 .testimonials__title {
   font-family: var(--f-display);
   font-weight: 400;
-  font-size: clamp(1.9rem, 4vw, 2.8rem);
+  font-size: clamp(2.2rem, 4vw, 3.2rem);
   line-height: 1.1;
   letter-spacing: 0.04em;
   color: #0C1528;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .testimonials__title em {
@@ -102,46 +113,47 @@ const testimonials = [
 
 .testimonials__desc {
   font-family: var(--f-serif);
-  font-size: 0.95rem;
-  line-height: 1.7;
+  font-size: 1.1rem;
+  line-height: 1.75;
   color: #9B9590;
 }
 
+/* Grid */
 .testimonials__grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.25rem;
-  margin-bottom: 3.5rem;
+  gap: 1.5rem;
+  margin-bottom: 4rem;
 }
 
 .tcard {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1.75rem;
+  gap: 1.1rem;
+  padding: 2rem;
   background: #FDFCF9;
   border: 1px solid #EAE7E0;
-  border-radius: 6px;
+  border-radius: 8px;
   transition: background var(--t), border-color var(--t), box-shadow var(--t), transform var(--t);
 }
 
 .tcard:hover {
   background: #fff;
-  border-color: #D4CFC6;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.07);
-  transform: translateY(-3px);
+  border-color: rgba(176,122,20,0.25);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+  transform: translateY(-4px);
 }
 
 .tcard__top { display: flex; align-items: center; justify-content: space-between; }
-.tcard__quote-icon { color: #D4C9A8; }
+.tcard__quote-icon { color: rgba(176, 122, 20, 0.25); }
 .tcard__stars { display: flex; gap: 0.1rem; }
-.tcard__star { color: #B07A14; font-size: 0.72rem; }
+.tcard__star { color: #B07A14; font-size: 0.8rem; }
 
 .tcard__text {
   font-family: var(--f-serif);
   font-style: italic;
-  font-size: 0.9rem;
-  line-height: 1.7;
+  font-size: 1.05rem;
+  line-height: 1.75;
   color: #4B4540;
   flex: 1;
 }
@@ -151,18 +163,18 @@ const testimonials = [
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding-top: 0.85rem;
+  padding-top: 1rem;
   border-top: 1px solid #EAE7E0;
 }
 
-.tcard__author { display: flex; align-items: center; gap: 0.65rem; }
+.tcard__author { display: flex; align-items: center; gap: 0.75rem; }
 
 .tcard__avatar {
-  width: 36px; height: 36px;
+  width: 40px; height: 40px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-family: var(--f-display);
-  font-size: 0.6rem; font-weight: 700;
+  font-size: 0.65rem; font-weight: 700;
   color: white; flex-shrink: 0;
 }
 
@@ -170,19 +182,19 @@ const testimonials = [
 
 .tcard__name {
   font-family: var(--f-display);
-  font-size: 0.65rem; font-weight: 600;
+  font-size: 0.7rem; font-weight: 600;
   letter-spacing: 0.06em; color: #1A1714;
 }
 
 .tcard__country {
   font-family: var(--f-mono);
-  font-size: 0.55rem; color: #9B9590; letter-spacing: 0.06em;
+  font-size: 0.6rem; color: #9B9590; letter-spacing: 0.06em;
 }
 
 .tcard__tag {
   font-family: var(--f-mono);
-  font-size: 0.52rem;
-  padding: 0.2rem 0.6rem;
+  font-size: 0.58rem;
+  padding: 0.25rem 0.7rem;
   border: 1px solid rgba(10, 144, 96, 0.25);
   color: #0A9060;
   border-radius: 2px;
@@ -199,12 +211,12 @@ const testimonials = [
 
 .testimonials__cta-text {
   font-family: var(--f-serif);
-  font-style: italic; font-size: 1.1rem; color: #9B9590;
+  font-style: italic; font-size: 1.2rem; color: #9B9590;
 }
 
 .testimonials__cta {
   font-family: var(--f-display);
-  font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
+  font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase;
   color: #0C1528; text-decoration: none;
   padding-bottom: 0.3rem;
   border-bottom: 1px solid #0C1528;
@@ -214,5 +226,5 @@ const testimonials = [
 .testimonials__cta:hover { color: #B07A14; border-color: #B07A14; }
 
 @media (max-width: 1024px) { .testimonials__grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 640px) { .testimonials__grid { grid-template-columns: 1fr; } .testimonials { padding: 5rem 1.5rem; } }
+@media (max-width: 640px) { .testimonials__grid { grid-template-columns: 1fr; } .testimonials { padding: 6rem 1.75rem; } }
 </style>
