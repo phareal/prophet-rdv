@@ -92,7 +92,7 @@ const stats = [
   font-size: 0.65rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #9B9590;
+  color: #5C5752;
 }
 
 @media (max-width: 640px) {

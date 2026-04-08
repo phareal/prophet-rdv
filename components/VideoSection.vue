@@ -112,7 +112,7 @@ const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
 }
 
 .video-section__desc {
-  font-family: var(--f-serif); font-size: 1.1rem; line-height: 1.75; color: #6B6560;
+  font-family: var(--f-serif); font-size: 1.1rem; line-height: 1.75; color: #4A4540;
 }
 
 /* Grid */
@@ -214,7 +214,7 @@ const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
 
 .vcard__desc {
   font-family: var(--f-serif);
-  font-size: 0.95rem; line-height: 1.65; color: #9B9590;
+  font-size: 0.95rem; line-height: 1.65; color: #5C5752;
 }
 
 /* Channel link */

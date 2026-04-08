@@ -195,7 +195,7 @@ const gifts = [
   font-style: italic;
   font-size: 1.05rem;
   line-height: 1.65;
-  color: #6B6560;
+  color: #4A4540;
 }
 
 .about__float-ref {
@@ -235,7 +235,7 @@ const gifts = [
   font-family: var(--f-serif);
   font-size: 1.1rem;
   line-height: 1.8;
-  color: #6B6560;
+  color: #4A4540;
 }
 
 .about__body strong { color: #1A1714; font-weight: 600; }
@@ -243,7 +243,7 @@ const gifts = [
 .about__gifts-title {
   font-family: var(--f-mono);
   font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase;
-  color: #9B9590; margin-bottom: 0.85rem;
+  color: #5C5752; margin-bottom: 0.85rem;
 }
 
 .about__gifts-list {

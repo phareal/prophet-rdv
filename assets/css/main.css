@@ -97,10 +97,15 @@ body {
   color: #1A1714;
   font-family: var(--f-serif);
   font-size: 18px;
-  line-height: 1.7;
+  font-weight: 500;
+  line-height: 1.75;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+strong, b { font-weight: 700; }
+
+p { font-weight: 500; }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--f-display);

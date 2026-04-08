@@ -260,7 +260,7 @@ import { ChevronDown, Calendar, Play } from 'lucide-vue-next'
   font-style: italic;
   font-size: 1.05rem;
   line-height: 1.7;
-  color: #6B6560;
+  color: #4A4540;
   margin-bottom: 0.5rem;
 }
 
@@ -350,7 +350,7 @@ import { ChevronDown, Calendar, Play } from 'lucide-vue-next'
   font-size: 0.6rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #9B9590;
+  color: #5C5752;
 }
 
 .hero__stat-sep {
@@ -454,7 +454,7 @@ import { ChevronDown, Calendar, Play } from 'lucide-vue-next'
   font-style: italic;
   font-size: 1rem;
   line-height: 1.6;
-  color: #6B6560;
+  color: #4A4540;
 }
 
 .hero__float-ref {
@@ -477,7 +477,7 @@ import { ChevronDown, Calendar, Play } from 'lucide-vue-next'
   z-index: 2;
 }
 
-.hero__scroll:hover { color: #9B9590; }
+.hero__scroll:hover { color: #5C5752; }
 
 .hero__scroll-label {
   font-family: var(--f-mono);

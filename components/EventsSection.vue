@@ -151,7 +151,7 @@ const typeColor: Record<string, string> = {
 }
 
 .events__desc {
-  font-family: var(--f-serif); font-size: 1.1rem; line-height: 1.75; color: #9B9590;
+  font-family: var(--f-serif); font-size: 1.1rem; line-height: 1.75; color: #5C5752;
 }
 
 /* List */
@@ -209,7 +209,7 @@ const typeColor: Record<string, string> = {
 
 .event-card__year {
   font-family: var(--f-mono);
-  font-size: 0.55rem; color: #9B9590; line-height: 1.4;
+  font-size: 0.55rem; color: #5C5752; line-height: 1.4;
 }
 
 /* Content */
@@ -250,7 +250,7 @@ const typeColor: Record<string, string> = {
   display: inline-flex; align-items: center;
   gap: 0.35rem;
   font-family: var(--f-mono); font-size: 0.62rem;
-  letter-spacing: 0.06em; color: #9B9590;
+  letter-spacing: 0.06em; color: #5C5752;
 }
 
 /* CTA */

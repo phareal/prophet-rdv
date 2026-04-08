@@ -109,7 +109,7 @@ const services = [
   font-family: var(--f-serif);
   font-size: 1.1rem;
   line-height: 1.75;
-  color: #6B6560;
+  color: #4A4540;
 }
 
 /* Grid */
@@ -178,7 +178,7 @@ const services = [
   font-family: var(--f-serif);
   font-size: 0.95rem;
   line-height: 1.65;
-  color: #9B9590;
+  color: #5C5752;
   flex: 1;
 }
 

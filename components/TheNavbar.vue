@@ -116,7 +116,7 @@ const links = [
 .navbar__link {
   font-family: var(--f-mono);
   font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
-  color: #6B6560; text-decoration: none;
+  color: #4A4540; text-decoration: none;
   transition: color var(--t);
   position: relative;
   padding-bottom: 2px;
@@ -174,7 +174,7 @@ const links = [
 .navbar__mobile-link {
   font-family: var(--f-mono);
   font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase;
-  color: #6B6560; text-decoration: none;
+  color: #4A4540; text-decoration: none;
   padding: 0.9rem 0;
   border-bottom: 1px solid #F0EDE6;
   transition: color var(--t);

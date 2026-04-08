@@ -201,7 +201,7 @@ const open = ref(false)
 .floating-wa__bubble-time {
   font-family: var(--f-mono);
   font-size: 0.52rem;
-  color: #9B9590;
+  color: #5C5752;
   align-self: flex-end;
 }
 

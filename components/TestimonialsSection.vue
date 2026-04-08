@@ -115,7 +115,7 @@ const testimonials = [
   font-family: var(--f-serif);
   font-size: 1.1rem;
   line-height: 1.75;
-  color: #9B9590;
+  color: #5C5752;
 }
 
 /* Grid */
@@ -188,7 +188,7 @@ const testimonials = [
 
 .tcard__country {
   font-family: var(--f-mono);
-  font-size: 0.6rem; color: #9B9590; letter-spacing: 0.06em;
+  font-size: 0.6rem; color: #5C5752; letter-spacing: 0.06em;
 }
 
 .tcard__tag {
@@ -211,7 +211,7 @@ const testimonials = [
 
 .testimonials__cta-text {
   font-family: var(--f-serif);
-  font-style: italic; font-size: 1.2rem; color: #9B9590;
+  font-style: italic; font-size: 1.2rem; color: #5C5752;
 }
 
 .testimonials__cta {
