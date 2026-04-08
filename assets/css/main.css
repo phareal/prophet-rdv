@@ -1,0 +1,153 @@
+@tailwind base;
+@tailwind utilities;
+
+/* ══════════════════════════════════════════════════════════════
+   SYSTÈME DE DESIGN — PROPHÈTE JEREMIAH NAHOUM
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Reset ────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+a  { color: inherit; text-decoration: none; }
+button { cursor: pointer; font: inherit; border: none; background: none; }
+img { display: block; max-width: 100%; }
+
+/* ── Tokens ───────────────────────────────────────────────── */
+:root {
+  /* Couleurs */
+  --ink:            #0F0E0B;
+  --dark:           #0F0E0B;
+  --dark-mid:       #1A1916;
+  --gold:           #C8921C;
+  --gold-light:     #D4A030;
+  --gold-pale:      rgba(200, 146, 28, 0.25);
+  --emerald:        #0EAA72;
+  --emerald-bright: #0EAA72;
+  --ivory:          #FAFAF9;
+  --cream:          #F4F0E8;
+  --text:           #1A1714;
+  --text-soft:      rgba(26, 23, 20, 0.52);
+  --text-faint:     rgba(26, 23, 20, 0.30);
+
+  /* Typo */
+  --f-display: 'Cinzel', Georgia, serif;
+  --f-serif:   'Cormorant Garamond', Georgia, serif;
+  --f-mono:    'JetBrains Mono', monospace;
+
+  /* Espacement (grille 8px) */
+  --s1: 0.5rem;
+  --s2: 0.75rem;
+  --s3: 1rem;
+  --s4: 1.5rem;
+  --s5: 2rem;
+  --s6: 2.75rem;
+  --s7: 3.5rem;
+  --s8: 5rem;
+
+  /* Radius */
+  --r1: 4px;
+  --r2: 6px;
+  --r3: 10px;
+  --r4: 14px;
+  --r5: 20px;
+  --rpill: 9999px;
+
+  /* Ombres — neutres, sans couleur */
+  --sh-sm:  0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --sh-md:  0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+  --sh-lg:  0 8px 32px rgba(0,0,0,0.10), 0 4px 12px rgba(0,0,0,0.05);
+  --sh-xl:  0 20px 56px rgba(0,0,0,0.14), 0 8px 20px rgba(0,0,0,0.07);
+
+  /* Transitions */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --t:   220ms cubic-bezier(0.16, 1, 0.3, 1);
+  --tf:  140ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Tokens shadcn (HSL) — requis par les composants ui/ */
+  --background:             0 0% 100%;
+  --foreground:             20 14% 4%;
+  --card:                   0 0% 100%;
+  --card-foreground:        20 14% 4%;
+  --popover:                45 30% 97%;
+  --popover-foreground:     20 14% 4%;
+  --primary:                155 75% 37%;
+  --primary-foreground:     0 0% 100%;
+  --secondary:              45 20% 95%;
+  --secondary-foreground:   24 10% 10%;
+  --muted:                  45 18% 95%;
+  --muted-foreground:       25 5% 45%;
+  --accent:                 45 18% 93%;
+  --accent-foreground:      24 10% 10%;
+  --destructive:            0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --border:                 38 26% 84%;
+  --input:                  38 26% 84%;
+  --ring:                   155 75% 37%;
+  --radius:                 0.5rem;
+}
+
+/* ── Base ─────────────────────────────────────────────────── */
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--ivory);
+  color: var(--text);
+  font-family: var(--f-serif);
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--f-display);
+  letter-spacing: 0.025em;
+  line-height: 1.15;
+}
+
+/* ── Animations ───────────────────────────────────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(110%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes toast-out {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(110%); }
+}
+
+/* ── Scrollbar ────────────────────────────────────────────── */
+* { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.12) transparent; }
+*::-webkit-scrollbar { width: 4px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 2px; }
+
+/* ── Popover (shadcn override) ────────────────────────────── */
+[data-radix-popper-content-wrapper] > * {
+  background: white !important;
+  border: 1px solid #E5E0D8 !important;
+  border-radius: var(--r4) !important;
+  box-shadow: var(--sh-xl) !important;
+}
+
+/* Toast live region */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}

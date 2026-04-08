@@ -1,0 +1,58 @@
+version: '3.9'
+
+# ─── DEV : hot-reload sans rebuild ───────────────────────────────────────────
+# Usage :  docker compose -f docker-compose.dev.yml up
+#   - le code source est monté en volume → chaque sauvegarde recharge l'appli
+#   - node_modules reste dans le conteneur (volume anonyme) pour éviter
+#     les conflits de binaires natifs macOS/Linux
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  app:
+    image: node:20-alpine
+    container_name: prophet_rdv_dev
+    working_dir: /app
+    command: sh -c "npm install && npx nuxt dev --host 0.0.0.0"
+    volumes:
+      - .:/app
+      - /app/node_modules        # volume anonyme → garde les binaires Linux
+      - /app/.nuxt               # cache Nuxt isolé du host
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongo:27017/prophetrdv
+      - NITRO_HOST=0.0.0.0
+      - NITRO_PORT=3000
+    env_file:
+      - path: .env
+        required: false          # pas d'erreur si .env absent
+    ports:
+      - "3000:3000"              # app
+      - "24678:24678"            # Vite HMR websocket
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - prophet_net_dev
+
+  mongo:
+    image: mongo:7
+    container_name: prophet_rdv_mongo_dev
+    restart: unless-stopped
+    volumes:
+      - mongo_data_dev:/data/db
+    networks:
+      - prophet_net_dev
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  mongo_data_dev:
+    driver: local
+
+networks:
+  prophet_net_dev:
+    driver: bridge

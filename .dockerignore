@@ -1,0 +1,13 @@
+node_modules
+.nuxt
+.output
+.env
+*.log
+.git
+.gitignore
+README.md
+scripts/
+nginx/ssl/
+.DS_Store
+*.local
+dist/

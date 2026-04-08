@@ -1,0 +1,23 @@
+# Nuxt dev/build
+.nuxt
+.nitro
+.cache
+.output
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+
+# SSL certs (jamais dans git)
+nginx/ssl/
