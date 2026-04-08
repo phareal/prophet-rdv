@@ -1,44 +1,7 @@
 <script setup lang="ts">
 import { MapPin, Clock, Users, ArrowRight } from 'lucide-vue-next'
 
-const events = [
-  {
-    date: { day: '18', month: 'Avr', year: '2026' },
-    title: 'Nuit de Prophétie & Délivrance',
-    lieu: 'Paris, France',
-    heure: '20h00 – 00h00',
-    places: 'Entrée libre',
-    type: 'Croisade',
-    featured: true,
-  },
-  {
-    date: { day: '26', month: 'Avr', year: '2026' },
-    title: 'Conférence des Leaders & Entrepreneurs',
-    lieu: 'Abidjan, Côte d\'Ivoire',
-    heure: '09h00 – 17h00',
-    places: 'Places limitées',
-    type: 'Conférence',
-    featured: false,
-  },
-  {
-    date: { day: '10', month: 'Mai', year: '2026' },
-    title: 'Crusade Prophétique Internationale',
-    lieu: 'Lagos, Nigeria',
-    heure: '18h00 – 23h00',
-    places: 'Entrée libre',
-    type: 'Croisade',
-    featured: false,
-  },
-  {
-    date: { day: '24', month: 'Mai', year: '2026' },
-    title: 'Retraite Spirituelle — Activation des Appels',
-    lieu: 'Montréal, Canada',
-    heure: '2 jours (Sam & Dim)',
-    places: 'Sur inscription',
-    type: 'Retraite',
-    featured: false,
-  },
-]
+const { data: events } = await useFetch('/api/calendar/events')
 
 const typeColor: Record<string, string> = {
   Croisade: '#B07A14',
@@ -71,9 +34,9 @@ const typeColor: Record<string, string> = {
           :class="['event-card', ev.featured ? 'event-card--featured' : '']"
         >
           <div class="event-card__date">
-            <span class="event-card__day">{{ ev.date.day }}</span>
-            <span class="event-card__month">{{ ev.date.month }}</span>
-            <span class="event-card__year">{{ ev.date.year }}</span>
+            <span class="event-card__day">{{ ev.day }}</span>
+            <span class="event-card__month">{{ ev.month }}</span>
+            <span class="event-card__year">{{ ev.year }}</span>
           </div>
 
           <div class="event-card__content">
