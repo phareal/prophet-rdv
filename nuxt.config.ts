@@ -13,6 +13,10 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     // Serveur uniquement
+    youtubeApiKey: process.env.YOUTUBE_API_KEY || '',
+    youtubeChannelId: process.env.YOUTUBE_CHANNEL_ID || '',
+    googleApiKey: process.env.GOOGLE_API_KEY || '',
+    googleCalendarId: process.env.GOOGLE_CALENDAR_ID || '',
     mongodbUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/prophetrdv',
     smtpHost: process.env.SMTP_HOST || 'smtp.gmail.com',
     smtpPort: parseInt(process.env.SMTP_PORT || '587'),
