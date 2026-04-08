@@ -68,12 +68,6 @@ import { ChevronDown, Calendar, Play } from 'lucide-vue-next'
           <div class="hero__portrait-corner hero__portrait-corner--tl" />
           <div class="hero__portrait-corner hero__portrait-corner--br" />
           <div class="hero__portrait">
-            <img
-              src="/images/prophet-main.jpg"
-              alt="Prophète Jeremiah Nahoum"
-              class="hero__portrait-img"
-              @error="(e: Event) => ((e.target as HTMLImageElement).style.display = 'none')"
-            />
             <div class="hero__portrait-placeholder">
               <svg viewBox="0 0 200 260" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="200" height="260" fill="#F6F4EF"/>
@@ -82,6 +76,12 @@ import { ChevronDown, Calendar, Play } from 'lucide-vue-next'
                 <text x="100" y="225" text-anchor="middle" font-family="serif" font-size="11" fill="#C4BAA0">photo · 400 × 500 px</text>
               </svg>
             </div>
+            <img
+              src="/images/prophet-main.jpg"
+              alt="Prophète Jeremiah Nahoum"
+              class="hero__portrait-img"
+              @error="(e: Event) => ((e.target as HTMLImageElement).style.display = 'none')"
+            />
           </div>
           <div class="hero__portrait-badge">
             <span class="hero__portrait-badge-cross">✦</span>
