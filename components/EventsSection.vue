@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { MapPin, Clock, Users, ArrowRight } from 'lucide-vue-next'
 
-const { data: events } = await useFetch('/api/calendar/events')
+const { data: events } = useFetch('/api/calendar/events', { lazy: true })
 
 const typeColor: Record<string, string> = {
   Croisade: '#B07A14',

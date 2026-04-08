@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Play, Youtube } from 'lucide-vue-next'
 
-const { data: videos } = await useFetch('/api/youtube/latest')
+const { data: videos } = useFetch('/api/youtube/latest', { lazy: true })
 
 const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
 </script>
@@ -34,6 +34,9 @@ const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
               :src="v.thumbnail"
               :alt="v.title"
               class="vcard__img"
+              loading="lazy"
+              width="480"
+              height="270"
               @error="(e: Event) => ((e.target as HTMLImageElement).style.display='none')"
             />
             <div class="vcard__thumb-placeholder">
