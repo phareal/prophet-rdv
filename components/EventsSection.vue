@@ -1,50 +1,41 @@
 <script setup lang="ts">
-import { MapPin, Clock, Users, ArrowRight } from 'lucide-vue-next'
+import { MapPin, Clock, Users, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 
-const events = [
-  {
-    date: { day: '18', month: 'Avr', year: '2026' },
-    title: 'Nuit de Prophétie & Délivrance',
-    lieu: 'Paris, France',
-    heure: '20h00 – 00h00',
-    places: 'Entrée libre',
-    type: 'Croisade',
-    featured: true,
-  },
-  {
-    date: { day: '26', month: 'Avr', year: '2026' },
-    title: 'Conférence des Leaders & Entrepreneurs',
-    lieu: 'Abidjan, Côte d\'Ivoire',
-    heure: '09h00 – 17h00',
-    places: 'Places limitées',
-    type: 'Conférence',
-    featured: false,
-  },
-  {
-    date: { day: '10', month: 'Mai', year: '2026' },
-    title: 'Crusade Prophétique Internationale',
-    lieu: 'Lagos, Nigeria',
-    heure: '18h00 – 23h00',
-    places: 'Entrée libre',
-    type: 'Croisade',
-    featured: false,
-  },
-  {
-    date: { day: '24', month: 'Mai', year: '2026' },
-    title: 'Retraite Spirituelle — Activation des Appels',
-    lieu: 'Montréal, Canada',
-    heure: '2 jours (Sam & Dim)',
-    places: 'Sur inscription',
-    type: 'Retraite',
-    featured: false,
-  },
-]
+const { data: events, status } = await useFetch('/api/calendar/events')
+
+const FRENCH_MONTH_INDEX: Record<string, number> = {
+  Jan:0, Fév:1, Mar:2, Avr:3, Mai:4, Juin:5,
+  Juil:6, Août:7, Sep:8, Oct:9, Nov:10, Déc:11,
+}
+
+function eventHref(ev: { title: string; day: string; month: string; year: string; lieu: string; heure: string; places: string }) {
+  if (ev.places !== 'Sur inscription') return '/rdv'
+  const date = new Date(+ev.year, FRENCH_MONTH_INDEX[ev.month] ?? 0, +ev.day)
+  const params = new URLSearchParams({
+    event: ev.title,
+    eventDate: date.toISOString(),
+    eventLieu: ev.lieu,
+    eventHeure: ev.heure,
+  })
+  return `/rdv?${params.toString()}`
+}
 
 const typeColor: Record<string, string> = {
   Croisade: '#B07A14',
   Conférence: '#0A9060',
   Retraite: '#7B5EA7',
 }
+
+const PAGE_SIZE = 4
+const page = ref(1)
+
+const totalPages = computed(() => Math.ceil((events.value?.length ?? 0) / PAGE_SIZE))
+const paginatedEvents = computed(() => {
+  const list = events.value ?? []
+  return list.slice((page.value - 1) * PAGE_SIZE, page.value * PAGE_SIZE)
+})
+
+watch(events, () => { page.value = 1 })
 </script>
 
 <template>
@@ -65,15 +56,19 @@ const typeColor: Record<string, string> = {
       </div>
 
       <div class="events__list">
+        <div v-if="status === 'pending'" class="events__loading">
+          <div v-for="n in 4" :key="n" class="event-card event-card--skeleton" />
+        </div>
+
         <article
-          v-for="(ev, i) in events"
+          v-for="(ev, i) in paginatedEvents"
           :key="i"
           :class="['event-card', ev.featured ? 'event-card--featured' : '']"
         >
           <div class="event-card__date">
-            <span class="event-card__day">{{ ev.date.day }}</span>
-            <span class="event-card__month">{{ ev.date.month }}</span>
-            <span class="event-card__year">{{ ev.date.year }}</span>
+            <span class="event-card__day">{{ ev.day }}</span>
+            <span class="event-card__month">{{ ev.month }}</span>
+            <span class="event-card__year">{{ ev.year }}</span>
           </div>
 
           <div class="event-card__content">
@@ -98,12 +93,40 @@ const typeColor: Record<string, string> = {
             </div>
           </div>
 
-          <a href="/rdv" class="event-card__cta">
+          <a :href="eventHref(ev)" class="event-card__cta">
             <span>S'inscrire</span>
             <ArrowRight :size="14" />
           </a>
         </article>
       </div>
+
+      <nav v-if="totalPages > 1" class="events__pagination">
+        <button
+          class="pagination__btn"
+          :disabled="page === 1"
+          @click="page--"
+          aria-label="Page précédente"
+        >
+          <ChevronLeft :size="15" />
+        </button>
+
+        <button
+          v-for="p in totalPages"
+          :key="p"
+          class="pagination__page"
+          :class="{ 'pagination__page--active': p === page }"
+          @click="page = p"
+        >{{ p }}</button>
+
+        <button
+          class="pagination__btn"
+          :disabled="page === totalPages"
+          @click="page++"
+          aria-label="Page suivante"
+        >
+          <ChevronRight :size="15" />
+        </button>
+      </nav>
 
     </div>
   </section>
@@ -160,6 +183,19 @@ const typeColor: Record<string, string> = {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+}
+
+.event-card--skeleton {
+  height: 96px;
+  background: linear-gradient(90deg, #F0EDE6 25%, #E8E4DC 50%, #F0EDE6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 /* Card */
@@ -269,6 +305,65 @@ const typeColor: Record<string, string> = {
 .event-card__cta:hover {
   border-color: #B07A14; color: #B07A14;
   background: rgba(176, 122, 20, 0.04);
+}
+
+/* Pagination */
+.events__pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 2.5rem;
+}
+
+.pagination__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px; height: 34px;
+  border: 1px solid #D4CFC6;
+  border-radius: 3px;
+  background: transparent;
+  color: #0C1528;
+  cursor: pointer;
+  transition: border-color var(--t), color var(--t), background var(--t);
+}
+
+.pagination__btn:hover:not(:disabled) {
+  border-color: #B07A14;
+  color: #B07A14;
+}
+
+.pagination__btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.pagination__page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px; height: 34px;
+  border: 1px solid #D4CFC6;
+  border-radius: 3px;
+  background: transparent;
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  color: #5C5752;
+  cursor: pointer;
+  transition: border-color var(--t), color var(--t), background var(--t);
+}
+
+.pagination__page:hover {
+  border-color: #B07A14;
+  color: #B07A14;
+}
+
+.pagination__page--active {
+  border-color: #B07A14;
+  background: #B07A14;
+  color: #fff;
 }
 
 @media (max-width: 700px) {

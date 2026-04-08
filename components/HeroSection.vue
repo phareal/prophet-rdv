@@ -80,6 +80,9 @@ import { ChevronDown, Calendar, Play } from 'lucide-vue-next'
               src="/images/prophet-main.jpg"
               alt="Prophète Jeremiah Nahoum"
               class="hero__portrait-img"
+              width="400"
+              height="500"
+              fetchpriority="high"
               @error="(e: Event) => ((e.target as HTMLImageElement).style.display = 'none')"
             />
           </div>

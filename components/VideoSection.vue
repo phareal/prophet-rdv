@@ -1,11 +1,7 @@
 <script setup lang="ts">
 import { Play, Youtube } from 'lucide-vue-next'
 
-const videos = [
-  { id: 'YOUTUBE_ID_1', title: 'Prophétie sur les nations — 2026', desc: 'Le Prophète Jeremiah annonce ce que Dieu prépare pour les nations en cette nouvelle saison.', duration: '45 min', type: 'Prophétie' },
-  { id: 'YOUTUBE_ID_2', title: 'Consultation prophétique en direct', desc: 'Session de consultations prophétiques en direct avec des révélations précises et vérifiables.', duration: '1h 12 min', type: 'En direct' },
-  { id: 'YOUTUBE_ID_3', title: 'Témoignages — Prophéties accomplies', desc: 'Des personnes témoignent de la précision des prophéties reçues lors de leurs consultations.', duration: '28 min', type: 'Témoignages' },
-]
+const { data: videos, pending } = useFetch('/api/youtube/latest', { lazy: true })
 
 const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
 </script>
@@ -26,7 +22,20 @@ const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
         </p>
       </div>
 
-      <div class="video-section__grid">
+      <!-- Skeleton pendant le chargement -->
+      <div v-if="pending" class="video-section__grid">
+        <div v-for="n in 3" :key="n" class="vcard vcard--skeleton" :style="`--delay:${(n-1)*0.18}s`">
+          <div class="vcard__thumb vcard__thumb--skeleton" />
+          <div class="vcard__body">
+            <span class="vcard__skeleton-line vcard__skeleton-line--badge" />
+            <span class="vcard__skeleton-line vcard__skeleton-line--title" />
+            <span class="vcard__skeleton-line" />
+            <span class="vcard__skeleton-line vcard__skeleton-line--long" />
+          </div>
+        </div>
+      </div>
+
+      <div v-else class="video-section__grid">
         <div v-for="(v, i) in videos" :key="i" class="vcard">
           <a
             :href="`https://www.youtube.com/watch?v=${v.id}`"
@@ -34,15 +43,18 @@ const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
             rel="noopener noreferrer"
             class="vcard__thumb"
           >
-            <img
-              :src="`https://img.youtube.com/vi/${v.id}/maxresdefault.jpg`"
-              :alt="v.title"
-              class="vcard__img"
-              @error="(e: Event) => ((e.target as HTMLImageElement).style.display='none')"
-            />
             <div class="vcard__thumb-placeholder">
               <Youtube :size="36" class="vcard__yt-icon" />
             </div>
+            <img
+              :src="v.thumbnail"
+              :alt="v.title"
+              class="vcard__img"
+              loading="lazy"
+              width="480"
+              height="270"
+              @error="(e: Event) => ((e.target as HTMLImageElement).style.display='none')"
+            />
             <div class="vcard__play">
               <div class="vcard__play-btn">
                 <Play :size="20" fill="currentColor" />
@@ -148,6 +160,7 @@ const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
 }
 
 .vcard__img {
+  position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
   transition: transform 0.5s var(--ease);
@@ -234,6 +247,37 @@ const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
 .video-section__channel-btn:hover {
   opacity: 0.88; transform: translateY(-2px);
 }
+
+/* Skeleton */
+@keyframes shimmer {
+  0%   { background-position: -800px 0; }
+  100% { background-position:  800px 0; }
+}
+
+.vcard--skeleton .vcard__thumb--skeleton,
+.vcard--skeleton .vcard__skeleton-line {
+  animation-delay: var(--delay, 0s);
+}
+
+.vcard__thumb--skeleton {
+  background: linear-gradient(90deg, #EDE9E0 0%, #EDE9E0 30%, #D8D3C8 50%, #EDE9E0 70%, #EDE9E0 100%);
+  background-size: 800px 100%;
+  animation: shimmer 1.6s infinite ease-in-out;
+}
+
+.vcard__skeleton-line {
+  display: block;
+  height: 0.7rem;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #EDE9E0 0%, #EDE9E0 30%, #D8D3C8 50%, #EDE9E0 70%, #EDE9E0 100%);
+  background-size: 800px 100%;
+  animation: shimmer 1.6s infinite ease-in-out;
+  width: 75%;
+}
+
+.vcard__skeleton-line--badge  { width: 28%; height: 0.55rem; }
+.vcard__skeleton-line--title  { width: 85%; height: 1rem; border-radius: 4px; }
+.vcard__skeleton-line--long   { width: 90%; }
 
 @media (max-width: 900px) {
   .video-section__grid { grid-template-columns: repeat(2, 1fr); }

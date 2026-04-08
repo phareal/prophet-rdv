@@ -1,16 +1,7 @@
 <script setup lang="ts">
-import TheNavbar from '@/components/TheNavbar.vue'
-import HeroSection from '@/components/HeroSection.vue'
-import StatsBar from '@/components/StatsBar.vue'
-import AboutSection from '@/components/AboutSection.vue'
-import ServicesSection from '@/components/ServicesSection.vue'
-import VideoSection from '@/components/VideoSection.vue'
-import EventsSection from '@/components/EventsSection.vue'
-import TestimonialsSection from '@/components/TestimonialsSection.vue'
-import GallerySection from '@/components/GallerySection.vue'
-import CtaSection from '@/components/CtaSection.vue'
-import AppFooter from '@/components/AppFooter.vue'
-import FloatingWhatsApp from '@/components/FloatingWhatsApp.vue'
+// Nuxt auto-imports all components — préfixe Lazy = chargement différé
+// Above-the-fold : TheNavbar, HeroSection, StatsBar, AboutSection, ServicesSection
+// Below-the-fold : Lazy* (chargés après l'hydration initiale)
 
 useSeoMeta({
   title: 'Prophète Jeremiah Nahoum — Le Conseiller des Rois',
@@ -28,14 +19,14 @@ useSeoMeta({
       <StatsBar />
       <AboutSection />
       <ServicesSection />
-      <VideoSection />
-      <EventsSection />
-      <TestimonialsSection />
-      <GallerySection />
-      <CtaSection />
+      <LazyVideoSection />
+      <LazyEventsSection />
+      <LazyTestimonialsSection />
+      <LazyGallerySection />
+      <LazyCtaSection />
     </main>
     <AppFooter />
-    <FloatingWhatsApp />
+    <LazyFloatingWhatsApp />
   </div>
 </template>
 

@@ -35,6 +35,9 @@ const gifts = [
               src="/images/prophet-main-2.jpeg"
               alt="Prophète Jeremiah Nahoum"
               class="about__portrait-img"
+              loading="lazy"
+              width="400"
+              height="500"
               @error="(e: Event) => ((e.target as HTMLImageElement).style.display='none')"
             />
             <div class="about__portrait-badge">

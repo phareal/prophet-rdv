@@ -1,13 +1,25 @@
 version: '3.9'
 
-# ─── DEV : hot-reload sans rebuild ───────────────────────────────────────────
-# Usage :  docker compose -f docker-compose.dev.yml up
-#   - le code source est monté en volume → chaque sauvegarde recharge l'appli
-#   - node_modules reste dans le conteneur (volume anonyme) pour éviter
-#     les conflits de binaires natifs macOS/Linux
+# ─── DEV : hot-reload, HTTP simple, pas de build ─────────────────────────────
+# Usage : docker compose -f docker-compose.dev.yml up
 # ─────────────────────────────────────────────────────────────────────────────
 
 services:
+
+  # ── Reverse proxy dev (HTTP uniquement, port 80) ─────────────────────────
+  caddy:
+    image: caddy:2-alpine
+    container_name: prophet_rdv_caddy_dev
+    ports:
+      - "80:80"
+    volumes:
+      - ./Caddyfile.dev:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - app
+    networks:
+      - prophet_net_dev
+
+  # ── Application Nuxt (hot-reload) ─────────────────────────────────────────
   app:
     image: node:20-alpine
     container_name: prophet_rdv_dev
@@ -15,25 +27,50 @@ services:
     command: sh -c "npm install && npx nuxt dev --host 0.0.0.0"
     volumes:
       - .:/app
-      - /app/node_modules        # volume anonyme → garde les binaires Linux
-      - /app/.nuxt               # cache Nuxt isolé du host
+      - /app/node_modules   # binaires Linux isolés du host macOS
+      - /app/.nuxt
     environment:
-      - NODE_ENV=development
-      - MONGODB_URI=mongodb://mongo:27017/prophetrdv
-      - NITRO_HOST=0.0.0.0
-      - NITRO_PORT=3000
+      NODE_ENV: development
+      MONGODB_URI: mongodb://mongo:27017/prophetrdv
+      NITRO_HOST: "0.0.0.0"
+      NITRO_PORT: "3000"
+      API_BRIDGE_URL: http://api-bridge:4000
     env_file:
       - path: .env
-        required: false          # pas d'erreur si .env absent
+        required: false
     ports:
-      - "3000:3000"              # app
-      - "24678:24678"            # Vite HMR websocket
+      - "3000:3000"     # accès direct si besoin
+      - "24678:24678"   # Vite HMR websocket
     depends_on:
       mongo:
         condition: service_healthy
     networks:
       - prophet_net_dev
 
+  # ── Pont API (hot-reload tsx) ─────────────────────────────────────────────
+  api-bridge:
+    image: node:20-alpine
+    container_name: prophet_rdv_bridge_dev
+    working_dir: /app
+    command: sh -c "npm install && npm run dev"
+    volumes:
+      - ./api-bridge:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+      PORT: "4000"
+      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY:-}
+      YOUTUBE_CHANNEL_ID: ${YOUTUBE_CHANNEL_ID:-}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      GOOGLE_CALENDAR_ID: ${GOOGLE_CALENDAR_ID:-}
+      ALLOWED_ORIGINS: http://localhost:3000,http://localhost:80
+    env_file:
+      - path: .env
+        required: false
+    networks:
+      - prophet_net_dev
+
+  # ── Base de données ───────────────────────────────────────────────────────
   mongo:
     image: mongo:7
     container_name: prophet_rdv_mongo_dev
