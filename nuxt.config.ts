@@ -35,18 +35,7 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    experimental: {
-      wasm: true,
-    },
-  },
-
-  vite: {
-    server: {
-      watch: {
-        usePolling: true,
-        interval: 300,
-      },
-    },
+    compressPublicAssets: true,
   },
 
   app: {
@@ -70,9 +59,17 @@ export default defineNuxtConfig({
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+        // Chargement non-bloquant des fonts (évite le render-blocking)
         {
           rel: 'stylesheet',
           href: 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap',
+          media: 'print',
+          onload: "this.media='all'",
+        },
+      ],
+      noscript: [
+        {
+          innerHTML: '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap">',
         },
       ],
     },
