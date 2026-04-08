@@ -21,12 +21,7 @@ const gifts = [
           <div class="about__frame-corner about__frame-corner--tl" />
           <div class="about__frame-corner about__frame-corner--br" />
           <div class="about__portrait">
-            <img
-              src="/images/prophet-main.jpg"
-              alt="Prophète Jeremiah Nahoum"
-              class="about__portrait-img"
-              @error="(e: Event) => ((e.target as HTMLImageElement).style.display='none')"
-            />
+            <!-- Placeholder toujours en fond absolu -->
             <div class="about__portrait-placeholder">
               <svg viewBox="0 0 160 200" fill="none">
                 <rect width="160" height="200" fill="#F6F4EF"/>
@@ -35,6 +30,13 @@ const gifts = [
                 <text x="80" y="163" text-anchor="middle" font-family="serif" font-size="9" fill="#B8AD95">photo prophète</text>
               </svg>
             </div>
+            <!-- Photo par-dessus, cachée si erreur -->
+            <img
+              src="/images/prophet-main.jpg"
+              alt="Prophète Jeremiah Nahoum"
+              class="about__portrait-img"
+              @error="(e: Event) => ((e.target as HTMLImageElement).style.display='none')"
+            />
             <div class="about__portrait-badge">
               <span class="about__badge-cross">✦</span>
               <span>Prophète Jeremiah Nahoum</span>
@@ -136,15 +138,24 @@ const gifts = [
   border: 1px solid #E5E2DB;
   background: #F6F4EF;
   box-shadow: 0 20px 60px rgba(0,0,0,0.09);
+  aspect-ratio: 4 / 5;
+  width: 100%;
 }
 
 .about__portrait-img {
-  width: 100%; display: block;
-  aspect-ratio: 4/5; object-fit: cover;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .about__portrait-placeholder {
-  display: block; width: 100%; aspect-ratio: 4/5;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .about__portrait-placeholder svg { width: 100%; height: 100%; display: block; }

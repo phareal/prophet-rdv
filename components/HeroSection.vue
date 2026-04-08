@@ -390,21 +390,26 @@ import { ChevronDown, Calendar, Play } from 'lucide-vue-next'
   border-radius: 4px;
   border: 1px solid #E5E2DB;
   aspect-ratio: 4/5;
+  width: 100%;
   background: #F6F4EF;
   box-shadow: 0 16px 48px rgba(0,0,0,0.09);
 }
 
 .hero__portrait-img {
+  position: absolute;
+  inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
   display: block;
 }
 
 .hero__portrait-placeholder {
-  position: absolute; inset: 0;
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
 }
 
-.hero__portrait-placeholder svg { width: 100%; height: 100%; }
+.hero__portrait-placeholder svg { width: 100%; height: 100%; display: block; }
 
 .hero__portrait-badge {
   position: absolute;
