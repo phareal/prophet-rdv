@@ -1,63 +1,52 @@
 <script setup lang="ts">
-import HeroLeft from '@/components/HeroLeft.vue'
-import RdvForm from '@/components/RdvForm.vue'
-import { Toaster } from '@/components/ui/toast'
+import TheNavbar from '@/components/TheNavbar.vue'
+import HeroSection from '@/components/HeroSection.vue'
+import StatsBar from '@/components/StatsBar.vue'
+import AboutSection from '@/components/AboutSection.vue'
+import ServicesSection from '@/components/ServicesSection.vue'
+import VideoSection from '@/components/VideoSection.vue'
+import EventsSection from '@/components/EventsSection.vue'
+import TestimonialsSection from '@/components/TestimonialsSection.vue'
+import GallerySection from '@/components/GallerySection.vue'
+import CtaSection from '@/components/CtaSection.vue'
+import AppFooter from '@/components/AppFooter.vue'
+import FloatingWhatsApp from '@/components/FloatingWhatsApp.vue'
 
 useSeoMeta({
-  title: 'Prophète Jeremiah Nahoum — Prendre Rendez-vous',
-  description: 'Prenez rendez-vous avec le Prophète Jeremiah Nahoum, Le Conseiller des Rois. Consultation prophétique, spirituelle et stratégique pour les nations.',
+  title: 'Prophète Jeremiah Nahoum — Le Conseiller des Rois',
+  description: 'Ministère prophétique international. Consultations prophétiques pour les nations, les leaders et les familles. Plus de 40 nations, 15 ans de ministère.',
   ogTitle: 'Prophète Jeremiah Nahoum — Le Conseiller des Rois',
-  ogDescription: 'Consultation prophétique internationale. Prenez rendez-vous maintenant.',
+  ogDescription: 'Consultation prophétique internationale de précision. Mariages, affaires, appels, politique — réservez votre rendez-vous.',
 })
 </script>
 
 <template>
-  <section id="rdv" class="hero-layout">
-    <div class="hero-layout__left">
-      <HeroLeft />
-    </div>
-    <div class="hero-layout__right">
-      <RdvForm />
-    </div>
-    <Toaster />
-  </section>
+  <div class="site">
+    <TheNavbar />
+    <main>
+      <HeroSection />
+      <StatsBar />
+      <AboutSection />
+      <ServicesSection />
+      <VideoSection />
+      <EventsSection />
+      <TestimonialsSection />
+      <GallerySection />
+      <CtaSection />
+    </main>
+    <AppFooter />
+    <FloatingWhatsApp />
+  </div>
 </template>
 
 <style>
-.hero-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  width: 100vw;
-  height: 100vh;
-  max-height: 100vh;
-  overflow: hidden;
-  position: fixed;
-  top: 0;
-  left: 0;
-}
-.hero-layout__left {
-  height: 100vh;
-  overflow: hidden;
-}
-.hero-layout__right {
-  height: 100vh;
-  overflow: hidden;
-  background: #FAFAF9;
+html {
+  scroll-behavior: smooth;
 }
 
-@media (max-width: 1023px) {
-  .hero-layout {
-    position: static;
-    grid-template-columns: 1fr;
-    height: auto;
-    max-height: none;
-    width: 100%;
-    overflow: visible;
-  }
-  .hero-layout__left,
-  .hero-layout__right {
-    height: auto;
-    overflow: visible;
-  }
+.site {
+  background: #FDFCF9;
+  color: #1A1714;
+  min-height: 100vh;
 }
 </style>

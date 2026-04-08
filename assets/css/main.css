@@ -26,8 +26,8 @@ img { display: block; max-width: 100%; }
   --gold-pale:      rgba(200, 146, 28, 0.25);
   --emerald:        #0EAA72;
   --emerald-bright: #0EAA72;
-  --ivory:          #FAFAF9;
-  --cream:          #F4F0E8;
+  --ivory:          #FDFCF9;
+  --cream:          #F6F4EF;
   --text:           #1A1714;
   --text-soft:      rgba(26, 23, 20, 0.52);
   --text-faint:     rgba(26, 23, 20, 0.30);
@@ -55,7 +55,7 @@ img { display: block; max-width: 100%; }
   --r5: 20px;
   --rpill: 9999px;
 
-  /* Ombres — neutres, sans couleur */
+  /* Ombres */
   --sh-sm:  0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   --sh-md:  0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
   --sh-lg:  0 8px 32px rgba(0,0,0,0.10), 0 4px 12px rgba(0,0,0,0.05);
@@ -66,7 +66,7 @@ img { display: block; max-width: 100%; }
   --t:   220ms cubic-bezier(0.16, 1, 0.3, 1);
   --tf:  140ms cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* Tokens shadcn (HSL) — requis par les composants ui/ */
+  /* Tokens shadcn (HSL) */
   --background:             0 0% 100%;
   --foreground:             20 14% 4%;
   --card:                   0 0% 100%;
@@ -93,14 +93,19 @@ img { display: block; max-width: 100%; }
 html { scroll-behavior: smooth; }
 
 body {
-  background: var(--ivory);
-  color: var(--text);
+  background: #FDFCF9;
+  color: #1A1714;
   font-family: var(--f-serif);
-  font-size: 17px;
-  line-height: 1.65;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.75;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+strong, b { font-weight: 700; }
+
+p { font-weight: 500; }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--f-display);
@@ -108,9 +113,36 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.15;
 }
 
+/* ── Utilitaire ornement de section ──────────────────────── */
+.section-ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.section-ornament::before,
+.section-ornament::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(176, 122, 20, 0.25));
+}
+
+.section-ornament::after {
+  background: linear-gradient(to left, transparent, rgba(176, 122, 20, 0.25));
+}
+
+.section-ornament span {
+  font-size: 0.65rem;
+  color: rgba(176, 122, 20, 0.55);
+  flex-shrink: 0;
+}
+
 /* ── Animations ───────────────────────────────────────────── */
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes spin {

@@ -1,57 +1,48 @@
 <script setup lang="ts">
 const photos = [
-  { num: 1, caption: 'Culte de guérison',        location: 'Abidjan, 2024' },
-  { num: 2, caption: 'Conseil aux leaders',       location: 'Lagos, 2024' },
-  { num: 3, caption: 'Conférence prophétique',    location: 'Paris, 2023' },
-  { num: 4, caption: 'Prière d\'intercession',    location: 'Dakar, 2024' },
-  { num: 5, caption: 'Séminaire de formation',    location: 'Lomé, 2023' },
-  { num: 6, caption: 'Rencontre des nations',     location: 'Genève, 2024' },
+  { src: '/images/prophet-main.jpg',   caption: 'Prophète Jeremiah Nahoum',          span: 'normal' },
+  { src: '/images/prophet-main-2.jpeg', caption: 'Consultation prophétique',           span: 'normal' },
+  { src: '/images/prophet-main-3.jpeg', caption: 'Le Conseiller des Rois',             span: 'normal' },
+  { src: '/images/prophet-main.jpg',   caption: 'Ministère international',            span: 'wide' },
+  { src: '/images/prophet-main-2.jpeg', caption: 'Prière et intercession',             span: 'normal' },
+  { src: '/images/prophet-main-3.jpeg', caption: 'Parole prophétique aux nations',     span: 'normal' },
 ]
 </script>
 
 <template>
-  <section class="gallery" id="galerie">
-    <div class="gallery__container">
+  <section id="galerie" class="gallery">
+    <div class="gallery__inner">
 
-      <header class="gallery__header">
-        <p class="gallery__eyebrow">Galerie</p>
-        <h2 class="gallery__title">
-          Moments de <em>grâce</em>
-        </h2>
-        <p class="gallery__desc">
-          Des témoignages visuels de la puissance de Dieu à travers le ministère du Prophète Jeremiah Nahoum.
-        </p>
-      </header>
-
-      <div class="gallery__grid">
-        <figure
-          v-for="photo in photos"
-          :key="photo.num"
-          class="gallery__item"
-        >
-          <!-- Placeholder — remplacer par <img src="/images/gallery-N.jpg" ... /> -->
-          <div class="gallery__placeholder">
-            <svg class="gallery__ph-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="6" y="10" width="36" height="28" rx="3" stroke="currentColor" stroke-width="1.2" fill="none"/>
-              <circle cx="16" cy="20" r="4" stroke="currentColor" stroke-width="1.2" fill="none"/>
-              <path d="M6 32 L16 22 L24 30 L32 22 L42 32" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" fill="none"/>
-            </svg>
-            <p class="gallery__ph-num">Photo {{ photo.num }}</p>
-            <p class="gallery__ph-path">/images/gallery-{{ photo.num }}.jpg</p>
-          </div>
-
-          <figcaption class="gallery__caption">
-            <p class="gallery__caption-title">{{ photo.caption }}</p>
-            <p class="gallery__caption-loc">{{ photo.location }}</p>
-          </figcaption>
-        </figure>
+      <div class="gallery__header">
+        <div class="section-ornament"><span>✦</span></div>
+        <span class="gallery__label">En images</span>
+        <h2 class="gallery__title">Le ministère <em>à travers le monde</em></h2>
       </div>
 
-      <p class="gallery__hint">
-        Ajoutez vos photos dans
-        <code>/public/images/</code> et mettez à jour
-        <code>GallerySection.vue</code>
-      </p>
+      <div class="gallery__grid">
+        <div
+          v-for="(p, i) in photos"
+          :key="i"
+          :class="['gallery__item', p.span === 'wide' ? 'gallery__item--wide' : '']"
+        >
+          <div class="gallery__img-wrap">
+            <img :src="p.src" :alt="p.caption" class="gallery__img"
+              @error="(e: Event) => ((e.target as HTMLImageElement).parentElement!.querySelector('.gallery__placeholder') as HTMLElement).style.display = 'flex'"
+            />
+            <div class="gallery__placeholder">
+              <svg viewBox="0 0 24 24" fill="none" width="32" height="32">
+                <rect x="3" y="5" width="18" height="14" rx="2" stroke="#C4BAA0" stroke-width="1.5"/>
+                <circle cx="8.5" cy="10.5" r="1.5" stroke="#C4BAA0" stroke-width="1.5"/>
+                <path d="m21 15-5-5L5 19" stroke="#C4BAA0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span>{{ p.caption }}</span>
+            </div>
+          </div>
+          <div class="gallery__overlay">
+            <p class="gallery__caption">{{ p.caption }}</p>
+          </div>
+        </div>
+      </div>
 
     </div>
   </section>
@@ -59,146 +50,109 @@ const photos = [
 
 <style scoped>
 .gallery {
-  padding: 5rem 0;
-  background: #F8F6F1;
-}
-.gallery__container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 1.75rem;
+  background: #F6F4EF;
+  padding: 8rem 2.5rem;
+  position: relative;
 }
 
-/* Header */
-.gallery__header {
-  text-align: center;
-  margin-bottom: 3rem;
+.gallery::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent 0%, rgba(176,122,20,0.3) 30%, rgba(176,122,20,0.3) 70%, transparent 100%);
 }
-.gallery__eyebrow {
+
+.gallery__inner { max-width: 1200px; margin: 0 auto; }
+
+.gallery__header { text-align: center; margin-bottom: 3.5rem; }
+
+.gallery__label {
+  display: inline-block;
   font-family: var(--f-mono);
-  font-size: 0.62rem;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--emerald);
-  margin-bottom: 1rem;
-  opacity: 0.7;
+  font-size: 0.68rem; letter-spacing: 0.18em;
+  text-transform: uppercase; color: #B07A14; margin-bottom: 1rem;
 }
+
 .gallery__title {
   font-family: var(--f-display);
-  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
   font-weight: 400;
-  letter-spacing: 0.04em;
-  color: var(--ink);
-  margin-bottom: 0.75rem;
-}
-.gallery__title em {
-  font-style: normal;
-  font-weight: 700;
-  color: var(--emerald);
-}
-.gallery__desc {
-  font-family: var(--f-serif);
-  font-size: 1rem;
-  font-style: italic;
-  color: var(--text-soft);
-  max-width: 420px;
-  margin: 0 auto;
+  font-size: clamp(2.2rem, 4vw, 3.2rem);
+  line-height: 1.1; letter-spacing: 0.04em; color: #0C1528;
 }
 
-/* Grid */
+.gallery__title em {
+  font-family: var(--f-serif); font-style: italic; color: #B07A14;
+}
+
 .gallery__grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 240px;
   gap: 1rem;
-}
-@media (max-width: 700px) {
-  .gallery__grid { grid-template-columns: 1fr 1fr; }
-}
-@media (max-width: 440px) {
-  .gallery__grid { grid-template-columns: 1fr; }
 }
 
 .gallery__item {
   position: relative;
-  border-radius: var(--r3);
   overflow: hidden;
-  background: white;
-  border: 1px solid #EAE6DD;
-  box-shadow: var(--sh-sm);
-  transition: box-shadow var(--t);
+  border-radius: 8px;
+  border: 1px solid #EAE7E0;
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  transition: box-shadow var(--t), transform var(--t);
 }
+
 .gallery__item:hover {
-  box-shadow: var(--sh-md);
-}
-.gallery__item:hover .gallery__caption {
-  opacity: 1;
-  transform: translateY(0);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
 }
 
-/* Placeholder */
+.gallery__item--wide { grid-column: span 2; }
+
+.gallery__img-wrap { position: absolute; inset: 0; }
+
+.gallery__img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 0.55s var(--ease);
+}
+
+.gallery__item:hover .gallery__img { transform: scale(1.06); }
+
 .gallery__placeholder {
-  height: 220px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  background: #F3F0E8;
-}
-.gallery__ph-icon {
-  width: 36px; height: 36px;
-  color: rgba(26,23,20,0.2);
-}
-.gallery__ph-num {
-  font-family: var(--f-serif);
-  font-size: 0.82rem;
-  color: rgba(26,23,20,0.3);
-}
-.gallery__ph-path {
-  font-family: var(--f-mono);
-  font-size: 0.6rem;
-  color: rgba(26,23,20,0.18);
+  position: absolute; inset: 0;
+  display: none;
+  flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, #F0EDE6, #EAE7E0);
+  font-family: var(--f-serif); font-style: italic;
+  font-size: 0.9rem; color: #C4BAA0;
+  text-align: center; padding: 1.25rem;
 }
 
-/* Caption overlay */
-.gallery__caption {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 1rem;
-  background: linear-gradient(to top, rgba(15,14,11,0.78) 0%, transparent 55%);
+.gallery__overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(12, 21, 40, 0.75) 0%, transparent 50%);
+  display: flex; align-items: flex-end;
+  padding: 1.3rem;
   opacity: 0;
-  transform: translateY(4px);
-  transition: opacity var(--t), transform var(--t);
-}
-.gallery__caption-title {
-  font-family: var(--f-display);
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: white;
-}
-.gallery__caption-loc {
-  font-family: var(--f-mono);
-  font-size: 0.62rem;
-  color: rgba(255,255,255,0.55);
-  margin-top: 0.2rem;
+  transition: opacity 0.3s var(--ease);
 }
 
-/* Hint */
-.gallery__hint {
-  text-align: center;
-  margin-top: 2rem;
-  font-family: var(--f-serif);
-  font-style: italic;
-  font-size: 0.85rem;
-  color: rgba(26,23,20,0.32);
+.gallery__item:hover .gallery__overlay { opacity: 1; }
+
+.gallery__caption {
+  font-family: var(--f-serif); font-style: italic;
+  font-size: 0.95rem; color: rgba(255,255,255,0.92);
 }
-.gallery__hint code {
-  font-family: var(--f-mono);
-  font-style: normal;
-  font-size: 0.75rem;
-  color: var(--emerald);
+
+@media (max-width: 768px) {
+  .gallery__grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 175px; }
+  .gallery { padding: 6rem 1.75rem; }
+}
+
+@media (max-width: 480px) {
+  .gallery__grid { grid-template-columns: 1fr; grid-auto-rows: 210px; }
+  .gallery__item--wide { grid-column: span 1; }
 }
 </style>

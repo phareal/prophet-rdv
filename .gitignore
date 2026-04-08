@@ -21,3 +21,4 @@ Thumbs.db
 
 # SSL certs (jamais dans git)
 nginx/ssl/
+.vercel
