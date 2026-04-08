@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Play, Youtube } from 'lucide-vue-next'
 
-const { data: videos } = useFetch('/api/youtube/latest', { lazy: true })
+const { data: videos, pending } = useFetch('/api/youtube/latest', { lazy: true })
 
 const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
 </script>
@@ -22,7 +22,19 @@ const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
         </p>
       </div>
 
-      <div class="video-section__grid">
+      <!-- Skeleton pendant le chargement -->
+      <div v-if="pending" class="video-section__grid">
+        <div v-for="n in 3" :key="n" class="vcard vcard--skeleton">
+          <div class="vcard__thumb vcard__thumb--skeleton" />
+          <div class="vcard__body">
+            <span class="vcard__skeleton-line vcard__skeleton-line--short" />
+            <span class="vcard__skeleton-line" />
+            <span class="vcard__skeleton-line vcard__skeleton-line--long" />
+          </div>
+        </div>
+      </div>
+
+      <div v-else class="video-section__grid">
         <div v-for="(v, i) in videos" :key="i" class="vcard">
           <a
             :href="`https://www.youtube.com/watch?v=${v.id}`"
@@ -30,6 +42,9 @@ const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
             rel="noopener noreferrer"
             class="vcard__thumb"
           >
+            <div class="vcard__thumb-placeholder">
+              <Youtube :size="36" class="vcard__yt-icon" />
+            </div>
             <img
               :src="v.thumbnail"
               :alt="v.title"
@@ -39,9 +54,6 @@ const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
               height="270"
               @error="(e: Event) => ((e.target as HTMLImageElement).style.display='none')"
             />
-            <div class="vcard__thumb-placeholder">
-              <Youtube :size="36" class="vcard__yt-icon" />
-            </div>
             <div class="vcard__play">
               <div class="vcard__play-btn">
                 <Play :size="20" fill="currentColor" />
@@ -147,6 +159,7 @@ const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
 }
 
 .vcard__img {
+  position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
   transition: transform 0.5s var(--ease);
@@ -233,6 +246,31 @@ const channelUrl = 'https://www.youtube.com/@ProphetJeremiahNahoum'
 .video-section__channel-btn:hover {
   opacity: 0.88; transform: translateY(-2px);
 }
+
+/* Skeleton */
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+
+.vcard__thumb--skeleton {
+  background: linear-gradient(90deg, #EDE9E0 25%, #E0DBD0 50%, #EDE9E0 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+.vcard__skeleton-line {
+  display: block;
+  height: 0.75rem;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #EDE9E0 25%, #E0DBD0 50%, #EDE9E0 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.4s infinite linear;
+  width: 75%;
+}
+
+.vcard__skeleton-line--short { width: 35%; }
+.vcard__skeleton-line--long  { width: 90%; }
 
 @media (max-width: 900px) {
   .video-section__grid { grid-template-columns: repeat(2, 1fr); }
