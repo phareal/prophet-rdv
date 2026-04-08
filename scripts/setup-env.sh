@@ -13,21 +13,44 @@ BACKUP_FILE=".env.backup.$(date +%Y%m%d_%H%M%S)"
 # ── Couleurs ──────────────────────────────────
 BOLD='\033[1m'
 DIM='\033[2m'
-RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
 NC='\033[0m'
 
-# ── Helpers ───────────────────────────────────
+# ── Helpers affichage ─────────────────────────
 section() { echo ""; echo -e "${BLUE}${BOLD}── $1 ──────────────────────────────────────${NC}"; }
 hint()    { echo -e "  ${DIM}↳ $1${NC}"; }
 ok()      { echo -e "${GREEN}✓${NC} $1"; }
 warn()    { echo -e "${YELLOW}⚠${NC}  $1"; }
 info()    { echo -e "${CYAN}ℹ${NC}  $1"; }
+link()    { echo -e "  ${MAGENTA}${BOLD}🔗 $1${NC}"; }
 
-# Lire la valeur actuelle depuis le .env existant
+# ── Ouvrir une URL dans le navigateur (multi-OS) ──
+open_url() {
+  local url="$1"
+  local label="${2:-}"
+
+  link "${label:-$url}"
+
+  if command -v open &>/dev/null; then          # macOS
+    open "$url" 2>/dev/null &
+  elif command -v xdg-open &>/dev/null; then    # Linux
+    xdg-open "$url" 2>/dev/null &
+  elif command -v wslview &>/dev/null; then     # WSL
+    wslview "$url" 2>/dev/null &
+  fi
+}
+
+# Pause "appuyez sur Entrée pour continuer" après une ouverture de page
+wait_ready() {
+  echo -e -n "  ${DIM}Appuyez sur Entrée une fois la page chargée...${NC}"
+  read -r
+}
+
+# ── Lire la valeur actuelle depuis le .env existant ──
 current() {
   local key="$1"
   if [ -f "$ENV_FILE" ]; then
@@ -35,7 +58,7 @@ current() {
   fi
 }
 
-# Prompt standard — affiche la valeur courante comme défaut
+# ── Prompt standard — Entrée conserve la valeur courante ──
 ask() {
   local key="$1"
   local label="$2"
@@ -55,7 +78,7 @@ ask() {
   echo "${input:-$default}"
 }
 
-# Prompt masqué pour les mots de passe
+# ── Prompt masqué pour les secrets ──
 ask_secret() {
   local key="$1"
   local label="$2"
@@ -65,11 +88,13 @@ ask_secret() {
   if [ -n "$hint_text" ]; then hint "$hint_text"; fi
 
   local has_current=""
-  if [ -n "$(current "$key")" ]; then has_current=" ${DIM}[valeur existante — Entrée pour conserver]${NC}"; fi
+  if [ -n "$(current "$key")" ]; then
+    has_current=" ${DIM}[existant — Entrée pour conserver]${NC}"
+  fi
 
   echo -e -n "  ${BOLD}${label}${NC}${has_current} : "
   read -rs input
-  echo ""  # saut de ligne après saisie masquée
+  echo ""
 
   if [ -z "$input" ] && [ -n "$(current "$key")" ]; then
     current "$key"
@@ -86,6 +111,7 @@ echo -e "${BOLD}  ⚙  Configuration Prophet RDV — .env${NC}"
 echo -e "${BLUE}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 info "Ce script génère le fichier ${BOLD}.env${NC} à la racine du projet."
+info "Les pages nécessaires s'ouvrent automatiquement dans votre navigateur."
 info "Appuyez sur Entrée pour conserver la valeur entre crochets."
 
 # ── Backup ────────────────────────────────────
@@ -99,8 +125,7 @@ fi
 # ════════════════════════════════════════════════
 section "Application"
 
-NODE_ENV=$(ask "NODE_ENV" "Environnement" "production" \
-  "production | development")
+NODE_ENV=$(ask "NODE_ENV" "Environnement" "production" "production | development")
 
 NUXT_PUBLIC_SITE_URL=$(ask "NUXT_PUBLIC_SITE_URL" "URL du site" "" \
   "Ex : https://prophetjeremiahnahoum.com")
@@ -110,25 +135,35 @@ NUXT_PUBLIC_SITE_URL=$(ask "NUXT_PUBLIC_SITE_URL" "URL du site" "" \
 # ════════════════════════════════════════════════
 section "MongoDB"
 
-info "En Docker, utilisez l'URI interne : mongodb://mongo:27017/prophetrdv"
-info "En local, utilisez               : mongodb://localhost:27017/prophetrdv"
+info "En Docker : mongodb://mongo:27017/prophetrdv"
+info "En local  : mongodb://localhost:27017/prophetrdv"
 
 MONGODB_URI=$(ask "MONGODB_URI" "URI MongoDB" "mongodb://mongo:27017/prophetrdv")
 
 # ════════════════════════════════════════════════
-# SECTION 3 — SMTP (Email)
+# SECTION 3 — SMTP
 # ════════════════════════════════════════════════
 section "SMTP — Envoi d'emails"
 
 SMTP_HOST=$(ask "SMTP_HOST" "Serveur SMTP" "smtp.gmail.com")
 SMTP_PORT=$(ask "SMTP_PORT" "Port SMTP" "587" "587 (STARTTLS) | 465 (SSL)")
 SMTP_SECURE=$(ask "SMTP_SECURE" "TLS strict" "false" "true pour port 465, false pour 587")
-SMTP_USER=$(ask "SMTP_USER" "Adresse email SMTP" "" \
-  "Votre adresse Gmail ou email pro")
-SMTP_PASS=$(ask_secret "SMTP_PASS" "Mot de passe SMTP" \
-  "Gmail : myaccount.google.com/apppasswords → générer un App Password")
+SMTP_USER=$(ask "SMTP_USER" "Adresse email SMTP" "" "Votre adresse Gmail ou email pro")
+
+# Ouvrir App Passwords seulement si SMTP_PASS est vide
+if [ -z "$(current "SMTP_PASS")" ]; then
+  echo ""
+  info "Ouverture de la page Gmail App Passwords..."
+  open_url "https://myaccount.google.com/apppasswords" \
+    "myaccount.google.com/apppasswords"
+  wait_ready
+fi
+
+SMTP_PASS=$(ask_secret "SMTP_PASS" "Mot de passe SMTP (App Password)" \
+  "Sécurité → Authentification 2 facteurs → App Passwords → générer")
+
 PROPHET_EMAIL=$(ask "PROPHET_EMAIL" "Email destinataire (notifications RDV)" "" \
-  "Email du prophète qui reçoit les demandes de RDV")
+  "Email qui reçoit les demandes de RDV")
 
 # ════════════════════════════════════════════════
 # SECTION 4 — CONTACTS
@@ -144,14 +179,37 @@ PROPHET_PHONE_2=$(ask "PROPHET_PHONE_2" "Téléphone 2" "+2348119265483")
 # ════════════════════════════════════════════════
 section "YouTube Data API v3"
 
-echo ""
-hint "1. Allez sur console.cloud.google.com"
-hint "2. Créez un projet → Bibliothèque → YouTube Data API v3 → Activer"
-hint "3. Identifiants → Créer une clé API"
-hint "4. Channel ID : ouvrez votre chaîne YouTube → URL → copier l'ID après /channel/"
+# Ouvrir Google Cloud Console si clé YouTube absente
+if [ -z "$(current "YOUTUBE_API_KEY")" ]; then
+  echo ""
+  info "Étape 1 — Activer YouTube Data API v3 sur Google Cloud..."
+  open_url \
+    "https://console.cloud.google.com/apis/library/youtube.googleapis.com" \
+    "console.cloud.google.com → YouTube Data API v3"
+  wait_ready
 
-YOUTUBE_API_KEY=$(ask "YOUTUBE_API_KEY" "Clé API YouTube" "" \
-  "Commence par AIza...")
+  echo ""
+  info "Étape 2 — Créer une clé API..."
+  open_url \
+    "https://console.cloud.google.com/apis/credentials/wizard?api=youtube.googleapis.com" \
+    "console.cloud.google.com → Identifiants → Créer une clé API"
+  wait_ready
+fi
+
+YOUTUBE_API_KEY=$(ask "YOUTUBE_API_KEY" "Clé API YouTube" "" "Commence par AIza...")
+
+# Ouvrir la chaîne YouTube si Channel ID absent
+if [ -z "$(current "YOUTUBE_CHANNEL_ID")" ]; then
+  echo ""
+  info "Ouverture de la chaîne YouTube pour récupérer le Channel ID..."
+  open_url \
+    "https://www.youtube.com/@ProphetJeremiahNahoum/about" \
+    "youtube.com/@ProphetJeremiahNahoum/about"
+  hint "Dans la page → clic droit → Afficher le code source → chercher 'channelId'"
+  hint "Ou : URL de la chaîne → cliquer sur 'Partager' → copier le lien /channel/UC..."
+  wait_ready
+fi
+
 YOUTUBE_CHANNEL_ID=$(ask "YOUTUBE_CHANNEL_ID" "Channel ID" "" \
   "Ex : UCxxxxxxxxxxxxxxxxxxxxxxx")
 
@@ -160,14 +218,31 @@ YOUTUBE_CHANNEL_ID=$(ask "YOUTUBE_CHANNEL_ID" "Channel ID" "" \
 # ════════════════════════════════════════════════
 section "Google Calendar API"
 
-echo ""
-hint "1. Même projet Google Cloud → Bibliothèque → Google Calendar API → Activer"
-hint "2. Utilisez la même clé API ou créez-en une dédiée"
-hint "3. Calendar ID : Google Calendar → Paramètres → Intégrer l'agenda → ID de l'agenda"
-hint "   (ressemble à : votre-email@gmail.com ou xxxxx@group.calendar.google.com)"
+# Ouvrir Google Cloud Console si clé Calendar absente
+if [ -z "$(current "GOOGLE_API_KEY")" ]; then
+  echo ""
+  info "Étape 1 — Activer Google Calendar API..."
+  open_url \
+    "https://console.cloud.google.com/apis/library/calendar-json.googleapis.com" \
+    "console.cloud.google.com → Google Calendar API"
+  wait_ready
+fi
 
-GOOGLE_API_KEY=$(ask "GOOGLE_API_KEY" "Clé API Google" "" \
+GOOGLE_API_KEY=$(ask "GOOGLE_API_KEY" "Clé API Google Calendar" "" \
   "Peut être la même que YouTube si même projet GCP")
+
+# Ouvrir les paramètres Google Calendar si Calendar ID absent
+if [ -z "$(current "GOOGLE_CALENDAR_ID")" ]; then
+  echo ""
+  info "Ouverture des paramètres Google Calendar pour récupérer l'ID de l'agenda..."
+  open_url \
+    "https://calendar.google.com/calendar/r/settings" \
+    "calendar.google.com → Paramètres → [votre agenda] → Intégrer l'agenda"
+  hint "Sélectionnez l'agenda dans la colonne gauche → section 'Intégrer l'agenda'"
+  hint "Copiez 'ID de l'agenda' (ex: votre@email.com ou xxxx@group.calendar.google.com)"
+  wait_ready
+fi
+
 GOOGLE_CALENDAR_ID=$(ask "GOOGLE_CALENDAR_ID" "Calendar ID" "" \
   "Ex : votre@email.com ou xxxxx@group.calendar.google.com")
 
@@ -212,7 +287,6 @@ echo -e "${GREEN}${BOLD}✅ Fichier .env généré avec succès !${NC}"
 echo -e "${GREEN}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 
-# Afficher un résumé des valeurs (masquer les secrets)
 echo -e "  ${BOLD}APPLICATION${NC}"
 echo -e "    NODE_ENV             = ${NODE_ENV}"
 echo -e "    NUXT_PUBLIC_SITE_URL = ${NUXT_PUBLIC_SITE_URL}"
@@ -231,11 +305,10 @@ echo -e "    GOOGLE_API_KEY       = ${GOOGLE_API_KEY:+${DIM}••••${GOOGLE
 echo -e "    GOOGLE_CALENDAR_ID   = ${GOOGLE_CALENDAR_ID:-${YELLOW}(vide — mode mock actif)${NC}}"
 echo ""
 
-# Avertissements si clés manquantes
 missing=0
-[ -z "$YOUTUBE_API_KEY" ]    && warn "YOUTUBE_API_KEY vide → VideoSection en mode mock" && missing=1
+[ -z "$YOUTUBE_API_KEY" ]    && warn "YOUTUBE_API_KEY vide → VideoSection en mode mock"  && missing=1
 [ -z "$YOUTUBE_CHANNEL_ID" ] && warn "YOUTUBE_CHANNEL_ID vide → VideoSection en mode mock" && missing=1
-[ -z "$GOOGLE_API_KEY" ]     && warn "GOOGLE_API_KEY vide → EventsSection en mode mock" && missing=1
+[ -z "$GOOGLE_API_KEY" ]     && warn "GOOGLE_API_KEY vide → EventsSection en mode mock"  && missing=1
 [ -z "$GOOGLE_CALENDAR_ID" ] && warn "GOOGLE_CALENDAR_ID vide → EventsSection en mode mock" && missing=1
 [ "$missing" -eq 0 ]         && ok  "Toutes les clés API sont renseignées"
 
