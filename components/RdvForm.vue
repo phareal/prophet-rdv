@@ -70,13 +70,20 @@ const onSubmit = handleSubmit(async (vals) => {
       '/api/rdv', { method: 'POST', body: { ...vals, date: vals.date.toISOString() } }
     )
     if (result.success) {
-      toast({ title: 'Demande envoyée', description: 'Confirmez sur WhatsApp pour finaliser.' })
-      setTimeout(() => window.open(result.whatsappUrl, '_blank'), 800)
-      await navigateTo({
-        path: '/confirmation',
-        query: { nom: vals.nom, prenom: vals.prenom, consultation: vals.typeConsultation,
-                 date: vals.date.toISOString(), heure: vals.heure, waUrl: result.whatsappUrl },
-      })
+      // Génération PDF + envoi WhatsApp
+      const confirmation = await $fetch<{ success: boolean; confirmationId: string }>(
+        '/api/reservation/confirm', {
+          method: 'POST',
+          body: {
+            nom: `${vals.prenom} ${vals.nom}`,
+            date: vals.date.toISOString(),
+            heure: vals.heure,
+            typeRdv: vals.typeConsultation,
+            userPhone: vals.telephone,
+          },
+        }
+      )
+      await navigateTo(`/reservation/succes?ref=${confirmation.confirmationId}`)
     }
   } catch (err: unknown) {
     const e = err as { data?: { message?: string }; statusCode?: number }
