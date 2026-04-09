@@ -27,6 +27,11 @@ export default defineNuxtConfig({
     prophetEmail: process.env.PROPHET_EMAIL || '',
     prophetPhone1: process.env.PROPHET_PHONE_1 || '+22897169090',
     prophetPhone2: process.env.PROPHET_PHONE_2 || '+2348119265483',
+    twilioAccountSid: process.env.TWILIO_ACCOUNT_SID || '',
+    twilioAuthToken: process.env.TWILIO_AUTH_TOKEN || '',
+    twilioWhatsappNumber: process.env.TWILIO_WHATSAPP_NUMBER || '',
+    adminWhatsappNumber: process.env.ADMIN_WHATSAPP_NUMBER || '',
+    blobReadWriteToken: process.env.BLOB_READ_WRITE_TOKEN || '',
     // Public (exposé côté client)
     public: {
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
