@@ -6,47 +6,6 @@
 
 namespace App;
 
-use Illuminate\Support\Facades\Vite;
-
-/**
- * Inject styles into the block editor.
- *
- * @return array
- */
-add_filter('block_editor_settings_all', function ($settings) {
-    $style = Vite::asset('resources/css/editor.css');
-
-    $settings['styles'][] = [
-        'css' => "@import url('{$style}')",
-    ];
-
-    return $settings;
-});
-
-/**
- * Inject scripts into the block editor.
- *
- * @return void
- */
-add_action('admin_head', function () {
-    if (! get_current_screen()?->is_block_editor()) {
-        return;
-    }
-
-    if (! Vite::isRunningHot()) {
-        $dependencies = json_decode(Vite::content('editor.deps.json'));
-
-        foreach ($dependencies as $dependency) {
-            if (! wp_script_is($dependency)) {
-                wp_enqueue_script($dependency);
-            }
-        }
-    }
-    echo Vite::withEntryPoints([
-        'resources/js/editor.js',
-    ])->toHtml();
-});
-
 /**
  * Use the generated theme.json file.
  *
