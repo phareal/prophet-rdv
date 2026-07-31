@@ -1116,6 +1116,19 @@ git commit -m "feat(core): formatage des dates en français et construction du l
   - `GoogleCalendar::parseItems(array $items): array` — pur, testable sans HTTP
   - Forme d'un événement : `['day','month','year','title','lieu','heure','places','type','featured']`, toutes valeurs `string` sauf `featured` (`bool`)
 
+**Divergence assumée sur le fuseau horaire.** Le bridge Node construit `new Date(…)`
+puis lit `getHours()`, ce qui rend l'heure dans le fuseau du **process**, pas dans
+celui de l'événement : un événement à 20h00 heure de Paris s'affiche `18h00` sur un
+serveur en UTC. Le port PHP conserve le décalage porté par la charge utile Google et
+rend donc `20h00`. C'est l'heure que le public doit lire — celle de l'événement, sur
+place. On garde le comportement PHP : il corrige un défaut latent de l'existant au
+lieu de le reproduire.
+
+**Note d'outillage.** Brain Monkey ne peut pas remplacer les fonctions internes de
+PHP (ici `error_log`) sans que Patchwork y soit autorisé. Un fichier
+`cms/patchwork.json` déclarant ces fonctions est nécessaire pour que les tests de
+repli s'exécutent.
+
 - [ ] **Step 1: Écrire le test qui échoue**
 
 `cms/tests/Unit/Services/GoogleCalendarTest.php` :
