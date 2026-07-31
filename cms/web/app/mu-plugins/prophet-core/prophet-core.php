@@ -9,3 +9,9 @@ declare(strict_types=1);
  */
 
 // Les register() des tâches suivantes viennent ici.
+
+use ProphetCore\Services\SmtpConfigurator;
+
+add_action('plugins_loaded', static function (): void {
+    SmtpConfigurator::register();
+});
