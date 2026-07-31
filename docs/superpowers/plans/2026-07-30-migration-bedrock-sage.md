@@ -2599,8 +2599,18 @@ git commit -m "feat(core): types de contenu services, témoignages, photos et pa
 - Produces:
   - `RendezVous::SLUG = 'rendez_vous'`, `RendezVous::register(): void`
   - Statuts `prophet_en_attente`, `prophet_confirme`, `prophet_annule` ; constantes `RendezVous::STATUT_EN_ATTENTE`, `STATUT_CONFIRME`, `STATUT_ANNULE`
-  - Métadonnées : `rdv_nom`, `rdv_prenom`, `rdv_email`, `rdv_telephone`, `rdv_pays`, `rdv_date` (`Y-m-d`), `rdv_heure`, `rdv_type_consultation`, `rdv_mode_paiement`, `rdv_message`, `rdv_ref`
+  - `RendezVous::META_PREFIX = '_rdv_'` et `RendezVous::metaKey(string $champ): string`
+  - Champs : `nom`, `prenom`, `email`, `telephone`, `pays`, `date` (`Y-m-d`), `heure`, `type_consultation`, `mode_paiement`, `message`, `ref`
   - Colonnes d'administration : date, nom, type, statut
+
+**Le préfixe est imposé par Carbon Fields, pas par goût.** Carbon Fields stocke
+toute méta de publication sous une clé préfixée d'un `_` (`Key_Toolset::KEY_PREFIX`,
+non configurable). Un code qui écrirait `rdv_prenom` en direct produirait donc un
+rendez-vous que le panneau d'administration afficherait vide, et réciproquement —
+deux jeux de clés pour une même donnée. D'où une source unique : **personne
+n'écrit une clé littérale**, tout passe par `RendezVous::metaKey('prenom')`. Le
+préfixe `_` a par ailleurs le mérite de rendre ces données personnelles invisibles
+dans l'éditeur de champs personnalisés de WordPress.
 
 - [ ] **Step 1: Écrire le test qui échoue**
 
@@ -2686,6 +2696,19 @@ final class RendezVous
     public const STATUT_CONFIRME = 'prophet_confirme';
     public const STATUT_ANNULE = 'prophet_annule';
 
+    /**
+     * Carbon Fields préfixe toute méta de publication d'un `_`, sans possibilité
+     * de le désactiver. Toute lecture ou écriture passe par metaKey() : une clé
+     * littérale écrite ailleurs créerait un second jeu de données que
+     * l'administration n'afficherait pas.
+     */
+    public const META_PREFIX = '_rdv_';
+
+    public static function metaKey(string $champ): string
+    {
+        return self::META_PREFIX . $champ;
+    }
+
     private const STATUTS = [
         self::STATUT_EN_ATTENTE => 'En attente',
         self::STATUT_CONFIRME => 'Confirmé',
@@ -2747,12 +2770,12 @@ final class RendezVous
         switch ($colonne) {
             case 'rdv_date':
                 echo esc_html(
-                    get_post_meta($postId, 'rdv_date', true) . ' — '
-                    . get_post_meta($postId, 'rdv_heure', true)
+                    get_post_meta($postId, self::metaKey('date'), true) . ' — '
+                    . get_post_meta($postId, self::metaKey('heure'), true)
                 );
                 break;
             case 'rdv_type':
-                echo esc_html((string) get_post_meta($postId, 'rdv_type_consultation', true));
+                echo esc_html((string) get_post_meta($postId, self::metaKey('type_consultation'), true));
                 break;
             case 'rdv_statut':
                 echo esc_html(self::STATUTS[get_post_status($postId)] ?? '—');
@@ -3388,10 +3411,16 @@ final class RepositoryTest extends TestCase
         ]);
 
         $this->assertSame('REF0123456789', $ref);
-        $this->assertSame('2026-08-05', $metas['rdv_date']);
-        $this->assertSame('09h00', $metas['rdv_heure']);
-        $this->assertSame('Mariage', $metas['rdv_type_consultation']);
-        $this->assertSame('REF0123456789', $metas['rdv_ref']);
+        $this->assertSame('2026-08-05', $metas['_rdv_date']);
+        $this->assertSame('09h00', $metas['_rdv_heure']);
+        $this->assertSame('Mariage', $metas['_rdv_type_consultation']);
+        $this->assertSame('REF0123456789', $metas['_rdv_ref']);
+
+        // Le préfixe de Carbon Fields n'est pas cosmétique : sans lui, le
+        // panneau d'administration du rendez-vous s'affiche vide.
+        foreach (array_keys($metas) as $cle) {
+            $this->assertStringStartsWith('_rdv_', $cle);
+        }
     }
 
     public function test_une_reference_inconnue_renvoie_null(): void
@@ -3478,8 +3507,8 @@ final class Repository
             'posts_per_page' => 1,
             'no_found_rows' => true,
             'meta_query' => [
-                ['key' => 'rdv_date', 'value' => $dateYmd],
-                ['key' => 'rdv_heure', 'value' => $heure],
+                ['key' => RendezVous::metaKey('date'), 'value' => $dateYmd],
+                ['key' => RendezVous::metaKey('heure'), 'value' => $heure],
             ],
         ]);
 
@@ -3507,21 +3536,24 @@ final class Repository
         }
 
         $metas = [
-            'rdv_nom' => sanitize_text_field($data['nom']),
-            'rdv_prenom' => sanitize_text_field($data['prenom']),
-            'rdv_email' => sanitize_email($data['email']),
-            'rdv_telephone' => sanitize_text_field($data['telephone']),
-            'rdv_pays' => sanitize_text_field($data['pays']),
-            'rdv_date' => $data['date']->format('Y-m-d'),
-            'rdv_heure' => sanitize_text_field($data['heure']),
-            'rdv_type_consultation' => sanitize_text_field($data['type_consultation']),
-            'rdv_mode_paiement' => sanitize_text_field($data['mode_paiement']),
-            'rdv_message' => sanitize_textarea_field($data['message']),
-            'rdv_ref' => $ref,
+            'nom' => sanitize_text_field($data['nom']),
+            'prenom' => sanitize_text_field($data['prenom']),
+            'email' => sanitize_email($data['email']),
+            'telephone' => sanitize_text_field($data['telephone']),
+            'pays' => sanitize_text_field($data['pays']),
+            'date' => $data['date']->format('Y-m-d'),
+            'heure' => sanitize_text_field($data['heure']),
+            'type_consultation' => sanitize_text_field($data['type_consultation']),
+            'mode_paiement' => sanitize_text_field($data['mode_paiement']),
+            'message' => sanitize_textarea_field($data['message']),
+            'ref' => $ref,
         ];
 
-        foreach ($metas as $cle => $valeur) {
-            update_post_meta((int) $postId, $cle, $valeur);
+        // Les clés passent par RendezVous::metaKey() : Carbon Fields impose son
+        // préfixe, et une clé littérale ici produirait un rendez-vous que le
+        // panneau d'administration afficherait vide.
+        foreach ($metas as $champ => $valeur) {
+            update_post_meta((int) $postId, RendezVous::metaKey($champ), $valeur);
         }
 
         return $ref;
@@ -3535,7 +3567,7 @@ final class Repository
             'fields' => 'ids',
             'posts_per_page' => 1,
             'no_found_rows' => true,
-            'meta_query' => [['key' => 'rdv_ref', 'value' => $ref]],
+            'meta_query' => [['key' => RendezVous::metaKey('ref'), 'value' => $ref]],
         ]);
 
         if ($posts === []) {
@@ -3544,20 +3576,23 @@ final class Repository
 
         $postId = (int) $posts[0];
 
+        $lire = static fn (string $champ): string => (string) get_post_meta(
+            $postId,
+            RendezVous::metaKey($champ),
+            true
+        );
+
         return [
-            'nom' => (string) get_post_meta($postId, 'rdv_nom', true),
-            'prenom' => (string) get_post_meta($postId, 'rdv_prenom', true),
-            'email' => (string) get_post_meta($postId, 'rdv_email', true),
-            'telephone' => (string) get_post_meta($postId, 'rdv_telephone', true),
-            'pays' => (string) get_post_meta($postId, 'rdv_pays', true),
-            'date' => new DateTimeImmutable(
-                (string) get_post_meta($postId, 'rdv_date', true),
-                new DateTimeZone('UTC')
-            ),
-            'heure' => (string) get_post_meta($postId, 'rdv_heure', true),
-            'type_consultation' => (string) get_post_meta($postId, 'rdv_type_consultation', true),
-            'mode_paiement' => (string) get_post_meta($postId, 'rdv_mode_paiement', true),
-            'message' => (string) get_post_meta($postId, 'rdv_message', true),
+            'nom' => $lire('nom'),
+            'prenom' => $lire('prenom'),
+            'email' => $lire('email'),
+            'telephone' => $lire('telephone'),
+            'pays' => $lire('pays'),
+            'date' => new DateTimeImmutable($lire('date'), new DateTimeZone('UTC')),
+            'heure' => $lire('heure'),
+            'type_consultation' => $lire('type_consultation'),
+            'mode_paiement' => $lire('mode_paiement'),
+            'message' => $lire('message'),
         ];
     }
 }
