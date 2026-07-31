@@ -6,6 +6,8 @@
 
 namespace App;
 
+use Illuminate\Support\Facades\Vite;
+
 /**
  * Use the generated theme.json file.
  *
@@ -120,3 +122,52 @@ add_action('widgets_init', function () {
         'id' => 'sidebar-footer',
     ] + $config);
 });
+
+/**
+ * Enqueue the compiled theme stylesheet (design tokens ported from Nuxt).
+ *
+ * The `@vite` Blade directive was deliberately left out of
+ * resources/views/layouts/app.blade.php in Task 2 (minimal layout; the
+ * section markup returns in tasks 14+). Task 4 needs tokens.css live on
+ * every page now, so the compiled asset is enqueued here instead.
+ *
+ * @return void
+ */
+add_action('wp_enqueue_scripts', function () {
+    echo Vite::withEntryPoints(['resources/css/app.css'])->toHtml();
+}, 1);
+
+/**
+ * Register the Google fonts stylesheet, loaded non-blocking.
+ *
+ * @return void
+ */
+add_action('wp_enqueue_scripts', function () {
+    add_filter('style_loader_tag', function (string $tag, string $handle): string {
+        if ($handle !== 'prophet-fonts') {
+            return $tag;
+        }
+
+        // Chargement non bloquant, identique à nuxt.config.ts:57-66.
+        return str_replace(
+            "media='all'",
+            "media='print' onload=\"this.media='all'\"",
+            $tag
+        );
+    }, 10, 2);
+
+    wp_enqueue_style(
+        'prophet-fonts',
+        'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;900'
+        . '&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600'
+        . '&family=JetBrains+Mono:wght@400;500;600'
+        . '&family=Inter:wght@400;500;600&display=swap',
+        [],
+        null
+    );
+}, 90);
+
+add_action('wp_head', function () {
+    echo '<link rel="preconnect" href="https://fonts.googleapis.com">' . "\n";
+    echo '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . "\n";
+}, 1);
