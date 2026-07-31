@@ -99,6 +99,15 @@ Cette procédure s'applique aux tâches 14 à 19. Chaque tâche la suit intégra
 6. Les données viennent d'un View Composer, jamais d'une requête dans la vue.
 7. Vérification : lancer les deux sites côte à côte (`npm run dev` sur le Nuxt, port 3000 ; WordPress sur 8080), comparer la section à trois largeurs (375, 768, 1440 px). Tout écart visible est corrigé avant de commiter.
 
+**Styles globaux de page.** L'audit de la tâche 4 ne scanne que les blocs
+`<style scoped>`. Or `pages/index.vue` et `pages/rdv.vue` portent chacun un bloc
+`<style>` **non scopé** (`.site`, `.rdv-page`, `.rdv-back`, `.rdv-layout*`) qui
+échappe donc à l'audit comme au scoping par section. Ces règles sont globales par
+nature : elles vont dans `resources/css/app.css` ou dans un fichier
+`sections/_page-<nom>.css` importé sans enveloppe `.sec-*`, et non dans le fichier
+d'une section. La tâche 15 traite celui de `pages/index.vue`, la tâche 19 celui de
+`pages/rdv.vue`.
+
 ---
 
 ## Phase A — Socle
@@ -4080,6 +4089,10 @@ git commit -m "feat(theme): icônes, Alpine, layout, barre de navigation et pied
 
 Les tâches 16 à 18 ajoutent leurs `@include` à la suite, dans l'ordre de `pages/index.vue`.
 
+Porter aussi le bloc `<style>` **non scopé** de `pages/index.vue` (la classe `.site`)
+vers `resources/css/app.css`, sans enveloppe de section : ces règles sont globales à
+la page d'accueil et le scoping par section les casserait.
+
 - [ ] **Step 2: Écrire le composer des chiffres**
 
 `app/View/Composers/Stats.php` :
@@ -4831,6 +4844,11 @@ document.addEventListener('DOMContentLoaded', () => {
 ```
 
 Reprendre la mise en page à deux colonnes de `pages/rdv.vue` dans `_rdv-form.css` sous `.page-rdv`.
+
+Le bloc `<style>` **non scopé** de `pages/rdv.vue` (`.rdv-page`, `.rdv-back`,
+`.rdv-layout*`) est global à la page : le porter dans un fichier
+`resources/css/sections/_page-rdv.css` importé **sans** enveloppe `.sec-*`, puisque
+le scoping par section l'empêcherait d'atteindre ses cibles.
 
 - [ ] **Step 6: Créer la page dans WordPress**
 
