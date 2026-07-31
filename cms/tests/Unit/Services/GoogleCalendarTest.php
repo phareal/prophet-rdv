@@ -95,7 +95,10 @@ final class GoogleCalendarTest extends TestCase
     public function test_sans_cle_api_le_service_renvoie_les_donnees_de_demonstration(): void
     {
         Functions\when('get_transient')->justReturn(false);
-        Functions\when('set_transient')->justReturn(true);
+        Functions\expect('set_transient')
+            ->once()
+            ->with(GoogleCalendar::TRANSIENT, GoogleCalendar::MOCK_EVENTS, GoogleCalendar::TTL_ECHEC)
+            ->andReturn(true);
 
         $events = (new GoogleCalendar('', ''))->events();
 
@@ -105,14 +108,64 @@ final class GoogleCalendarTest extends TestCase
     public function test_une_erreur_http_retombe_sur_les_donnees_de_demonstration(): void
     {
         Functions\when('get_transient')->justReturn(false);
-        Functions\when('set_transient')->justReturn(true);
         Functions\when('is_wp_error')->justReturn(true);
         Functions\when('wp_remote_get')->justReturn('erreur');
         Functions\when('error_log')->justReturn(true);
+        Functions\expect('set_transient')
+            ->once()
+            ->with(GoogleCalendar::TRANSIENT, GoogleCalendar::MOCK_EVENTS, GoogleCalendar::TTL_ECHEC)
+            ->andReturn(true);
 
         $events = (new GoogleCalendar('cle', 'agenda'))->events();
 
         $this->assertSame(GoogleCalendar::MOCK_EVENTS, $events);
+    }
+
+    public function test_une_reponse_inattendue_retombe_sur_les_donnees_de_demonstration(): void
+    {
+        Functions\when('get_transient')->justReturn(false);
+        Functions\when('is_wp_error')->justReturn(false);
+        Functions\when('wp_remote_get')->justReturn(['body' => '{"foo":"bar"}']);
+        Functions\when('wp_remote_retrieve_body')->justReturn('{"foo":"bar"}');
+        Functions\when('error_log')->justReturn(true);
+        Functions\expect('set_transient')
+            ->once()
+            ->with(GoogleCalendar::TRANSIENT, GoogleCalendar::MOCK_EVENTS, GoogleCalendar::TTL_ECHEC)
+            ->andReturn(true);
+
+        $events = (new GoogleCalendar('cle', 'agenda'))->events();
+
+        $this->assertSame(GoogleCalendar::MOCK_EVENTS, $events);
+    }
+
+    public function test_un_appel_reussi_renvoie_les_evenements_et_utilise_le_ttl_normal(): void
+    {
+        $body = json_encode([
+            'items' => [[
+                'summary' => 'Culte de Puissance',
+                'description' => "lieu: Lomé, Togo\nplaces: Entrée libre\ntype: Croisade",
+                'start' => ['dateTime' => '2026-08-01T18:00:00+00:00'],
+                'end' => ['dateTime' => '2026-08-01T20:00:00+00:00'],
+            ]],
+        ]);
+
+        Functions\when('get_transient')->justReturn(false);
+        Functions\when('is_wp_error')->justReturn(false);
+        Functions\when('wp_remote_get')->justReturn(['body' => $body]);
+        Functions\when('wp_remote_retrieve_body')->justReturn($body);
+        Functions\expect('set_transient')
+            ->once()
+            ->with(GoogleCalendar::TRANSIENT, \Mockery::type('array'), GoogleCalendar::TTL)
+            ->andReturn(true);
+
+        $events = (new GoogleCalendar('cle', 'agenda'))->events();
+
+        $this->assertCount(1, $events);
+        $this->assertSame('Culte de Puissance', $events[0]['title']);
+        $this->assertSame('01', $events[0]['day']);
+        $this->assertSame('Lomé, Togo', $events[0]['lieu']);
+        $this->assertSame('18h00 – 20h00', $events[0]['heure']);
+        $this->assertTrue($events[0]['featured']);
     }
 
     public function test_le_cache_est_servi_sans_appel_http(): void

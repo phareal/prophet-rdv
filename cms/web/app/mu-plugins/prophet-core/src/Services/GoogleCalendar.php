@@ -11,6 +11,7 @@ final class GoogleCalendar
 {
     public const TRANSIENT = 'prophet_calendar_events';
     public const TTL = 600; // 10 minutes, TTL du bridge Node.
+    public const TTL_ECHEC = 60;
 
     /** Reprises de server/api/calendar/events.get.ts:1-40. */
     public const MOCK_EVENTS = [
@@ -54,15 +55,26 @@ final class GoogleCalendar
         }
 
         $events = $this->fetch();
+
+        if ($events === null) {
+            // Un échec ne fige pas les données de démonstration pour 10 minutes :
+            // le site se remet tout seul à la minute suivante, sans pour autant
+            // rappeler l'API à chaque affichage de page.
+            set_transient(self::TRANSIENT, self::MOCK_EVENTS, self::TTL_ECHEC);
+
+            return self::MOCK_EVENTS;
+        }
+
         set_transient(self::TRANSIENT, $events, self::TTL);
 
         return $events;
     }
 
-    private function fetch(): array
+    /** Renvoie null en cas d'échec (clé absente, erreur HTTP, réponse inattendue). */
+    private function fetch(): ?array
     {
         if ($this->apiKey === '' || $this->calendarId === '') {
-            return self::MOCK_EVENTS;
+            return null;
         }
 
         $url = 'https://www.googleapis.com/calendar/v3/calendars/'
@@ -79,7 +91,7 @@ final class GoogleCalendar
         if (is_wp_error($response)) {
             error_log('[Calendar] appel en échec, retour des données de démonstration');
 
-            return self::MOCK_EVENTS;
+            return null;
         }
 
         $payload = json_decode((string) wp_remote_retrieve_body($response), true);
@@ -87,7 +99,7 @@ final class GoogleCalendar
         if (! is_array($payload) || ! isset($payload['items'])) {
             error_log('[Calendar] réponse inattendue, retour des données de démonstration');
 
-            return self::MOCK_EVENTS;
+            return null;
         }
 
         return self::parseItems($payload['items']);
@@ -99,7 +111,9 @@ final class GoogleCalendar
         $events = [];
 
         foreach ($items as $item) {
-            if (empty($item['summary'])) {
+            // Pas `empty()` : en PHP `empty('0')` est vrai, alors que le bridge
+            // conserve un titre valant littéralement « 0 ».
+            if (($item['summary'] ?? '') === '') {
                 continue;
             }
 
