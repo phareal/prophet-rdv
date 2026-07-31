@@ -21,6 +21,7 @@ use ProphetCore\PostTypes\Photo;
 use ProphetCore\PostTypes\RendezVous;
 use ProphetCore\PostTypes\Service;
 use ProphetCore\PostTypes\Temoignage;
+use ProphetCore\Rdv\SubmitHandler;
 use ProphetCore\Services\SmtpConfigurator;
 
 add_action('plugins_loaded', static function (): void {
@@ -52,3 +53,7 @@ PhotoFields::register();
 RendezVousFields::register();
 ContenuOptions::register();
 RdvOptions::register();
+
+add_action('init', static function (): void {
+    SubmitHandler::register();
+});
