@@ -144,7 +144,7 @@ Créer `docker/php/Dockerfile` :
 FROM php:8.2-fpm-alpine
 
 RUN apk add --no-cache \
-      icu-dev libpng-dev libjpeg-turbo-dev freetype-dev libzip-dev \
+      icu-dev icu-data-full libpng-dev libjpeg-turbo-dev freetype-dev libzip-dev \
       $PHPIZE_DEPS \
  && docker-php-ext-configure gd --with-freetype --with-jpeg \
  && docker-php-ext-install -j"$(nproc)" mysqli intl gd zip opcache \
@@ -156,6 +156,10 @@ WORKDIR /srv
 ```
 
 L'extension `intl` est obligatoire : `Support\Date::formatFr()` en dépend (tâche 5).
+`icu-data-full` l'est tout autant : l'image Alpine n'embarque sinon que les données
+ICU anglaises, et `IntlDateFormatter('fr_FR', …)` retombe **silencieusement** sur
+l'anglais, sans erreur ni avertissement. Vérifier la locale, pas seulement la
+présence de l'extension.
 
 - [ ] **Step 3: Écrire le Caddyfile de développement**
 
@@ -5384,7 +5388,7 @@ git commit -m "feat(core): commande wp prophet seed pour installer le contenu du
 FROM php:8.2-fpm-alpine AS base
 
 RUN apk add --no-cache \
-      icu-dev libpng-dev libjpeg-turbo-dev freetype-dev libzip-dev \
+      icu-dev icu-data-full libpng-dev libjpeg-turbo-dev freetype-dev libzip-dev \
       $PHPIZE_DEPS \
  && docker-php-ext-configure gd --with-freetype --with-jpeg \
  && docker-php-ext-install -j"$(nproc)" mysqli intl gd zip opcache \
@@ -5552,6 +5556,19 @@ docker compose -f docker-compose.cms.yml run --rm app ls web/app/themes/prophet/
 ```
 
 Attendu : un `manifest.json` et les fichiers hachés.
+
+Vérifier aussi la locale française dans l'image de production — la présence de
+l'extension `intl` ne suffit pas, il faut les données ICU complètes :
+
+```bash
+docker compose -f docker-compose.cms.yml run --rm app php -r \
+  'echo (new IntlDateFormatter("fr_FR", 0, 0, "UTC", 1, "EEEE d MMMM y"))
+     ->format(new DateTimeImmutable("2026-07-30")), PHP_EOL;'
+```
+
+Attendu : `jeudi 30 juillet 2026`. Une sortie en anglais signale qu'`icu-data-full`
+manque, et toutes les dates du site seraient servies en anglais sans la moindre
+erreur.
 
 - [ ] **Step 6: Mettre à jour le README**
 
