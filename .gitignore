@@ -22,3 +22,14 @@ Thumbs.db
 # SSL certs (jamais dans git)
 nginx/ssl/
 .vercel
+
+# CMS (Bedrock / Sage)
+cms/.env
+cms/vendor/
+cms/web/wp/
+cms/web/app/uploads/
+cms/web/app/plugins/
+cms/web/app/mu-plugins/bedrock-autoloader.php
+cms/web/app/themes/prophet/node_modules/
+cms/web/app/themes/prophet/public/
+cms/web/app/themes/prophet/vendor/

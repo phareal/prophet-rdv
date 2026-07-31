@@ -1,0 +1,64 @@
+name: prophet_cms_dev
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: prophet_cms_caddy
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./docker/Caddyfile.cms.dev:/etc/caddy/Caddyfile:ro
+      - ./cms:/srv
+    depends_on:
+      - app
+    networks: [cms_net]
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: prophet_cms_app
+    env_file: ./cms/.env
+    volumes:
+      - ./cms:/srv
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [cms_net]
+
+  db:
+    image: mysql:8
+    container_name: prophet_cms_db
+    environment:
+      MYSQL_DATABASE: prophet
+      MYSQL_USER: prophet
+      MYSQL_PASSWORD: prophet
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - cms_mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [cms_net]
+
+  wpcli:
+    image: wordpress:cli-php8.2
+    container_name: prophet_cms_wpcli
+    user: "33:33"
+    env_file: ./cms/.env
+    volumes:
+      - ./cms:/srv
+    working_dir: /srv/web/wp
+    entrypoint: ["tail", "-f", "/dev/null"]
+    depends_on:
+      - app
+    networks: [cms_net]
+
+volumes:
+  cms_mysql:
+
+networks:
+  cms_net:
+    driver: bridge

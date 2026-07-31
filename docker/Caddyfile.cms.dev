@@ -1,0 +1,6 @@
+:8080 {
+	root * /srv/web
+	encode zstd gzip
+	php_fastcgi app:9000
+	file_server
+}
