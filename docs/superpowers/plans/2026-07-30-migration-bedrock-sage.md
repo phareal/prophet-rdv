@@ -428,6 +428,7 @@ Remplacer `resources/views/layouts/app.blade.php` :
   <head>
     <meta charset="{{ get_bloginfo('charset') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @php(wp_head())
   </head>
   <body @php(body_class())>
@@ -440,6 +441,10 @@ Remplacer `resources/views/layouts/app.blade.php` :
   </body>
 </html>
 ```
+
+La directive `@vite` est ce qui charge la feuille de styles et le JavaScript du thème :
+sans elle, aucune page ne reçoit le moindre style. Les deux entrées correspondent
+exactement au tableau `input` de `vite.config.js`.
 
 Les partials `navbar` et `footer` sont ajoutées à la tâche 14.
 
@@ -3999,6 +4004,7 @@ Le lien WhatsApp est construit côté serveur :
   <head>
     <meta charset="{{ get_bloginfo('charset') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @php(wp_head())
   </head>
   <body @php(body_class())>
