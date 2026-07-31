@@ -14,9 +14,11 @@ use Carbon_Fields\Carbon_Fields;
 use ProphetCore\Fields\ContenuOptions;
 use ProphetCore\Fields\PhotoFields;
 use ProphetCore\Fields\RdvOptions;
+use ProphetCore\Fields\RendezVousFields;
 use ProphetCore\Fields\ServiceFields;
 use ProphetCore\Fields\TemoignageFields;
 use ProphetCore\PostTypes\Photo;
+use ProphetCore\PostTypes\RendezVous;
 use ProphetCore\PostTypes\Service;
 use ProphetCore\PostTypes\Temoignage;
 use ProphetCore\Services\SmtpConfigurator;
@@ -42,9 +44,11 @@ add_action('after_setup_theme', static function (): void {
 Service::register();
 Temoignage::register();
 Photo::register();
+RendezVous::register();
 
 ServiceFields::register();
 TemoignageFields::register();
 PhotoFields::register();
+RendezVousFields::register();
 ContenuOptions::register();
 RdvOptions::register();
