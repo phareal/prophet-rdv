@@ -18,6 +18,19 @@ final class RendezVous
         self::STATUT_ANNULE => 'Annulé',
     ];
 
+    /**
+     * Carbon Fields préfixe toute méta de publication d'un `_`, sans possibilité
+     * de le désactiver. Toute lecture ou écriture passe par metaKey() : une clé
+     * littérale écrite ailleurs créerait un second jeu de données que
+     * l'administration n'afficherait pas.
+     */
+    public const META_PREFIX = '_rdv_';
+
+    public static function metaKey(string $champ): string
+    {
+        return self::META_PREFIX . $champ;
+    }
+
     public static function register(): void
     {
         add_action('init', static function (): void {
@@ -74,12 +87,12 @@ final class RendezVous
         switch ($colonne) {
             case 'rdv_date':
                 echo esc_html(
-                    get_post_meta($postId, 'rdv_date', true) . ' — '
-                    . get_post_meta($postId, 'rdv_heure', true)
+                    get_post_meta($postId, self::metaKey('date'), true) . ' — '
+                    . get_post_meta($postId, self::metaKey('heure'), true)
                 );
                 break;
             case 'rdv_type':
-                echo esc_html((string) get_post_meta($postId, 'rdv_type_consultation', true));
+                echo esc_html((string) get_post_meta($postId, self::metaKey('type_consultation'), true));
                 break;
             case 'rdv_statut':
                 echo esc_html(self::STATUTS[get_post_status($postId)] ?? '—');

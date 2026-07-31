@@ -46,4 +46,14 @@ final class RendezVousTest extends TestCase
             array_keys($colonnes)
         );
     }
+
+    public function test_le_prefixe_de_meta_correspond_a_celui_impose_par_carbon_fields(): void
+    {
+        $this->assertSame('_rdv_', RendezVous::META_PREFIX);
+    }
+
+    public function test_meta_key_prefixe_le_champ_donne(): void
+    {
+        $this->assertSame('_rdv_date', RendezVous::metaKey('date'));
+    }
 }
