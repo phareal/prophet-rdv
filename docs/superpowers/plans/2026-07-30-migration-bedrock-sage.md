@@ -1872,6 +1872,15 @@ final class MailerTest extends TestCase
         ];
     }
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // sendClientConfirmation() passe l'URL du site au gabarit : sans ce
+        // remplacement, l'appel à home_url() lève une erreur fatale.
+        Functions\when('home_url')->justReturn('https://exemple.test/');
+    }
+
     private function capturerLesEnvois(): void
     {
         $this->envois = [];
