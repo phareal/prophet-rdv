@@ -6,8 +6,6 @@
 
 namespace App;
 
-use Illuminate\Support\Facades\Vite;
-
 /**
  * Use the generated theme.json file.
  *
@@ -122,20 +120,6 @@ add_action('widgets_init', function () {
         'id' => 'sidebar-footer',
     ] + $config);
 });
-
-/**
- * Enqueue the compiled theme stylesheet (design tokens ported from Nuxt).
- *
- * The `@vite` Blade directive was deliberately left out of
- * resources/views/layouts/app.blade.php in Task 2 (minimal layout; the
- * section markup returns in tasks 14+). Task 4 needs tokens.css live on
- * every page now, so the compiled asset is enqueued here instead.
- *
- * @return void
- */
-add_action('wp_enqueue_scripts', function () {
-    echo Vite::withEntryPoints(['resources/css/app.css'])->toHtml();
-}, 1);
 
 /**
  * Register the Google fonts stylesheet, loaded non-blocking.
