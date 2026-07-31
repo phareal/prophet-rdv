@@ -163,9 +163,14 @@ Créer `docker/Caddyfile.cms.dev` :
 
 - [ ] **Step 4: Écrire le compose de développement**
 
-Créer `docker-compose.cms.dev.yml` :
+Créer `docker-compose.cms.dev.yml`. Le `name:` en tête est obligatoire : sans lui,
+Compose dérive le nom de projet du répertoire, cette pile partage son identité avec
+le `docker-compose.yml` du Nuxt — dont les services s'appellent aussi `caddy` et
+`app` — et un `docker compose up` recrée les conteneurs de l'autre pile.
 
 ```yaml
+name: prophet_cms_dev
+
 services:
   caddy:
     image: caddy:2-alpine
@@ -5422,7 +5427,14 @@ RUN { \
 
 `docker-compose.cms.yml` :
 
+Le `name:` en tête est obligatoire. Sans lui, Compose dérive le nom de projet du
+répertoire et cette pile partage son identité avec le `docker-compose.yml` du Nuxt,
+dont les services s'appellent aussi `caddy` et `app` : un `docker compose up` recrée
+alors les conteneurs de l'autre pile. Le cas s'est produit en tâche 1.
+
 ```yaml
+name: prophet_cms
+
 services:
   caddy:
     image: caddy:2-alpine
