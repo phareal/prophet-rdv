@@ -5489,6 +5489,16 @@ RUN { \
 	@static path_regexp \.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?|ttf|eot|webp)$
 	header @static Cache-Control "public, max-age=31536000, immutable"
 
+	# Carbon Fields sert son JS et son CSS depuis le répertoire vendor de
+	# Composer, qui est hors de la racine web dans Bedrock. Sans cette route,
+	# tous ses assets répondent 404 et aucun champ ne s'affiche dans
+	# l'administration — la déclaration PHP a beau être correcte. Le préfixe est
+	# celui que prophet-core.php impose à Carbon_Fields\URL avant boot().
+	handle_path /cf-vendor/carbon-fields/* {
+		root * /srv/vendor/htmlburger/carbon-fields
+		file_server
+	}
+
 	# Les fichiers déposés dans uploads ne doivent jamais être exécutés.
 	@uploads_php path_regexp ^/app/uploads/.*\.php$
 	respond @uploads_php 403
@@ -5616,6 +5626,17 @@ docker compose -f docker-compose.cms.yml run --rm app php -r \
 Attendu : `jeudi 30 juillet 2026`. Une sortie en anglais signale qu'`icu-data-full`
 manque, et toutes les dates du site seraient servies en anglais sans la moindre
 erreur.
+
+Vérifier enfin que les assets de Carbon Fields sont bien servis en production —
+sans eux, l'administration perd tous ses champs sans afficher la moindre erreur :
+
+```bash
+curl -sS -o /dev/null -w '%{http_code}\n' \
+  "https://${DOMAIN}/cf-vendor/carbon-fields/build/classic/core.js"
+```
+
+Attendu : `200`. Un `404` signale que la route `handle_path` manque du Caddyfile ou
+que le préfixe ne correspond plus à celui imposé à `Carbon_Fields\URL`.
 
 - [ ] **Step 6: Mettre à jour le README**
 
