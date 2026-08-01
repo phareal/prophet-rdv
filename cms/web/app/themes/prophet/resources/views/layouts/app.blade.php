@@ -7,11 +7,15 @@
     @php(wp_head())
   </head>
   <body @php(body_class())>
-    @php(do_action('get_header'))
+    @include('partials.navbar')
+
     <main id="main">
       @yield('content')
     </main>
-    @php(do_action('get_footer'))
+
+    @include('partials.footer')
+    @include('partials.floating-whatsapp')
+
     @php(wp_footer())
   </body>
 </html>

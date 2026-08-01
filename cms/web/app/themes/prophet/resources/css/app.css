@@ -1,3 +1,9 @@
 @import "./tokens.css";
+@import "./sections/_navbar.css";
+@import "./sections/_footer.css";
+@import "./sections/_floating-whatsapp.css";
 
-/* Les imports de sections sont ajoutés au fil des tâches 14 à 19. */
+/* Les imports de sections restants sont ajoutés au fil des tâches 15 à 19. */
+
+/* Utilitaire Alpine : masque les éléments x-show avant l'initialisation d'Alpine. */
+[x-cloak] { display: none !important; }
