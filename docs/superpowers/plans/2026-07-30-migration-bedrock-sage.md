@@ -86,7 +86,16 @@ docker-compose.cms.yml
 Cette procédure s'applique aux tâches 14 à 19. Chaque tâche la suit intégralement avec ses paramètres propres (fichier source, fichier cible, classe de scope, source de données).
 
 1. Ouvrir le composant Vue source et repérer ses trois blocs : `<script setup>`, `<template>`, `<style scoped>`.
-2. Créer `resources/css/sections/_<nom>.css` : coller le contenu du `<style scoped>` **sans le modifier**, puis l'envelopper dans `.sec-<nom> { … }`. Le nesting PostCSS résout les sélecteurs imbriqués. Les `@keyframes` et les règles `:root` sortent de l'enveloppe (elles sont globales) ; si le composant en déclare, les déplacer en tête de fichier, hors du bloc.
+2. Créer `resources/css/sections/_<nom>.css` : coller le contenu du `<style scoped>` **sans le modifier**, puis l'envelopper dans `.sec-<nom> { … }`. Les `@keyframes` et les règles `:root` sortent de l'enveloppe (elles sont globales) ; si le composant en déclare, les déplacer en tête de fichier, hors du bloc.
+
+   **Piège du nesting, découvert en tâche 14.** Un sélecteur imbriqué nu compile en
+   combinateur de **descendance**. La règle `.sec-hero { .hero { position: fixed } }`
+   devient donc `.sec-hero .hero`, qui ne s'applique **jamais** à l'élément racine —
+   celui qui porte à la fois `sec-hero` et `hero`. Le style disparaît en silence.
+   Toute règle visant l'élément racine doit être composée avec `&` :
+   `.sec-hero { &.hero { position: fixed } }`. Concrètement : repérer dans le
+   `<style scoped>` les sélecteurs qui ciblent la racine du composant et leur
+   préfixer `&`. Les sélecteurs visant des descendants restent tels quels.
 3. Ajouter `@import "./sections/_<nom>.css";` dans `resources/css/app.css`.
 4. Créer la vue Blade : transposer le `<template>` en HTML, élément racine portant `class="sec-<nom>"` en plus de ses classes d'origine.
 5. Transpositions systématiques :
