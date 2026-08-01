@@ -106,7 +106,25 @@ Cette procédure s'applique aux tâches 14 à 19. Chaque tâche la suit intégra
    - `NuxtLink to="/rdv"` → `<a href="{{ home_url('/rdv') }}">`.
    - Toute image de `public/images/` → `@asset('images/<nom>')` après copie dans `resources/images/`.
 6. Les données viennent d'un View Composer, jamais d'une requête dans la vue.
-7. Vérification : lancer les deux sites côte à côte (`npm run dev` sur le Nuxt, port 3000 ; WordPress sur 8080), comparer la section à trois largeurs (375, 768, 1440 px). Tout écart visible est corrigé avant de commiter.
+7. Vérification. **Le serveur de développement Nuxt ne démarre pas dans cet
+   environnement** (`nitro` échoue sur `spawn EBADF`, sandbox ou non — constaté en
+   tâche 14 puis reconfirmé). La comparaison côte à côte est donc impossible, et il
+   ne faut pas prétendre l'avoir faite. À la place, trois contrôles qui prouvent
+   réellement quelque chose :
+
+   a. **CSS** : `diff` entre le `<style scoped>` source et le fichier de section.
+      Seuls l'enveloppe `.sec-<nom>` et les `&` de composition doivent différer.
+   b. **Structure** : comparer le `<template>` Vue et la vue Blade élément par
+      élément — même ordre, mêmes classes, mêmes attributs. Le rendu est
+      entièrement déterminé par le CSS copié et ces classes : si les deux
+      correspondent, l'affichage correspond.
+   c. **Rendu réel** : charger la page WordPress dans le navigateur et vérifier que
+      la section s'affiche, que ses règles s'appliquent (inspecter un élément
+      racine, pas seulement la présence du markup — c'est ainsi qu'on attrape le
+      piège du nesting ci-dessus) et que ses comportements Alpine fonctionnent.
+
+   La validation visuelle finale contre le Nuxt appartient à la recette de la
+   tâche 23, sur un environnement où les deux sites peuvent tourner ensemble.
 
 **Styles globaux de page.** L'audit de la tâche 4 ne scanne que les blocs
 `<style scoped>`. Or `pages/index.vue` et `pages/rdv.vue` portent chacun un bloc
