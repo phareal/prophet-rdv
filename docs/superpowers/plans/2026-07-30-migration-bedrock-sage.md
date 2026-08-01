@@ -3716,7 +3716,11 @@ use ProphetCore\Services\BladeRenderer;
 use ProphetCore\Services\Mailer;
 use Throwable;
 
-final class SubmitHandler
+/**
+ * Pas `final` : l'extraction de terminer() (voir plus bas) n'a de sens que si le
+ * test peut sous-classer ce gestionnaire pour neutraliser l'appel à exit.
+ */
+class SubmitHandler
 {
     public const ACTION = 'prophet_rdv_submit';
     public const NONCE = 'prophet_rdv';
