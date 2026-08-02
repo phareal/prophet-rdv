@@ -4704,7 +4704,7 @@ Si l'original fait défiler plusieurs cartes de front à partir d'un point de ru
 
 - [ ] **Step 3: Brancher dans la page d'accueil et le CSS**
 
-`front-page.blade.php` — ordre final, calqué sur `pages/index.vue` :
+`front-page.blade.php` — ordre final, relevé sur `pages/index.vue:18-26` :
 
 ```blade
 @extends('layouts.app')
@@ -4714,15 +4714,17 @@ Si l'original fait défiler plusieurs cartes de front à partir d'un point de ru
   @include('sections.stats')
   @include('sections.about')
   @include('sections.services')
-  @include('sections.events')
   @include('sections.videos')
-  @include('sections.gallery')
+  @include('sections.events')
   @include('sections.testimonials')
+  @include('sections.gallery')
   @include('sections.cta')
 @endsection
 ```
 
-Vérifier cet ordre contre `pages/index.vue` avant de commiter ; il fait foi.
+Cet ordre a été corrigé après coup : une première version du plan intervertissait
+vidéos/événements et témoignages/galerie. `pages/index.vue` fait foi, et le préfixe
+`Lazy` de certains composants ne change rien à leur position.
 
 `app.css` : ajouter les trois `@import` correspondants.
 
