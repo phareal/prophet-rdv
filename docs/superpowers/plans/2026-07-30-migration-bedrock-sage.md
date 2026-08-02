@@ -104,7 +104,14 @@ Cette procédure s'applique aux tâches 14 à 19. Chaque tâche la suit intégra
    - `<Component :icon="X" />` de lucide → `<x-icon name="x" />`.
    - `@click`, `v-model`, `ref()` → attributs Alpine (`x-data`, `x-on:click`, `x-model`, `x-show`).
    - `NuxtLink to="/rdv"` → `<a href="{{ home_url('/rdv') }}">`.
-   - Toute image de `public/images/` → `@asset('images/<nom>')` après copie dans `resources/images/`.
+   - Toute image de `public/images/` est copiée dans `resources/images/`, puis
+     référencée par **`@asset('resources/images/<nom>')`** — le chemin complet, pas
+     `@asset('images/<nom>')`. La clé du manifeste Vite est le chemin depuis la
+     racine du thème ; la forme raccourcie ne résout rien et l'image manque en
+     silence. Vite n'inclut par ailleurs une image au build que si quelque chose la
+     référence : `app.js` porte pour cela un `import.meta.glob` sur
+     `resources/images/**` (posé en tâche 15). Toute image ajoutée ensuite est
+     couverte par ce glob, sans autre intervention.
 6. Les données viennent d'un View Composer, jamais d'une requête dans la vue.
 7. Vérification. **Le serveur de développement Nuxt ne démarre pas dans cet
    environnement** (`nitro` échoue sur `spawn EBADF`, sandbox ou non — constaté en
@@ -4245,7 +4252,7 @@ Appliquer la **Procédure de port d'une section** avec :
 - source : `components/HeroSection.vue` (517 lignes, dont 408 de CSS — la plus grosse section)
 - CSS : `resources/css/sections/_hero.css`, scope `.sec-hero`
 - vue : `resources/views/sections/hero.blade.php`
-- données : `$contenu['hero_*']`, image via `wp_get_attachment_image_url(carbon_get_theme_option('hero_image'), 'full')` avec repli sur `@asset('images/prophet-main.jpg')`
+- données : `$contenu['hero_*']`, image via `wp_get_attachment_image_url(carbon_get_theme_option('hero_image'), 'full')` avec repli sur `@asset('resources/images/prophet-main.jpg')`
 - les boutons pointent vers `{{ home_url('/rdv') }}` et l'ancre `#services`
 
 - [ ] **Step 4: Porter la section Chiffres clés**
