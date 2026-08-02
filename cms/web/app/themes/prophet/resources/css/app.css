@@ -6,8 +6,10 @@
 @import "./sections/_stats.css";
 @import "./sections/_about.css";
 @import "./sections/_services.css";
+@import "./sections/_videos.css";
+@import "./sections/_events.css";
 
-/* Les imports de sections restants sont ajoutés au fil des tâches 17 à 19. */
+/* Les imports de sections restants sont ajoutés au fil des tâches 18 à 19. */
 
 /*
  * Bloc <style> non scopé de pages/index.vue (classe .site) — tâche 15.

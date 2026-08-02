@@ -5,4 +5,6 @@
   @include('sections.stats')
   @include('sections.about')
   @include('sections.services')
+  @include('sections.videos')
+  @include('sections.events')
 @endsection
