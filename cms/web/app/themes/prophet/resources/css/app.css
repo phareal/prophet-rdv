@@ -2,8 +2,30 @@
 @import "./sections/_navbar.css";
 @import "./sections/_footer.css";
 @import "./sections/_floating-whatsapp.css";
+@import "./sections/_hero.css";
+@import "./sections/_stats.css";
 
-/* Les imports de sections restants sont ajoutés au fil des tâches 15 à 19. */
+/* Les imports de sections restants sont ajoutés au fil des tâches 16 à 19. */
+
+/*
+ * Bloc <style> non scopé de pages/index.vue (classe .site) — tâche 15.
+ * Ces règles sont globales à la page d'accueil, pas à une section, donc pas
+ * d'enveloppe .sec-*. `.site` enveloppait navbar + main + footer dans le
+ * template Vue ; le layout Blade (tâche 14, non modifié par cette tâche) n'a
+ * pas d'équivalent porteur de cette classe, donc les déclarations sont
+ * reportées sur `body`, qui joue le même rôle de conteneur racine de page.
+ * `scroll-behavior` et les couleurs dupliquent déjà `tokens.css:90-101`
+ * (porté en tâche 4) ; seule `min-height: 100vh` y est réellement nouvelle.
+ */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #FDFCF9;
+  color: #1A1714;
+  min-height: 100vh;
+}
 
 /* Utilitaire Alpine : masque les éléments x-show avant l'initialisation d'Alpine. */
 [x-cloak] { display: none !important; }
