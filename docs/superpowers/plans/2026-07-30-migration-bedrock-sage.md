@@ -4688,19 +4688,10 @@ Appliquer la **Procédure de port d'une section** pour chacune :
 
 Le CSS de `TestimonialCard.vue` va dans `_testimonials.css` : la carte n'est utilisée que par cette section, un fichier séparé n'apporterait rien.
 
-Le carrousel de témoignages devient :
-
-```blade
-<div class="sec-testimonials" x-data="{ index: 0, total: {{ count($temoignages) }} }">
-  @foreach ($temoignages as $i => $temoignage)
-    <div x-show="index === {{ $i }}">@include('partials.testimonial-card', ['temoignage' => $temoignage])</div>
-  @endforeach
-  <button x-on:click="index = (index - 1 + total) % total">…</button>
-  <button x-on:click="index = (index + 1) % total">…</button>
-</div>
-```
-
-Si l'original fait défiler plusieurs cartes de front à partir d'un point de rupture, conserver ce comportement en portant la règle CSS correspondante et en adaptant l'incrément.
+**Pas de carrousel de témoignages.** Une version antérieure de ce plan en décrivait
+un, à tort : `TestimonialsSection.vue` n'a ni `ref`, ni index, ni logique de
+défilement — c'est une grille CSS statique en 3, 2 puis 1 colonnes qui affiche tous
+les témoignages à la fois. Porter la grille telle quelle, sans Alpine.
 
 - [ ] **Step 3: Brancher dans la page d'accueil et le CSS**
 
