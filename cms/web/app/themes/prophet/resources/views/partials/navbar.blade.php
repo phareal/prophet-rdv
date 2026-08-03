@@ -30,7 +30,15 @@
     </div>
   </div>
 
-  <div class="navbar__mobile" x-show="ouvert" x-cloak>
+  {{-- TheNavbar.vue:50 : <transition name="mobile-menu">. .mobile-menu-enter-*/
+       -leave-* sont copiées telles quelles dans _navbar.css ; Alpine ne connaît
+       pas ces noms nativement mais x-transition:enter/:leave acceptent
+       n'importe quelle classe CSS (même modèle que hero-left.blade.php). --}}
+  <div class="navbar__mobile" x-show="ouvert" x-cloak
+       x-transition:enter="mobile-menu-enter-active"
+       x-transition:enter-start="mobile-menu-enter-from"
+       x-transition:leave="mobile-menu-leave-active"
+       x-transition:leave-end="mobile-menu-leave-to">
     <a href="#accueil" class="navbar__mobile-link" x-on:click="ouvert = false">Accueil</a>
     <a href="#apropos" class="navbar__mobile-link" x-on:click="ouvert = false">À propos</a>
     <a href="#services" class="navbar__mobile-link" x-on:click="ouvert = false">Services</a>
