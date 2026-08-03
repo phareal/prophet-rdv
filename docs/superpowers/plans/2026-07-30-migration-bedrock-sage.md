@@ -5676,6 +5676,14 @@ networks:
 
 Le volume `caddy_data` porte les certificats : le supprimer force une réémission et peut heurter les limites de Let's Encrypt.
 
+**Limite connue et acceptée.** Les piles de développement et de production
+partagent leurs `container_name` (`prophet_cms_app`, `prophet_cms_db`,
+`prophet_cms_caddy`), si bien qu'elles ne peuvent pas tourner **en même temps sur
+la même machine**, malgré des noms de projet Compose distincts. Ce n'est pas un
+scénario réel — la production tourne sur un serveur, le développement sur un poste.
+Pour une vérification ponctuelle de l'image de production depuis un poste où la
+pile de développement tourne, utiliser `docker compose … run --rm --no-deps app`.
+
 - [ ] **Step 4: Compléter les variables d'environnement**
 
 Ajouter à `cms/.env.example` :
