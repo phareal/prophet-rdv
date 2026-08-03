@@ -4,7 +4,7 @@
     $reseaux = [
         ['icon' => 'youtube', 'label' => 'YouTube', 'href' => $contenu['footer_youtube']],
         ['icon' => 'facebook', 'label' => 'Facebook', 'href' => $contenu['footer_facebook']],
-        ['icon' => 'instagram', 'label' => 'Instagram', 'href' => 'https://www.instagram.com/ProphetJeremiahNahoum'],
+        ['icon' => 'instagram', 'label' => 'Instagram', 'href' => $contenu['footer_instagram']],
     ];
 @endphp
 
@@ -65,8 +65,8 @@
       <div class="footer__col">
         <h4 class="footer__col-title">Services</h4>
         <nav class="footer__nav">
-          @foreach (['Mariage', 'Affaires', 'Carrière politique', 'Santé', 'Voyage', 'Appel prophétique'] as $service)
-            <a href="{{ home_url('/rdv') }}" class="footer__link">{{ $service }}</a>
+          @foreach ($services as $service)
+            <a href="{{ home_url('/rdv') }}" class="footer__link">{{ $service['titre'] }}</a>
           @endforeach
         </nav>
       </div>
