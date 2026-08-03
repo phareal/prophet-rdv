@@ -11,6 +11,7 @@ declare(strict_types=1);
 // Les register() des tâches suivantes viennent ici.
 
 use Carbon_Fields\Carbon_Fields;
+use ProphetCore\Cli\SeedCommand;
 use ProphetCore\Fields\ContenuOptions;
 use ProphetCore\Fields\PhotoFields;
 use ProphetCore\Fields\RdvOptions;
@@ -57,3 +58,7 @@ RdvOptions::register();
 add_action('init', static function (): void {
     SubmitHandler::register();
 });
+
+if (defined('WP_CLI') && WP_CLI) {
+    \WP_CLI::add_command('prophet seed', SeedCommand::class);
+}
