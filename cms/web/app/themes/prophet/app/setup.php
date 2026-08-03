@@ -166,3 +166,36 @@ add_action('wp_head', static function (): void {
         echo '<meta name="robots" content="noindex, nofollow">' . "\n";
     }
 }, 1);
+
+/**
+ * Meta description et Open Graph. Les trois pages Nuxt les posaient via
+ * useSeoMeta (pages/index.vue:6-11, pages/rdv.vue:6-9, pages/confirmation.vue:6-9) ;
+ * le port n'avait que add_theme_support('title-tag') plus haut, sans description
+ * ni og:*, une perte réelle pour un site dont le canal principal est la
+ * recherche et le partage. Seule la home pose ogTitle/ogDescription dans la
+ * source — reproduit à l'identique ici, rdv/confirmation n'ayant que title/description.
+ */
+add_action('wp_head', static function (): void {
+    if (is_front_page()) {
+        echo '<meta name="description" content="'
+            .esc_attr('Ministère prophétique international. Consultations prophétiques pour les nations, '
+                .'les leaders et les familles. Plus de 40 nations, 15 ans de ministère.')
+            .'">' . "\n";
+        echo '<meta property="og:title" content="'
+            .esc_attr('Prophète Jeremiah Nahoum — Le Conseiller des Rois')
+            .'">' . "\n";
+        echo '<meta property="og:description" content="'
+            .esc_attr('Consultation prophétique internationale de précision. Mariages, affaires, appels, '
+                .'politique — réservez votre rendez-vous.')
+            .'">' . "\n";
+    } elseif (is_page('rdv')) {
+        echo '<meta name="description" content="'
+            .esc_attr('Réservez votre consultation prophétique avec le Prophète Jeremiah Nahoum. '
+                .'Formulaire de rendez-vous en ligne.')
+            .'">' . "\n";
+    } elseif (is_page('confirmation')) {
+        echo '<meta name="description" content="'
+            .esc_attr('Votre demande de rendez-vous a bien été reçue.')
+            .'">' . "\n";
+    }
+}, 1);
