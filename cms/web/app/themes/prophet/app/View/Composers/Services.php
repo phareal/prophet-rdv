@@ -9,7 +9,7 @@ use Roots\Acorn\View\Composer;
 
 class Services extends Composer
 {
-    protected static $views = ['sections.services', 'partials.rdv-form'];
+    protected static $views = ['sections.services', 'partials.rdv-form', 'partials.footer'];
 
     public function with(): array
     {
