@@ -47,7 +47,7 @@ final class SubmitHandlerTest extends TestCase
         };
         $handler->process(['prophet_nonce' => 'faux'], '203.0.113.7');
 
-        $this->assertStringContainsString('/rdv?', (string) $redirection);
+        $this->assertStringContainsString('/rdv/?', (string) $redirection);
         $this->assertStringContainsString('e=CLE', (string) $redirection);
     }
 }

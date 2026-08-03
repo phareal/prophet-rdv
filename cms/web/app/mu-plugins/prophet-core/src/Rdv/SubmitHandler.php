@@ -110,7 +110,7 @@ class SubmitHandler
             $mailer->sendProphetNotification($data);
         });
 
-        wp_safe_redirect(add_query_arg(['ref' => $ref], home_url('/confirmation')));
+        wp_safe_redirect(add_query_arg(['ref' => $ref], home_url('/confirmation/')));
         $this->terminer();
 
         return;
@@ -154,7 +154,7 @@ class SubmitHandler
             'global' => $global,
         ]);
 
-        wp_safe_redirect(add_query_arg(['e' => $cle], home_url('/rdv')) . '#formulaire');
+        wp_safe_redirect(add_query_arg(['e' => $cle], home_url('/rdv/')) . '#formulaire');
         $this->terminer();
 
         return;

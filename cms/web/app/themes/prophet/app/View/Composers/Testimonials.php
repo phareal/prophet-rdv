@@ -9,7 +9,9 @@ use Roots\Acorn\View\Composer;
 
 class Testimonials extends Composer
 {
-    protected static $views = ['sections.testimonials'];
+    // partials.hero-left : HeroLeft.vue porte son propre carrousel de
+    // témoignages (voir hero-left.blade.php), alimenté par les mêmes données.
+    protected static $views = ['sections.testimonials', 'partials.hero-left'];
 
     public function with(): array
     {

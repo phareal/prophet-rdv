@@ -3718,7 +3718,7 @@ final class SubmitHandlerTest extends TestCase
         $handler = new SubmitHandler();
         $handler->process(['prophet_nonce' => 'faux'], '203.0.113.7');
 
-        $this->assertStringContainsString('/rdv?', (string) $redirection);
+        $this->assertStringContainsString('/rdv/?', (string) $redirection);
         $this->assertStringContainsString('e=CLE', (string) $redirection);
     }
 }
@@ -3854,7 +3854,7 @@ class SubmitHandler
             $mailer->sendProphetNotification($data);
         });
 
-        wp_safe_redirect(add_query_arg(['ref' => $ref], home_url('/confirmation')));
+        wp_safe_redirect(add_query_arg(['ref' => $ref], home_url('/confirmation/')));
         exit;
     }
 
@@ -3896,7 +3896,7 @@ class SubmitHandler
             'global' => $global,
         ]);
 
-        wp_safe_redirect(add_query_arg(['e' => $cle], home_url('/rdv')) . '#formulaire');
+        wp_safe_redirect(add_query_arg(['e' => $cle], home_url('/rdv/')) . '#formulaire');
         exit;
     }
 }
@@ -4773,11 +4773,33 @@ class Rdv extends Composer
 {
     protected static $views = ['template-rdv', 'partials.rdv-form'];
 
+    /**
+     * FlashStore::pull() supprime le transient à la lecture, et ce composer est
+     * enregistré pour deux vues : sans mémorisation, le premier rendu consomme les
+     * erreurs et le formulaire s'affiche muet — le visiteur est renvoyé vers un
+     * formulaire sans la moindre explication. On ne lit donc qu'une fois par
+     * requête.
+     */
+    private static ?array $flashMemorise = null;
+
+    private static bool $flashDejaLu = false;
+
+    /** @return array{errors?: array, values?: array, global?: string}|null */
+    private static function flash(): ?array
+    {
+        if (! self::$flashDejaLu) {
+            self::$flashDejaLu = true;
+            self::$flashMemorise = isset($_GET['e'])
+                ? FlashStore::pull(sanitize_text_field(wp_unslash($_GET['e'])))
+                : null;
+        }
+
+        return self::$flashMemorise;
+    }
+
     public function with(): array
     {
-        $flash = isset($_GET['e'])
-            ? FlashStore::pull(sanitize_text_field(wp_unslash($_GET['e'])))
-            : null;
+        $flash = self::flash();
 
         return [
             'erreurs' => $flash['errors'] ?? [],

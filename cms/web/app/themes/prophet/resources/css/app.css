@@ -11,8 +11,9 @@
 @import "./sections/_testimonials.css";
 @import "./sections/_gallery.css";
 @import "./sections/_cta.css";
-
-/* Les imports de sections restants sont ajoutés au fil de la tâche 19. */
+@import "./sections/_hero-left.css";
+@import "./sections/_rdv-form.css";
+@import "./sections/_page-rdv.css";
 
 /*
  * Bloc <style> non scopé de pages/index.vue (classe .site) — tâche 15.
