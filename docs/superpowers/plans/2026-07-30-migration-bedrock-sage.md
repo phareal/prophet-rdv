@@ -5726,6 +5726,18 @@ curl -sS -o /dev/null -w '%{http_code}\n' \
 Attendu : `200`. Un `404` signale que la route `handle_path` manque du Caddyfile ou
 que le préfixe ne correspond plus à celui imposé à `Carbon_Fields\URL`.
 
+Vérifier enfin que le site est **indexable**. L'environnement de développement tourne
+avec `blog_public=0`, ce qui fait émettre à WordPress un `noindex` sur **toutes** les
+pages. Ce réglage vit en base, pas dans le code : il suit donc une copie de base de
+données et rendrait le site entièrement invisible des moteurs sans le moindre signe.
+
+```bash
+docker compose -f docker-compose.cms.yml exec -T wpcli wp option get blog_public
+```
+
+Attendu : `1`. Sinon : `wp option update blog_public 1`. Seule la page de
+confirmation doit porter un `noindex`, posé par le thème.
+
 - [ ] **Step 6: Mettre à jour le README**
 
 Remplacer le tableau « Stack Technique » et la section « Démarrage rapide » par la pile Bedrock + Sage, en documentant :
@@ -5772,7 +5784,8 @@ Créer `docs/superpowers/notes/2026-07-30-recette-migration.md` et y consigner l
 | 13 | Pot de miel rempli | demande non enregistrée |
 | 14 | Emails | reçus par le client et par le prophète, `Reply-To` correct |
 | 15 | Bouton WhatsApp | ouvre `wa.me` avec le message prérempli |
-| 16 | `/confirmation` sans `ref` | « Demande introuvable », `noindex` |
+| 16 | `/confirmation/` sans `ref` | « Demande introuvable », `noindex` |
+| 16b | `wp option get blog_public` | `1` — sinon tout le site est en `noindex` |
 | 17 | Administration | 12 services, 6 témoignages, 6 photos, options renseignées |
 | 18 | Rendez-vous en administration | listés avec date, heure, type, statut |
 | 19 | Modification d'un texte en administration | visible sur le site sans déploiement |
