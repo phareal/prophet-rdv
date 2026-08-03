@@ -80,6 +80,38 @@ final class SeedCommand
         ];
     }
 
+    /**
+     * Reprise de components/HeroSection.vue, AboutSection.vue et CtaSection.vue.
+     * Les champs source contenaient des <br> et des <em> décoratifs (mise en page
+     * du composant Vue) ; les champs Carbon Fields correspondants sont du texte
+     * simple (hero_titre, about_titre, cta_titre, cta_texte) ou du texte riche
+     * (about_texte, seul à passer par un rendu {!! !!} côté Blade) — le sens et
+     * les mots sont conservés à l'identique, seule la balise de mise en forme
+     * disparaît.
+     */
+    public static function contenu(): array
+    {
+        return [
+            'hero_surtitre' => 'Prophète',
+            'hero_titre' => 'Jeremiah Nahoum',
+            'hero_sous_titre' => 'Le Conseiller des Rois',
+            'hero_cta_principal' => 'Prendre Rendez-vous',
+            'hero_cta_secondaire' => 'Voir le ministère',
+            'about_titre' => 'Un prophète au service des nations',
+            'about_texte' => '<p>Depuis plus de 15 ans, le Prophète Jeremiah Nahoum exerce un ministère '
+                .'prophétique international reconnu pour sa précision et sa profondeur spirituelle. '
+                .'Surnommé <strong>"Le Conseiller des Rois"</strong>, il a accompagné des chefs '
+                .'d\'État, des hommes d\'affaires, des pasteurs et des familles à travers plus de 40 '
+                .'nations.</p><p>Son ministère est fondé sur la révélation divine : des prophéties '
+                .'qui citent des noms, des dates et des événements avec une exactitude qui ne peut '
+                .'venir que de Dieu. Chaque consultation est un rendez-vous avec l\'Éternel.</p>',
+            'cta_titre' => 'Votre rendez-vous avec Dieu vous attend',
+            'cta_texte' => 'Chaque consultation est unique. Chaque parole est précise. '
+                .'Prenez votre rendez-vous prophétique aujourd\'hui.',
+            'cta_bouton' => 'Réserver une consultation',
+        ];
+    }
+
     /** Reprise de components/StatsBar.vue:2-7. */
     public static function stats(): array
     {
@@ -152,18 +184,125 @@ final class SeedCommand
             $id = $this->upsert(Photo::SLUG, $photo['legende'], ['menu_order' => $ordre + 1]);
             carbon_set_post_meta($id, 'photo_legende', $photo['legende']);
             carbon_set_post_meta($id, 'photo_format', $photo['format']);
-            WP_CLI::log(sprintf(
-                'Photo « %s » créée — importer l\'image %s depuis la médiathèque.',
-                $photo['legende'],
-                $photo['fichier']
-            ));
+
+            // Idempotent : si la photo a déjà une image attachée (exécution
+            // précédente ou choix manuel dans wp-admin), on ne réimporte rien.
+            if ((int) carbon_get_post_meta($id, 'photo_image') === 0) {
+                $imageId = self::sideloadImage($photo['fichier']);
+
+                if ($imageId !== 0) {
+                    carbon_set_post_meta($id, 'photo_image', $imageId);
+                } else {
+                    WP_CLI::warning(sprintf(
+                        'Photo « %s » créée sans image — %s introuvable ou import impossible.',
+                        $photo['legende'],
+                        $photo['fichier']
+                    ));
+                }
+            }
         }
+
+        self::seedContenu();
 
         carbon_set_theme_option('stats', self::stats());
         carbon_set_theme_option('rdv_heures', self::heures());
         carbon_set_theme_option('rdv_modes_paiement', self::modesPaiement());
 
         WP_CLI::success('Contenu installé.');
+    }
+
+    /**
+     * Écrit les 10 textes de la page d'accueil uniquement s'ils sont vides.
+     *
+     * Contrairement aux services/témoignages/photos (ré-écrits à chaque passage,
+     * identifiés par leur titre), ce sont de longs textes éditoriaux qu'un
+     * administrateur est susceptible de personnaliser depuis wp-admin dès le
+     * premier jour. Écraser ces champs à chaque `wp prophet seed` détruirait
+     * silencieusement son travail — contraire au principe même du chantier
+     * (« Aucune configuration cliquée : tout est versionné », mais versionné
+     * n'est pas synonyme d'immuable une fois publié). On ne seed donc que le
+     * champ encore vide, ce qui couvre à la fois l'installation fraîche et les
+     * exécutions répétées de la commande.
+     */
+    public static function seedContenu(): void
+    {
+        foreach (self::contenu() as $cle => $valeur) {
+            if ((string) carbon_get_theme_option($cle) === '') {
+                carbon_set_theme_option($cle, $valeur);
+            }
+        }
+    }
+
+    /**
+     * Importe l'image du thème dans la médiathèque si elle n'y est pas déjà,
+     * et renvoie son ID d'attachement (0 en cas d'échec). Recherche d'abord un
+     * attachement existant pour ce fichier : plusieurs photos du seed
+     * partagent le même fichier (`prophet-main.jpg` notamment), et une
+     * ré-exécution de la commande ne doit jamais dupliquer un import.
+     */
+    public static function sideloadImage(string $fichier): int
+    {
+        $existant = self::attachmentExistant($fichier);
+
+        if ($existant !== 0) {
+            return $existant;
+        }
+
+        if (! function_exists('media_handle_sideload')) {
+            require_once ABSPATH.'wp-admin/includes/image.php';
+            require_once ABSPATH.'wp-admin/includes/file.php';
+            require_once ABSPATH.'wp-admin/includes/media.php';
+        }
+
+        $chemin = WP_CONTENT_DIR.'/themes/prophet/resources/images/'.$fichier;
+
+        if (! file_exists($chemin)) {
+            WP_CLI::warning(sprintf('Import de « %s » impossible : fichier introuvable (%s).', $fichier, $chemin));
+
+            return 0;
+        }
+
+        // media_handle_sideload() délègue à wp_handle_sideload(), qui — faute de
+        // fichier réellement uploadé — retombe sur copy() puis unlink() du
+        // « tmp_name » une fois la copie faite dans la médiathèque. Pointer
+        // 'tmp_name' directement sur le fichier du thème le ferait donc
+        // supprimer de resources/images/ à la première exécution : on passe une
+        // copie jetable, jamais le fichier source.
+        $copie = wp_tempnam($fichier);
+        copy($chemin, $copie);
+
+        $id = media_handle_sideload(['name' => $fichier, 'tmp_name' => $copie], 0);
+
+        if (is_wp_error($id)) {
+            WP_CLI::warning(sprintf('Import de « %s » impossible : %s', $fichier, $id->get_error_message()));
+
+            if (file_exists($copie)) {
+                unlink($copie);
+            }
+
+            return 0;
+        }
+
+        return (int) $id;
+    }
+
+    /** Retrouve un attachement déjà importé pour ce nom de fichier, tous dossiers d'upload confondus. */
+    public static function attachmentExistant(string $fichier): int
+    {
+        $existants = get_posts([
+            'post_type' => 'attachment',
+            'post_status' => 'inherit',
+            'posts_per_page' => 1,
+            'fields' => 'ids',
+            'no_found_rows' => true,
+            'meta_query' => [[
+                'key' => '_wp_attached_file',
+                'value' => $fichier,
+                'compare' => 'LIKE',
+            ]],
+        ]);
+
+        return $existants !== [] ? (int) $existants[0] : 0;
     }
 
     private function upsert(string $postType, string $titre, array $args): int

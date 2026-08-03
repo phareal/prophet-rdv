@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ProphetCore\Tests\Unit\Cli;
 
+use Brain\Monkey\Functions;
 use ProphetCore\Cli\SeedCommand;
 use ProphetCore\Tests\TestCase;
 
@@ -51,5 +52,116 @@ final class SeedCommandTest extends TestCase
             $this->assertNotSame('', $service['icone'], $service['titre']);
             $this->assertNotSame('', $service['description'], $service['titre']);
         }
+    }
+
+    public function test_les_dix_textes_de_la_page_d_accueil_sont_presents(): void
+    {
+        $contenu = SeedCommand::contenu();
+
+        $this->assertCount(10, $contenu);
+        $this->assertSame('Prophète', $contenu['hero_surtitre']);
+        $this->assertSame('Jeremiah Nahoum', $contenu['hero_titre']);
+        $this->assertSame('Le Conseiller des Rois', $contenu['hero_sous_titre']);
+        $this->assertSame('Prendre Rendez-vous', $contenu['hero_cta_principal']);
+        $this->assertSame('Voir le ministère', $contenu['hero_cta_secondaire']);
+        $this->assertSame('Un prophète au service des nations', $contenu['about_titre']);
+        $this->assertStringContainsString('Le Conseiller des Rois', $contenu['about_texte']);
+        $this->assertStringContainsString("l'Éternel", $contenu['about_texte']);
+        $this->assertSame('Votre rendez-vous avec Dieu vous attend', $contenu['cta_titre']);
+        $this->assertStringContainsString('aujourd\'hui', $contenu['cta_texte']);
+        $this->assertSame('Réserver une consultation', $contenu['cta_bouton']);
+    }
+
+    public function test_le_contenu_deja_saisi_par_un_administrateur_n_est_pas_ecrase(): void
+    {
+        $ecrits = [];
+
+        Functions\when('carbon_get_theme_option')->alias(
+            fn (string $cle) => $cle === 'hero_titre' ? 'Texte personnalisé par l\'admin' : ''
+        );
+        Functions\when('carbon_set_theme_option')->alias(function (string $cle, $valeur) use (&$ecrits): void {
+            $ecrits[$cle] = $valeur;
+        });
+
+        SeedCommand::seedContenu();
+
+        $this->assertArrayNotHasKey('hero_titre', $ecrits);
+        $this->assertSame('Prophète', $ecrits['hero_surtitre']);
+        $this->assertCount(9, $ecrits);
+    }
+
+    public function test_le_contenu_vide_est_ecrit_lors_d_une_premiere_execution(): void
+    {
+        $ecrits = [];
+
+        Functions\when('carbon_get_theme_option')->justReturn('');
+        Functions\when('carbon_set_theme_option')->alias(function (string $cle, $valeur) use (&$ecrits): void {
+            $ecrits[$cle] = $valeur;
+        });
+
+        SeedCommand::seedContenu();
+
+        $this->assertCount(10, $ecrits);
+    }
+
+    public function test_une_image_deja_presente_dans_la_mediatheque_n_est_pas_reimportee(): void
+    {
+        Functions\when('get_posts')->justReturn([42]);
+        Functions\expect('media_handle_sideload')->never();
+
+        $this->assertSame(42, SeedCommand::sideloadImage('prophet-main.jpg'));
+    }
+
+    public function test_une_image_absente_de_la_mediatheque_est_importee_et_son_id_renvoye(): void
+    {
+        $capture = [];
+        $copie = sys_get_temp_dir() . '/seed-test-' . uniqid('', true);
+
+        Functions\when('get_posts')->justReturn([]);
+        Functions\when('wp_tempnam')->justReturn($copie);
+        Functions\when('media_handle_sideload')->alias(function ($fileArray) use (&$capture) {
+            $capture = $fileArray;
+
+            return 99;
+        });
+        Functions\when('is_wp_error')->justReturn(false);
+
+        try {
+            $this->assertSame(99, SeedCommand::sideloadImage('prophet-main-3.jpeg'));
+            $this->assertSame('prophet-main-3.jpeg', $capture['name']);
+            $this->assertSame($copie, $capture['tmp_name']);
+            // Le fichier du thème doit être copié, jamais déplacé : wp_handle_sideload()
+            // supprime son 'tmp_name' une fois la copie faite en médiathèque, et pointer
+            // directement sur le fichier source le ferait disparaître de resources/images/.
+            $this->assertFileExists($copie);
+        } finally {
+            @unlink($copie);
+        }
+    }
+
+    public function test_un_import_en_echec_renvoie_zero(): void
+    {
+        $copie = sys_get_temp_dir() . '/seed-test-' . uniqid('', true);
+        $erreur = new class {
+            public function get_error_message(): string
+            {
+                return 'fichier introuvable';
+            }
+        };
+
+        Functions\when('get_posts')->justReturn([]);
+        Functions\when('wp_tempnam')->justReturn($copie);
+        Functions\when('media_handle_sideload')->justReturn($erreur);
+        Functions\when('is_wp_error')->justReturn(true);
+
+        $this->assertSame(0, SeedCommand::sideloadImage('prophet-main.jpg'));
+    }
+
+    public function test_un_fichier_source_introuvable_n_est_pas_importe(): void
+    {
+        Functions\when('get_posts')->justReturn([]);
+        Functions\expect('media_handle_sideload')->never();
+
+        $this->assertSame(0, SeedCommand::sideloadImage('fichier-inexistant.jpg'));
     }
 }
