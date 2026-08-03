@@ -32,7 +32,8 @@ final class Mailer
             $rdv['email'],
             $sujet,
             $corps,
-            ['From: "Prophète Jeremiah Nahoum" <' . Options::env('SMTP_USER') . '>']
+            ['From: "Prophète Jeremiah Nahoum" <' . Options::env('SMTP_USER') . '>'],
+            (string) ($rdv['ref'] ?? '')
         );
     }
 
@@ -61,19 +62,26 @@ final class Mailer
             [
                 'From: "Site Prophet RDV" <' . Options::env('SMTP_USER') . '>',
                 'Reply-To: ' . $rdv['email'],
-            ]
+            ],
+            (string) ($rdv['ref'] ?? '')
         );
     }
 
-    private function send(string $to, string $sujet, string $corps, array $headers): bool
+    private function send(string $to, string $sujet, string $corps, array $headers, string $ref): bool
     {
+        // Journalisation par référence de rendez-vous, jamais par sujet ni par
+        // destinataire : le sujet contient nom, prénom, type de consultation et
+        // date ; le destinataire est l'email du visiteur. Ce sont des données
+        // personnelles qui n'ont rien à faire dans error_log.
+        $reference = $ref !== '' ? 'réf. ' . $ref : 'référence inconnue';
+
         // Un destinataire vide fait échouer wp_mail sans rien dire de la cause.
         // Le cas se produit quand ni le champ « Email de notification » des
         // Réglages RDV ni PROPHET_EMAIL dans .env ne sont renseignés : la demande
         // est bien enregistrée, mais le prophète n'en est jamais averti.
         if (trim($to) === '') {
             error_log(
-                '[Mailer] destinataire vide pour « ' . $sujet . ' » — renseigner'
+                '[Mailer] destinataire vide pour le rendez-vous (' . $reference . ') — renseigner'
                 . ' le champ « Email de notification » des Réglages RDV ou'
                 . ' PROPHET_EMAIL dans .env.'
             );
@@ -86,7 +94,7 @@ final class Mailer
         $envoye = (bool) wp_mail($to, $sujet, $corps, $headers);
 
         if (! $envoye) {
-            error_log('[Mailer] envoi en échec vers ' . $to . ' — « ' . $sujet . ' »');
+            error_log('[Mailer] envoi en échec pour le rendez-vous (' . $reference . ')');
         }
 
         return $envoye;

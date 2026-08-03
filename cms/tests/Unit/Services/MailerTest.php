@@ -48,6 +48,7 @@ final class MailerTest extends TestCase
             'type_consultation' => 'Mariage',
             'mode_paiement' => 'mobile_money',
             'message' => '',
+            'ref' => 'REF0123456789',
         ];
     }
 
@@ -109,5 +110,42 @@ final class MailerTest extends TestCase
         $resultat = (new Mailer($this->renderer()))->sendClientConfirmation($this->rdv());
 
         $this->assertFalse($resultat);
+    }
+
+    public function test_un_echec_d_envoi_journalise_la_reference_jamais_l_adresse_ni_le_sujet(): void
+    {
+        $messages = [];
+        Functions\when('carbon_get_theme_option')->justReturn('');
+        Functions\when('wp_mail')->justReturn(false);
+        Functions\when('error_log')->alias(function (string $message) use (&$messages): void {
+            $messages[] = $message;
+        });
+
+        (new Mailer($this->renderer()))->sendClientConfirmation($this->rdv());
+
+        $this->assertCount(1, $messages);
+        $this->assertStringContainsString('REF0123456789', $messages[0]);
+        $this->assertStringNotContainsString('jane@example.test', $messages[0]);
+        $this->assertStringNotContainsString('Mariage', $messages[0]);
+        $this->assertStringNotContainsString('Confirmation de votre demande', $messages[0]);
+    }
+
+    public function test_un_destinataire_vide_est_journalise_sans_donnees_personnelles(): void
+    {
+        $messages = [];
+        Functions\when('carbon_get_theme_option')->justReturn('');
+        Functions\when('error_log')->alias(function (string $message) use (&$messages): void {
+            $messages[] = $message;
+        });
+
+        // Options::prophetEmail() retombe sur '' : ni réglage ni PROPHET_EMAIL.
+        $resultat = (new Mailer($this->renderer()))->sendProphetNotification($this->rdv());
+
+        $this->assertFalse($resultat);
+        $this->assertCount(1, $messages);
+        $this->assertStringContainsString('REF0123456789', $messages[0]);
+        $this->assertStringNotContainsString('Jane', $messages[0]);
+        $this->assertStringNotContainsString('Doe', $messages[0]);
+        $this->assertStringNotContainsString('Mariage', $messages[0]);
     }
 }
