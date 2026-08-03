@@ -10,9 +10,12 @@
   `$introuvable` ajouté par le brief, absent de la source. Il reprend
   l'habillage `.conf__card` pour rester visuellement cohérent avec le reste
   de la page.
+
+  Layout minimal (voir layouts/minimal.blade.php) : pages/confirmation.vue:24
+  ne montait ni TheNavbar, ni AppFooter, ni FloatingWhatsApp.
 --}}
 
-@extends('layouts.app')
+@extends('layouts.minimal')
 
 @section('content')
   <div class="sec-confirmation conf">

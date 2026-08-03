@@ -7,9 +7,13 @@
   colonnes (<section class="rdv-layout"> / .rdv-layout__left / __right),
   et sa classe racine est `.rdv-page`, pas `.page-rdv` — voir _page-rdv.css,
   qui porte le bloc <style> non scopé de pages/rdv.vue tel quel.
+
+  Layout minimal (voir layouts/minimal.blade.php) : pages/rdv.vue ne montait
+  ni TheNavbar, ni AppFooter, ni FloatingWhatsApp — son propre lien
+  « Retour au site » (.rdv-back ci-dessous) en tient déjà lieu.
 --}}
 
-@extends('layouts.app')
+@extends('layouts.minimal')
 
 @section('content')
   <div class="rdv-page">
