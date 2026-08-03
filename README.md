@@ -6,43 +6,58 @@ Application web complète de prise de rendez-vous pour le **Prophète Jeremiah N
 
 | Couche | Technologie |
 |--------|-------------|
-| Framework | Nuxt 3 (SSR, TypeScript strict) |
-| UI | shadcn-vue + Tailwind CSS v3 |
-| Icônes | lucide-vue-next |
-| Validation | vee-validate + zod |
-| Base de données | MongoDB via Mongoose |
-| Email | Nodemailer (SMTP) |
-| WhatsApp | Lien wa.me généré côté client |
-| Conteneur | Docker multi-stage + docker-compose |
-| Reverse proxy | Nginx (SSL ready) |
+| CMS | WordPress sur Bedrock 1.28 (PHP 8.2) |
+| Thème | Sage 11 (Blade, Vite) — `cms/web/app/themes/prophet` |
+| Champs personnalisés | Carbon Fields |
+| Base de données | MySQL 8 |
+| Email | SMTP (wp_mail) |
+| WhatsApp | Lien wa.me généré côté serveur |
+| Conteneur | Docker multi-stage (PHP-FPM) + docker-compose |
+| Reverse proxy | Caddy 2 (HTTPS automatique) |
 
 ---
 
 ## Démarrage rapide
 
 ### Prérequis
-- Node.js 20+
-- npm 10+
-- Docker + Docker Compose (pour la prod)
+- Docker + Docker Compose
+- Node.js 20+ et npm 10+ (pour builder le thème)
 
 ### Développement local
 
 ```bash
-# 1. Installer les dépendances
-npm install
+# 1. Copier et configurer les variables d'environnement
+cp cms/.env.example cms/.env
+# Éditer cms/.env avec vos valeurs
 
-# 2. Copier et configurer les variables d'environnement
-cp .env.example .env
-# Éditer .env avec vos valeurs
+# 2. Démarrer la pile de développement (Caddy, PHP-FPM, MySQL, WP-CLI)
+docker compose -f docker-compose.cms.dev.yml up -d
 
-# 3. Démarrer MongoDB localement (ou via Docker)
-docker run -d -p 27017:27017 --name mongo mongo:7
+# 3. Installer WordPress (une seule fois)
+./cms/scripts/install-wp.sh
 
-# 4. Lancer le serveur de développement
-npm run dev
+# 4. Charger le contenu réel du site
+docker compose -f docker-compose.cms.dev.yml exec -T wpcli wp prophet seed
+
+# 5. Lancer le serveur de développement du thème (Vite, hot-reload)
+cd cms/web/app/themes/prophet && npm install && npm run dev
 ```
 
-L'application sera disponible sur `http://localhost:3000`
+Le site sera disponible sur `http://localhost:8080`, l'administration sur `http://localhost:8080/wp/wp-admin`.
+
+### Production
+
+```bash
+# 1. Copier et configurer les variables d'environnement de production
+cp cms/.env.example cms/.env
+# Éditer cms/.env : WP_ENV=production, WP_HOME=https://votre-domaine.com,
+# secrets réels, DOMAIN et ACME_EMAIL pour Caddy
+
+# 2. Construire les images (thème compilé en étage séparé) et démarrer
+docker compose -f docker-compose.cms.yml up -d --build
+```
+
+Caddy obtient et renouvelle automatiquement les certificats HTTPS via Let's Encrypt.
 
 ---
 

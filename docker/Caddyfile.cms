@@ -1,0 +1,37 @@
+{
+	email {$ACME_EMAIL}
+	admin off
+}
+
+{$DOMAIN} {
+	root * /srv/web
+	encode zstd gzip
+
+	header {
+		X-Frame-Options SAMEORIGIN
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		-Server
+	}
+
+	@static path_regexp \.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?|ttf|eot|webp)$
+	header @static Cache-Control "public, max-age=31536000, immutable"
+
+	# Carbon Fields sert son JS et son CSS depuis le répertoire vendor de
+	# Composer, qui est hors de la racine web dans Bedrock. Sans cette route,
+	# tous ses assets répondent 404 et aucun champ ne s'affiche dans
+	# l'administration — la déclaration PHP a beau être correcte. Le préfixe est
+	# celui que prophet-core.php impose à Carbon_Fields\URL avant boot().
+	handle_path /cf-vendor/carbon-fields/* {
+		root * /srv/vendor/htmlburger/carbon-fields
+		file_server
+	}
+
+	# Les fichiers déposés dans uploads ne doivent jamais être exécutés.
+	@uploads_php path_regexp ^/app/uploads/.*\.php$
+	respond @uploads_php 403
+
+	php_fastcgi app:9000
+	file_server
+}

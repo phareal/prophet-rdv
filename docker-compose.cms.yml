@@ -1,0 +1,66 @@
+name: prophet_cms
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: prophet_cms_caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./docker/Caddyfile.cms:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      - cms_uploads:/srv/web/app/uploads:ro
+    depends_on: [app]
+    networks: [cms_net]
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile.prod
+    container_name: prophet_cms_app
+    restart: unless-stopped
+    env_file: ./cms/.env
+    volumes:
+      - cms_uploads:/srv/web/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [cms_net]
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+  db:
+    image: mysql:8
+    container_name: prophet_cms_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - cms_mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [cms_net]
+
+volumes:
+  cms_mysql:
+  cms_uploads:
+  caddy_data:      # certificats Let's Encrypt : ne jamais supprimer en production
+  caddy_config:
+
+networks:
+  cms_net:
+    driver: bridge
