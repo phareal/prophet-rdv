@@ -67,6 +67,20 @@ final class Mailer
 
     private function send(string $to, string $sujet, string $corps, array $headers): bool
     {
+        // Un destinataire vide fait échouer wp_mail sans rien dire de la cause.
+        // Le cas se produit quand ni le champ « Email de notification » des
+        // Réglages RDV ni PROPHET_EMAIL dans .env ne sont renseignés : la demande
+        // est bien enregistrée, mais le prophète n'en est jamais averti.
+        if (trim($to) === '') {
+            error_log(
+                '[Mailer] destinataire vide pour « ' . $sujet . ' » — renseigner'
+                . ' le champ « Email de notification » des Réglages RDV ou'
+                . ' PROPHET_EMAIL dans .env.'
+            );
+
+            return false;
+        }
+
         $headers[] = 'Content-Type: text/html; charset=UTF-8';
 
         $envoye = (bool) wp_mail($to, $sujet, $corps, $headers);

@@ -2197,6 +2197,20 @@ final class Mailer
 
     private function send(string $to, string $sujet, string $corps, array $headers): bool
     {
+        // Un destinataire vide fait échouer wp_mail sans rien dire de la cause.
+        // Le cas se produit quand ni le champ « Email de notification » des
+        // Réglages RDV ni PROPHET_EMAIL dans .env ne sont renseignés : la demande
+        // est bien enregistrée, mais le prophète n'en est jamais averti.
+        if (trim($to) === '') {
+            error_log(
+                '[Mailer] destinataire vide pour « ' . $sujet . ' » — renseigner'
+                . ' le champ « Email de notification » des Réglages RDV ou'
+                . ' PROPHET_EMAIL dans .env.'
+            );
+
+            return false;
+        }
+
         $headers[] = 'Content-Type: text/html; charset=UTF-8';
 
         $envoye = (bool) wp_mail($to, $sujet, $corps, $headers);
@@ -3970,7 +3984,7 @@ git commit -m "feat(core): traitement de la soumission du formulaire de rendez-v
 - Consumes: `Options` (tâche 8)
 - Produces:
   - `<x-icon name="heart" class="…" />` — SVG lucide inliné
-  - Alpine 3 disponible globalement, `data-observe` déclenchant l'animation `fade-up`
+  - Alpine 3 disponible globalement
   - Partials `partials.navbar`, `partials.footer`, `partials.floating-whatsapp` incluses par le layout
   - Composer `Content` exposant `$contenu` (tableau des options de la page « Contenu du site ») à toutes les vues
 
@@ -4033,19 +4047,11 @@ import Alpine from 'alpinejs'
 window.Alpine = Alpine
 Alpine.start()
 
-// Reproduit l'animation fade-up déclenchée à l'entrée dans le viewport.
-const observer = new IntersectionObserver(
-  (entries) => {
-    for (const entry of entries) {
-      if (!entry.isIntersecting) continue
-      entry.target.classList.add('is-visible')
-      observer.unobserve(entry.target)
-    }
-  },
-  { threshold: 0.15 }
-)
-
-document.querySelectorAll('[data-observe]').forEach((el) => observer.observe(el))
+// Pas d'IntersectionObserver : le site d'origine ne déclenche aucune animation au
+// défilement. `fade-up` y est une simple animation CSS jouée au chargement, sur
+// trois éléments seulement (HeroLeft.vue:169, RdvForm.vue:299,
+// pages/confirmation.vue:152). Le port la reproduit dans les fichiers de section
+// correspondants, sans JavaScript.
 ```
 
 - [ ] **Step 5: Écrire le View Composer du contenu global**
@@ -5778,7 +5784,7 @@ Créer `docs/superpowers/notes/2026-07-30-recette-migration.md` et y consigner l
 | # | Vérification | Attendu |
 |---|---|---|
 | 1 | Page d'accueil à 375, 768 et 1440 px | identique au Nuxt, section par section |
-| 2 | Animations `fade-up` au défilement | déclenchées à l'entrée dans le viewport |
+| 2 | Animation `fade-up` | jouée au chargement sur le hero latéral, le formulaire et la confirmation |
 | 3 | Menu mobile | ouverture et fermeture |
 | 4 | Carrousel de témoignages | avance et recule en boucle |
 | 5 | Pagination des événements | 4 par page, boutons désactivés aux extrémités |

@@ -36,16 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
   })
 })
 
-// Reproduit l'animation fade-up déclenchée à l'entrée dans le viewport.
-const observer = new IntersectionObserver(
-  (entries) => {
-    for (const entry of entries) {
-      if (!entry.isIntersecting) continue
-      entry.target.classList.add('is-visible')
-      observer.unobserve(entry.target)
-    }
-  },
-  { threshold: 0.15 }
-)
-
-document.querySelectorAll('[data-observe]').forEach((el) => observer.observe(el))
+// Pas d'IntersectionObserver ici : le site d'origine ne déclenche aucune animation
+// au défilement. `fade-up` y est une simple animation CSS jouée au chargement, sur
+// trois éléments seulement (HeroLeft.vue:169, RdvForm.vue:299,
+// pages/confirmation.vue:152), et le port la reproduit telle quelle dans
+// _hero-left.css, _rdv-form.css et _confirmation.css.
