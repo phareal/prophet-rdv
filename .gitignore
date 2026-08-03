@@ -1,13 +1,9 @@
-# Nuxt dev/build
-.nuxt
-.nitro
-.cache
-.output
+# Environnement
 .env
 .env.*
 !.env.example
 
-# Node
+# Node (outillage du thème et scripts)
 node_modules
 npm-debug.log*
 
@@ -18,10 +14,6 @@ Thumbs.db
 # IDE
 .vscode
 .idea
-
-# SSL certs (jamais dans git)
-nginx/ssl/
-.vercel
 
 # CMS (Bedrock / Sage)
 cms/.env
