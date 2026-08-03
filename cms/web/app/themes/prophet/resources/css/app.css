@@ -14,6 +14,7 @@
 @import "./sections/_hero-left.css";
 @import "./sections/_rdv-form.css";
 @import "./sections/_page-rdv.css";
+@import "./sections/_confirmation.css";
 
 /*
  * Bloc <style> non scopé de pages/index.vue (classe .site) — tâche 15.

@@ -155,3 +155,14 @@ add_action('wp_head', function () {
     echo '<link rel="preconnect" href="https://fonts.googleapis.com">' . "\n";
     echo '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . "\n";
 }, 1);
+
+/**
+ * La page de confirmation affiche des données personnelles (nom, type de
+ * consultation, date) adressées par un jeton dans l'URL : elle n'a rien à
+ * faire dans un index de moteur de recherche.
+ */
+add_action('wp_head', static function (): void {
+    if (is_page('confirmation')) {
+        echo '<meta name="robots" content="noindex, nofollow">' . "\n";
+    }
+}, 1);
