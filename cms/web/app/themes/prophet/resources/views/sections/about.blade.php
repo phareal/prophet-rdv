@@ -51,7 +51,9 @@
       <div class="section-ornament about__ornament"><span>✦</span></div>
       <span class="about__section-label">À propos du ministère</span>
 
-      <h2 class="about__title">{{ $contenu['about_titre'] }}</h2>
+      {{-- Deux champs (voir Content.php) reproduisent le <br><em> structurel de
+           AboutSection.vue:62-65 sans déséchapper de champ. --}}
+      <h2 class="about__title">{{ $contenu['about_titre_ligne_1'] }}<br><em>{{ $contenu['about_titre_emphase'] }}</em></h2>
 
       <div class="about__body">
         {!! $contenu['about_texte'] !!}
@@ -60,14 +62,7 @@
       <div class="about__gifts">
         <p class="about__gifts-title">Domaines de ministère</p>
         <ul class="about__gifts-list">
-          @foreach ([
-              'Prophétie de précision — noms, dates, détails vérifiables',
-              'Conseil stratégique pour dirigeants et entrepreneurs',
-              'Intercession et délivrance spirituelle',
-              'Activation des appels prophétiques',
-              'Guidance dans les décisions de carrière et de mariage',
-              'Révélation sur les années et les saisons spirituelles',
-          ] as $gift)
+          @foreach ($contenu['points_cles'] as $gift)
             <li class="about__gift">
               <x-icon name="check-circle-2" :size="15" class="about__gift-icon" />
               <span>{{ $gift }}</span>

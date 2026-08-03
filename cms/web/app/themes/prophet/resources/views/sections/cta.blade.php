@@ -18,12 +18,13 @@
       <cite>— Jérémie 33:3</cite>
     </blockquote>
 
-    {{-- cta_titre/cta_texte/cta_bouton sont des champs uniques (Content composer) qui
-         remplacent le titre <br><em> et le sous-texte <br> statiques de la source, comme
-         about.blade.php et hero.blade.php le font déjà pour about_titre/hero_titre. --}}
-    <h2 class="cta__title">{{ $contenu['cta_titre'] }}</h2>
+    {{-- cta_titre_ligne_1/emphase et cta_texte_ligne_1/2 sont des paires de champs
+         (Content composer) qui reproduisent le titre <br><em> et le sous-texte <br>
+         structurels de CtaSection.vue:29-37 sans déséchapper de champ, comme
+         about.blade.php et hero.blade.php le font déjà pour leurs propres titres. --}}
+    <h2 class="cta__title">{{ $contenu['cta_titre_ligne_1'] }}<br><em>{{ $contenu['cta_titre_emphase'] }}</em></h2>
 
-    <p class="cta__sub">{{ $contenu['cta_texte'] }}</p>
+    <p class="cta__sub">{{ $contenu['cta_texte_ligne_1'] }}<br>{{ $contenu['cta_texte_ligne_2'] }}</p>
 
     <div class="cta__actions">
       <a href="{{ home_url('/rdv') }}" class="cta__btn cta__btn--primary">

@@ -83,21 +83,25 @@ final class SeedCommand
     /**
      * Reprise de components/HeroSection.vue, AboutSection.vue et CtaSection.vue.
      * Les champs source contenaient des <br> et des <em> décoratifs (mise en page
-     * du composant Vue) ; les champs Carbon Fields correspondants sont du texte
-     * simple (hero_titre, about_titre, cta_titre, cta_texte) ou du texte riche
-     * (about_texte, seul à passer par un rendu {!! !!} côté Blade) — le sens et
-     * les mots sont conservés à l'identique, seule la balise de mise en forme
-     * disparaît.
+     * du composant Vue). Une revue ultérieure (finding 1) a scindé les titres à
+     * deux lignes en deux champs texte (hero_titre_ligne_1/2, about_titre_ligne_1
+     * + about_titre_emphase, cta_titre_ligne_1 + cta_titre_emphase, cta_texte_ligne_1/2)
+     * pour que le <br>/<em> décoratif reste exprimable sans déséchapper de champ :
+     * seule about_texte (rich_text) passe par un rendu {!! !!} côté Blade. Le sens
+     * et les mots restent identiques à la source ; seule la balise de mise en forme
+     * disparaît, remplacée par la frontière entre les deux champs.
      */
     public static function contenu(): array
     {
         return [
             'hero_surtitre' => 'Prophète',
-            'hero_titre' => 'Jeremiah Nahoum',
+            'hero_titre_ligne_1' => 'Jeremiah',
+            'hero_titre_ligne_2' => 'Nahoum',
             'hero_sous_titre' => 'Le Conseiller des Rois',
             'hero_cta_principal' => 'Prendre Rendez-vous',
             'hero_cta_secondaire' => 'Voir le ministère',
-            'about_titre' => 'Un prophète au service des nations',
+            'about_titre_ligne_1' => 'Un prophète',
+            'about_titre_emphase' => 'au service des nations',
             'about_texte' => '<p>Depuis plus de 15 ans, le Prophète Jeremiah Nahoum exerce un ministère '
                 .'prophétique international reconnu pour sa précision et sa profondeur spirituelle. '
                 .'Surnommé <strong>"Le Conseiller des Rois"</strong>, il a accompagné des chefs '
@@ -105,9 +109,10 @@ final class SeedCommand
                 .'nations.</p><p>Son ministère est fondé sur la révélation divine : des prophéties '
                 .'qui citent des noms, des dates et des événements avec une exactitude qui ne peut '
                 .'venir que de Dieu. Chaque consultation est un rendez-vous avec l\'Éternel.</p>',
-            'cta_titre' => 'Votre rendez-vous avec Dieu vous attend',
-            'cta_texte' => 'Chaque consultation est unique. Chaque parole est précise. '
-                .'Prenez votre rendez-vous prophétique aujourd\'hui.',
+            'cta_titre_ligne_1' => 'Votre rendez-vous',
+            'cta_titre_emphase' => 'avec Dieu vous attend',
+            'cta_texte_ligne_1' => 'Chaque consultation est unique. Chaque parole est précise.',
+            'cta_texte_ligne_2' => 'Prenez votre rendez-vous prophétique aujourd\'hui.',
             'cta_bouton' => 'Réserver une consultation',
         ];
     }

@@ -54,21 +54,25 @@ final class SeedCommandTest extends TestCase
         }
     }
 
-    public function test_les_dix_textes_de_la_page_d_accueil_sont_presents(): void
+    public function test_les_quatorze_textes_de_la_page_d_accueil_sont_presents(): void
     {
         $contenu = SeedCommand::contenu();
 
-        $this->assertCount(10, $contenu);
+        $this->assertCount(14, $contenu);
         $this->assertSame('Prophète', $contenu['hero_surtitre']);
-        $this->assertSame('Jeremiah Nahoum', $contenu['hero_titre']);
+        $this->assertSame('Jeremiah', $contenu['hero_titre_ligne_1']);
+        $this->assertSame('Nahoum', $contenu['hero_titre_ligne_2']);
         $this->assertSame('Le Conseiller des Rois', $contenu['hero_sous_titre']);
         $this->assertSame('Prendre Rendez-vous', $contenu['hero_cta_principal']);
         $this->assertSame('Voir le ministère', $contenu['hero_cta_secondaire']);
-        $this->assertSame('Un prophète au service des nations', $contenu['about_titre']);
+        $this->assertSame('Un prophète', $contenu['about_titre_ligne_1']);
+        $this->assertSame('au service des nations', $contenu['about_titre_emphase']);
         $this->assertStringContainsString('Le Conseiller des Rois', $contenu['about_texte']);
         $this->assertStringContainsString("l'Éternel", $contenu['about_texte']);
-        $this->assertSame('Votre rendez-vous avec Dieu vous attend', $contenu['cta_titre']);
-        $this->assertStringContainsString('aujourd\'hui', $contenu['cta_texte']);
+        $this->assertSame('Votre rendez-vous', $contenu['cta_titre_ligne_1']);
+        $this->assertSame('avec Dieu vous attend', $contenu['cta_titre_emphase']);
+        $this->assertStringContainsString('précise.', $contenu['cta_texte_ligne_1']);
+        $this->assertStringContainsString('aujourd\'hui', $contenu['cta_texte_ligne_2']);
         $this->assertSame('Réserver une consultation', $contenu['cta_bouton']);
     }
 
@@ -77,7 +81,7 @@ final class SeedCommandTest extends TestCase
         $ecrits = [];
 
         Functions\when('carbon_get_theme_option')->alias(
-            fn (string $cle) => $cle === 'hero_titre' ? 'Texte personnalisé par l\'admin' : ''
+            fn (string $cle) => $cle === 'hero_titre_ligne_1' ? 'Texte personnalisé par l\'admin' : ''
         );
         Functions\when('carbon_set_theme_option')->alias(function (string $cle, $valeur) use (&$ecrits): void {
             $ecrits[$cle] = $valeur;
@@ -85,9 +89,9 @@ final class SeedCommandTest extends TestCase
 
         SeedCommand::seedContenu();
 
-        $this->assertArrayNotHasKey('hero_titre', $ecrits);
+        $this->assertArrayNotHasKey('hero_titre_ligne_1', $ecrits);
         $this->assertSame('Prophète', $ecrits['hero_surtitre']);
-        $this->assertCount(9, $ecrits);
+        $this->assertCount(13, $ecrits);
     }
 
     public function test_le_contenu_vide_est_ecrit_lors_d_une_premiere_execution(): void
@@ -101,7 +105,7 @@ final class SeedCommandTest extends TestCase
 
         SeedCommand::seedContenu();
 
-        $this->assertCount(10, $ecrits);
+        $this->assertCount(14, $ecrits);
     }
 
     public function test_une_image_deja_presente_dans_la_mediatheque_n_est_pas_reimportee(): void

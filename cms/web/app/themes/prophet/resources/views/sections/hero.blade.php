@@ -24,7 +24,9 @@
 
       <h1 class="hero__title">
         <span class="hero__title-pre">{{ $contenu['hero_surtitre'] }}</span>
-        <span class="hero__title-name">{{ $contenu['hero_titre'] }}</span>
+        {{-- Deux champs (voir Content.php) reproduisent le <br> structurel de
+             HeroSection.vue:26 sans déséchapper de champ. --}}
+        <span class="hero__title-name">{{ $contenu['hero_titre_ligne_1'] }}<br>{{ $contenu['hero_titre_ligne_2'] }}</span>
       </h1>
 
       <p class="hero__subtitle">&quot;{{ $contenu['hero_sous_titre'] }}&quot;</p>
@@ -39,7 +41,7 @@
           <x-icon name="calendar" :size="17" />
           <span>{{ $contenu['hero_cta_principal'] }}</span>
         </a>
-        <a href="#services" class="hero__btn hero__btn--ghost">
+        <a href="#video" class="hero__btn hero__btn--ghost">
           <x-icon name="play" :size="15" class="hero__btn-play-icon" />
           <span>{{ $contenu['hero_cta_secondaire'] }}</span>
         </a>
