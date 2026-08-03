@@ -123,6 +123,14 @@
 
   .vcard__thumb:hover .vcard__play-btn { transform: scale(1.08); }
 
+  /* Ajout : VideoSection.vue:60 passe fill="currentColor" au composant Play de
+     lucide-vue-next. x-icon inline le SVG lucide-static tel quel (fill="none"
+     figé dans le fichier) sans permettre de surcharger cet attribut ; même
+     traitement que .hero__btn-play-icon dans _hero.css. */
+  .vcard__play-btn svg {
+    fill: currentColor;
+  }
+
   .vcard__duration {
     position: absolute; bottom: 0.7rem; right: 0.7rem;
     font-family: var(--f-mono); font-size: 0.58rem;

@@ -32,7 +32,7 @@
               loading="lazy"
               width="480"
               height="270"
-              x-on:error="$el.style.display = 'none'"
+              onerror="this.style.display='none'"
             />
             <div class="vcard__play">
               <div class="vcard__play-btn">
