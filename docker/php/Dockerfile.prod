@@ -28,3 +28,12 @@ RUN { \
       echo 'opcache.validate_timestamps=0'; \
       echo 'opcache.max_accelerated_files=10000'; \
     } > /usr/local/etc/php/conf.d/opcache.ini
+
+# En production le .env n'existe plus dans l'image (voir .dockerignore) : les
+# variables passent uniquement par `env_file:` dans docker-compose.cms.yml.
+# php-fpm ignore par défaut l'environnement hérité (clear_env = yes) et vide
+# donc l'environnement des workers avant que Bedrock ne lise DB_NAME, les
+# sels WordPress ou SMTP_PASS via env(). Sans cette ligne, tout ce qui dépend
+# de env() résout à null/vide en production alors que le conteneur a bien
+# reçu les variables.
+RUN sed -i 's/^;clear_env = no/clear_env = no/' /usr/local/etc/php-fpm.d/www.conf

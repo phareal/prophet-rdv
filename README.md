@@ -60,16 +60,27 @@ docker compose -f docker-compose.cms.dev.yml run --rm app \
 ### Production
 
 ```bash
-# 1. Environnement de production dans cms/.env
-#    WP_ENV=production, WP_HOME=https://votre-domaine.com,
-#    secrets réels, DOMAIN et ACME_EMAIL pour Caddy
+# 1. Variables lues par Docker Compose lui-même (${DOMAIN}, ${DB_NAME}...)
+cp .env.example .env
+# Éditer .env : DOMAIN, ACME_EMAIL, DB_NAME, DB_USER, DB_PASSWORD, DB_ROOT_PASSWORD
 
-# 2. Construction et démarrage
+# 2. Variables applicatives de WordPress, comme en développement
+cp cms/.env.example cms/.env
+# Éditer cms/.env : WP_ENV=production, WP_HOME=https://votre-domaine.com,
+# secrets réels, DB_* (mêmes valeurs que dans .env), SMTP, clés Google/YouTube
+
+# 3. Construction et démarrage
 docker compose -f docker-compose.cms.yml up -d --build
 ```
 
 Caddy obtient et renouvelle les certificats HTTPS via Let's Encrypt. Le volume
 `caddy_data` porte ces certificats : ne jamais le supprimer en production.
+
+La pile de production embarque désormais aussi un service `wpcli` (image
+officielle `wordpress:cli-php8.2`, comme en développement) : wp-cli n'est pas
+une dépendance Composer de l'application, donc l'image `app` ne le fournit
+pas. Ce service lit le code depuis le même volume que Caddy — jamais un bind
+mount — il voit donc exactement ce qui est déployé.
 
 **À vérifier après le premier déploiement :**
 
@@ -91,6 +102,8 @@ docker compose -f docker-compose.cms.yml run --rm app php -r \
 
 ## Configuration (`cms/.env`)
 
+Ces variables alimentent l'environnement des conteneurs PHP via `env_file:`.
+
 | Variable | Description |
 |----------|-------------|
 | `WP_ENV`, `WP_HOME`, `WP_SITEURL` | Environnement et URLs |
@@ -101,13 +114,27 @@ docker compose -f docker-compose.cms.yml run --rm app php -r \
 | `PROPHET_PHONE_1`, `PROPHET_PHONE_2` | Numéros WhatsApp |
 | `GOOGLE_API_KEY`, `GOOGLE_CALENDAR_ID` | Agenda des événements |
 | `YOUTUBE_API_KEY`, `YOUTUBE_CHANNEL_ID` | Dernières vidéos |
-| `DOMAIN`, `ACME_EMAIL` | Production : domaine et contact Let's Encrypt |
 
 Sans clés Google ou YouTube, les sections Événements et Vidéos affichent des
 données de démonstration plutôt que de tomber en erreur.
 
 **Note Gmail :** activer l'authentification à deux facteurs, puis créer un
 « App Password » sur [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords).
+
+## Configuration (`.env`, racine du dépôt)
+
+Ces variables ne sont lues que par Docker Compose, pour interpoler
+`${VARIABLE}` dans `docker-compose.cms.yml` — jamais transmises aux
+conteneurs. `DB_NAME`/`DB_USER`/`DB_PASSWORD` doivent avoir les mêmes valeurs
+que dans `cms/.env`, puisque MySQL est provisionné à partir d'ici alors que
+WordPress s'y connecte à partir de là.
+
+| Variable | Description |
+|----------|-------------|
+| `DOMAIN` | Nom de domaine servi par Caddy en production |
+| `ACME_EMAIL` | Contact Let's Encrypt |
+| `DB_NAME`, `DB_USER`, `DB_PASSWORD` | Provisionnement MySQL |
+| `DB_ROOT_PASSWORD` | Mot de passe root MySQL |
 
 ---
 
@@ -143,7 +170,7 @@ prophet-rdv/
 │           └── resources/{views,css,js,images}
 ├── docker/                                 # Dockerfiles et Caddyfiles
 ├── docs/superpowers/                       # spécification, plan, notes de recette
-├── scripts/
+├── .env.example                            # variables interpolées par Docker Compose
 ├── docker-compose.cms.dev.yml
 └── docker-compose.cms.yml
 ```
