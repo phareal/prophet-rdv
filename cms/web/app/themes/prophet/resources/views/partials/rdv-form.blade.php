@@ -29,6 +29,13 @@
       <p class="fp__subheading">
         Remplissez le formulaire. Vous recevrez une confirmation par email et WhatsApp.
       </p>
+      {{-- rdv_aide (App\View\Composers\Rdv::with()) n'a pas d'équivalent dans
+           RdvForm.vue — c'est un champ ajouté par le brief pour laisser un
+           administrateur écrire une consigne complémentaire. Rendu seulement
+           s'il est renseigné, sinon rien ne change par rapport à la source. --}}
+      @if ($aide)
+        <p class="fp__subheading">{{ $aide }}</p>
+      @endif
     </header>
 
     {{-- ── BANDEAU ÉVÉNEMENT ── --}}

@@ -22,6 +22,7 @@
         <article
           class="event-card{{ $event['featured'] ? ' event-card--featured' : '' }}"
           x-show="Math.floor({{ $i }} / taille) + 1 === page"
+          x-cloak
         >
           <div class="event-card__date">
             <span class="event-card__day">{{ $event['day'] }}</span>

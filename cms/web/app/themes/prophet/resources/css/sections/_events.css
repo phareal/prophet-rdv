@@ -140,11 +140,15 @@
     border: 1px solid currentColor; opacity: 0.9;
   }
 
-  /* Couleur par type — remplace la map JS `typeColor` (voir commentaire en tête de fichier). */
-  .event-card__type { color: #B07A14; }
-  .event-card__type[data-type="Croisade"] { color: #B07A14; }
-  .event-card__type[data-type="Conférence"] { color: #0A9060; }
-  .event-card__type[data-type="Retraite"] { color: #7B5EA7; }
+  /* Couleur par type — remplace la map JS `typeColor` (voir commentaire en tête de fichier).
+     EventsSection.vue:78 posait aussi `borderColor: ${color}40` (25% d'alpha, suffixe hexa
+     `40`) en plus de `color` ; `border: 1px solid currentColor` ci-dessus peint le contour
+     dans la couleur pleinement saturée. Ajout : une bordure dédiée par type restaure l'alpha
+     d'origine sans toucher à `color`. */
+  .event-card__type { color: #B07A14; border-color: #B07A1440; }
+  .event-card__type[data-type="Croisade"] { color: #B07A14; border-color: #B07A1440; }
+  .event-card__type[data-type="Conférence"] { color: #0A9060; border-color: #0A906040; }
+  .event-card__type[data-type="Retraite"] { color: #7B5EA7; border-color: #7B5EA740; }
 
   .event-card__featured-badge {
     font-family: var(--f-mono);

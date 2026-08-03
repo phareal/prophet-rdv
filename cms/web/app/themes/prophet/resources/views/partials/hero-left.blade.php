@@ -101,7 +101,7 @@
 
       <div class="hero__carousel-track">
         <template x-for="(temoignage, i) in temoignages" :key="i">
-          <article class="hero__tcard" x-show="current === i"
+          <article class="hero__tcard" x-show="current === i" x-cloak
                    x-transition:enter="tcard-enter-active"
                    x-transition:enter-start="tcard-enter-from"
                    x-transition:enter-end="tcard-enter-to"
