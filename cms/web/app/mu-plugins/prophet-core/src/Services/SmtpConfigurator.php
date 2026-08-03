@@ -26,6 +26,12 @@ final class SmtpConfigurator
             $phpmailer->Password = Options::env('SMTP_PASS');
             $phpmailer->SMTPSecure = Options::env('SMTP_SECURE') === 'true' ? 'ssl' : 'tls';
             $phpmailer->CharSet = 'UTF-8';
+
+            // PHPMailer's default Timeout is 300s. Sous PHP-FPM, sans
+            // fastcgi_finish_request() ni limite courte ici, un serveur SMTP
+            // injoignable ferait patienter le visiteur plusieurs minutes après
+            // l'envoi du formulaire, alors que le rendez-vous est déjà enregistré.
+            $phpmailer->Timeout = 10;
         });
     }
 }

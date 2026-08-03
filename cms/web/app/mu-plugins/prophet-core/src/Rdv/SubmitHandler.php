@@ -36,13 +36,20 @@ class SubmitHandler
     public function process(array $post, string $ip): void
     {
         // Les robots reçoivent la page de confirmation générique : aucun signal utile.
+        // La limite de débit est posée ici (et non pas seulement après un envoi
+        // réussi) : ni un pot de miel rempli ni un nonce invalide ne peuvent venir
+        // d'un visiteur légitime, contrairement à une erreur de validation ou un
+        // créneau déjà pris — sans quoi un robot en boucle sur ce point ferait
+        // grossir wp_options sans limite (FlashStore::put() à chaque passage).
         if (self::isBot($post)) {
+            $this->appliquerLimiteDeDebit($ip);
             $this->redirigerVersFormulaire(['global' => 'Votre demande n\'a pas pu être traitée.'], $post);
 
             return;
         }
 
         if (! wp_verify_nonce((string) ($post['prophet_nonce'] ?? ''), self::NONCE)) {
+            $this->appliquerLimiteDeDebit($ip);
             $this->redirigerVersFormulaire(
                 ['global' => 'Votre session a expiré. Merci de renvoyer le formulaire.'],
                 $post,
@@ -98,13 +105,20 @@ class SubmitHandler
             return;
         }
 
-        if ($ip !== '') {
-            set_transient(self::rateLimitKey($ip), 1, self::DELAI_ENTRE_ENVOIS);
-        }
+        $data['ref'] = $ref;
 
-        // Les emails ne doivent pas retarder la redirection ; un échec est journalisé
-        // sans faire échouer la demande, comme server/api/rdv.post.ts:87-95.
+        $this->appliquerLimiteDeDebit($ip);
+
+        // Les emails ne doivent pas retarder la redirection. Sous PHP-FPM la
+        // connexion reste ouverte jusqu'à la fin du script : sans
+        // fastcgi_finish_request(), le navigateur du visiteur patiente derrière les
+        // deux envois SMTP alors que le rendez-vous est déjà enregistré. Un échec
+        // est journalisé sans faire échouer la demande, comme server/api/rdv.post.ts:87-95.
         add_action('shutdown', static function () use ($data): void {
+            if (function_exists('fastcgi_finish_request')) {
+                fastcgi_finish_request();
+            }
+
             $mailer = new Mailer(new BladeRenderer());
             $mailer->sendClientConfirmation($data);
             $mailer->sendProphetNotification($data);
@@ -124,6 +138,13 @@ class SubmitHandler
     public static function rateLimitKey(string $ip): string
     {
         return 'prophet_rdv_ip_' . md5($ip);
+    }
+
+    private function appliquerLimiteDeDebit(string $ip): void
+    {
+        if ($ip !== '') {
+            set_transient(self::rateLimitKey($ip), 1, self::DELAI_ENTRE_ENVOIS);
+        }
     }
 
     /** @return array<int, string> */
