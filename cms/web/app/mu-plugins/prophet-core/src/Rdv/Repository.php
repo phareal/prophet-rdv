@@ -6,6 +6,8 @@ namespace ProphetCore\Rdv;
 
 use DateTimeImmutable;
 use DateTimeZone;
+use ProphetCore\Paiement\Montant;
+use ProphetCore\Paiement\Statut;
 use ProphetCore\PostTypes\RendezVous;
 
 final class Repository
@@ -62,6 +64,13 @@ final class Repository
             'ref' => $ref,
         ];
 
+        // Le statut de paiement naît avec le rendez-vous : « en attente » s'il y
+        // a un montant dû, « non requis » sinon. Aucun appel réseau ici — le
+        // rendez-vous doit être enregistré même si Moneroo est injoignable.
+        $metas['paiement_statut'] = Montant::pour((string) $data['type_consultation']) === null
+            ? Statut::NON_REQUIS
+            : Statut::EN_ATTENTE;
+
         // Les clés passent par RendezVous::metaKey() : Carbon Fields impose son
         // préfixe, et une clé littérale ici produirait un rendez-vous que le
         // panneau d'administration afficherait vide.
@@ -96,6 +105,8 @@ final class Repository
         );
 
         return [
+            'post_id' => $postId,
+            'ref' => $ref,
             'nom' => $lire('nom'),
             'prenom' => $lire('prenom'),
             'email' => $lire('email'),

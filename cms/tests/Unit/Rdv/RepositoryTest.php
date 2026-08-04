@@ -56,6 +56,7 @@ final class RepositoryTest extends TestCase
         Functions\when('sanitize_textarea_field')->returnArg();
         Functions\when('sanitize_email')->returnArg();
         Functions\when('is_wp_error')->justReturn(false);
+        Functions\when('carbon_get_theme_option')->justReturn('');
         Functions\when('update_post_meta')->alias(function ($id, $key, $value) use (&$metas) {
             $metas[$key] = $value;
 
@@ -88,5 +89,47 @@ final class RepositoryTest extends TestCase
         Functions\when('get_posts')->justReturn([]);
 
         $this->assertNull((new Repository())->findByRef('INCONNUE'));
+    }
+
+    public function test_la_creation_pose_un_statut_de_paiement_non_requis_sans_prix(): void
+    {
+        $metas = [];
+
+        Functions\when('wp_generate_password')->justReturn('REF0123456789');
+        Functions\when('wp_insert_post')->justReturn(7);
+        Functions\when('sanitize_text_field')->returnArg();
+        Functions\when('sanitize_textarea_field')->returnArg();
+        Functions\when('sanitize_email')->returnArg();
+        Functions\when('is_wp_error')->justReturn(false);
+        Functions\when('carbon_get_theme_option')->justReturn('');
+        Functions\when('update_post_meta')->alias(function ($id, $cle, $valeur) use (&$metas) {
+            $metas[$cle] = $valeur;
+
+            return true;
+        });
+
+        (new Repository())->create([
+            'nom' => 'Doe', 'prenom' => 'Jane', 'email' => 'jane@example.test',
+            'telephone' => '+22890000000', 'pays' => 'Togo',
+            'date' => new DateTimeImmutable('2026-08-05', new DateTimeZone('UTC')),
+            'heure' => '09h00', 'type_consultation' => 'Mariage',
+            'mode_paiement' => 'mobile_money', 'message' => '',
+        ]);
+
+        $this->assertSame(
+            'non_requis',
+            $metas[RendezVous::metaKey('paiement_statut')]
+        );
+    }
+
+    public function test_la_recherche_par_reference_renvoie_l_identifiant_de_publication(): void
+    {
+        Functions\when('get_posts')->justReturn([42]);
+        Functions\when('get_post_meta')->justReturn('');
+
+        $rdv = (new Repository())->findByRef('REF123');
+
+        $this->assertSame(42, $rdv['post_id']);
+        $this->assertSame('REF123', $rdv['ref']);
     }
 }
