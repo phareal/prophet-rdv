@@ -12,7 +12,9 @@ declare(strict_types=1);
 
 use Carbon_Fields\Carbon_Fields;
 use ProphetCore\Cli\SeedCommand;
+use ProphetCore\Don\DonPayable;
 use ProphetCore\Fields\ContenuOptions;
+use ProphetCore\Fields\DonFields;
 use ProphetCore\Fields\MotifPaiementFields;
 use ProphetCore\Fields\PaiementOptions;
 use ProphetCore\Fields\PhotoFields;
@@ -24,6 +26,7 @@ use ProphetCore\Paiement\Abandon;
 use ProphetCore\Paiement\InitHandler;
 use ProphetCore\Paiement\ResolveurDeSujet;
 use ProphetCore\Paiement\Webhook;
+use ProphetCore\PostTypes\Don;
 use ProphetCore\PostTypes\MotifPaiement;
 use ProphetCore\PostTypes\Photo;
 use ProphetCore\PostTypes\RendezVous;
@@ -56,12 +59,14 @@ Temoignage::register();
 Photo::register();
 RendezVous::register();
 MotifPaiement::register();
+Don::register();
 
 ServiceFields::register();
 TemoignageFields::register();
 PhotoFields::register();
 RendezVousFields::register();
 MotifPaiementFields::register();
+DonFields::register();
 ContenuOptions::register();
 RdvOptions::register();
 PaiementOptions::register();
@@ -70,6 +75,10 @@ add_action('init', static function (): void {
     ResolveurDeSujet::enregistrer(
         static fn (string $ref) => RendezVousPayable::parReference($ref),
         static fn (string $id) => RendezVousPayable::parPaiementId($id),
+    );
+    ResolveurDeSujet::enregistrer(
+        static fn (string $ref) => DonPayable::parReference($ref),
+        static fn (string $id) => DonPayable::parPaiementId($id),
     );
 }, 5);
 
