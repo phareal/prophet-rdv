@@ -19,6 +19,7 @@ use ProphetCore\Fields\RdvOptions;
 use ProphetCore\Fields\RendezVousFields;
 use ProphetCore\Fields\ServiceFields;
 use ProphetCore\Fields\TemoignageFields;
+use ProphetCore\Paiement\InitHandler;
 use ProphetCore\PostTypes\Photo;
 use ProphetCore\PostTypes\RendezVous;
 use ProphetCore\PostTypes\Service;
@@ -59,6 +60,7 @@ PaiementOptions::register();
 
 add_action('init', static function (): void {
     SubmitHandler::register();
+    InitHandler::register();
 });
 
 if (defined('WP_CLI') && WP_CLI) {
