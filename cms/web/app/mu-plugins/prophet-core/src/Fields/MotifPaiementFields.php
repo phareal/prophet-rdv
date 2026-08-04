@@ -6,6 +6,7 @@ namespace ProphetCore\Fields;
 
 use Carbon_Fields\Container;
 use Carbon_Fields\Field;
+use ProphetCore\Don\QrCode;
 use ProphetCore\PostTypes\MotifPaiement;
 
 final class MotifPaiementFields
@@ -48,5 +49,17 @@ final class MotifPaiementFields
                         ->set_help_text('Décoché, le motif disparaît du formulaire mais son lien reste consultable.'),
                 ]);
         });
+
+        // Un changement d'identifiant change l'URL du motif : le QR en cache
+        // pointerait alors vers une page disparue.
+        add_action('post_updated', static function (int $postId, $apres, $avant): void {
+            if ($apres->post_type !== MotifPaiement::SLUG) {
+                return;
+            }
+
+            if ($apres->post_name !== $avant->post_name) {
+                QrCode::invalider($postId);
+            }
+        }, 10, 3);
     }
 }
