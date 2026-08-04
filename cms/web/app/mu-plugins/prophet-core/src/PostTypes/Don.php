@@ -163,7 +163,9 @@ final class Don
 
     /**
      * Somme des montants des dons correspondant aux filtres actifs — la
-     * période visible par le trésorier, pas la table entière.
+     * période visible par le trésorier, pas la table entière — et
+     * effectivement encaissés. Un don en attente ou échoué n'est pas de
+     * l'argent reçu : le compter gonflerait un total censé être fiable.
      */
     public static function totalPeriodeVisible(): int
     {
@@ -176,10 +178,13 @@ final class Don
         ];
 
         $metaQuery = self::filtresMetaQuery();
+        $metaQuery[] = ['key' => self::metaKey('paiement_statut'), 'value' => Statut::PAYE];
 
-        if ($metaQuery !== []) {
-            $args['meta_query'] = $metaQuery;
+        if (count($metaQuery) > 1) {
+            $metaQuery['relation'] = 'AND';
         }
+
+        $args['meta_query'] = $metaQuery;
 
         $total = 0;
 
