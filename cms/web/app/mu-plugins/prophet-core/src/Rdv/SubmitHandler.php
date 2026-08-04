@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace ProphetCore\Rdv;
 
 use ProphetCore\Options;
+use ProphetCore\Paiement\InitHandler;
+use ProphetCore\Paiement\MonerooException;
 use ProphetCore\PostTypes\Service;
 use ProphetCore\Services\BladeRenderer;
 use ProphetCore\Services\Mailer;
@@ -123,6 +125,20 @@ class SubmitHandler
             $mailer->sendClientConfirmation($data);
             $mailer->sendProphetNotification($data);
         });
+
+        // En mode exigé, le visiteur part payer immédiatement. Le rendez-vous est
+        // déjà enregistré et ses emails déjà programmés : un échec de paiement ou
+        // un abandon laisse une demande exploitable, jamais un trou.
+        if (Options::momentPaiement() === 'exige') {
+            try {
+                wp_redirect((new InitHandler())->demarrer($ref));
+                $this->terminer();
+
+                return;
+            } catch (MonerooException $e) {
+                error_log('[RDV] paiement non initialisable (réf. ' . $ref . ') : ' . $e->getMessage());
+            }
+        }
 
         wp_safe_redirect(add_query_arg(['ref' => $ref], home_url('/confirmation/')));
         $this->terminer();

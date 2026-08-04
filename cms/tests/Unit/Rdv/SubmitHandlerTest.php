@@ -279,4 +279,147 @@ final class SubmitHandlerTest extends TestCase
         $correspondants = array_filter($transients, fn ($a) => $a['cle'] === $cleAttendue);
         $this->assertEmpty($correspondants, 'un créneau déjà pris ne doit pas poser de limite de débit');
     }
+
+    /**
+     * `get_posts` sert plusieurs recherches (créneau, services, référence) : on
+     * distingue la recherche par référence des autres via sa clé de meta_query,
+     * pour simuler un rendez-vous retrouvable après sa création.
+     */
+    private function getPostsExigeAlias(bool $rdvRetrouvableParRef): callable
+    {
+        return function (array $args) use ($rdvRetrouvableParRef) {
+            if (($args['post_type'] ?? '') === \ProphetCore\PostTypes\RendezVous::SLUG) {
+                $clesMeta = array_column($args['meta_query'] ?? [], 'key');
+                $chercheParRef = in_array(
+                    \ProphetCore\PostTypes\RendezVous::metaKey('ref'),
+                    $clesMeta,
+                    true
+                );
+
+                if ($chercheParRef) {
+                    return $rdvRetrouvableParRef ? [7] : [];
+                }
+
+                return []; // aucun créneau déjà pris
+            }
+
+            return [(object) ['ID' => 7, 'post_title' => 'Mariage']];
+        };
+    }
+
+    public function test_en_mode_exige_le_paiement_redirige_vers_moneroo(): void
+    {
+        $redirectionMoneroo = null;
+        $redirectionSure = null;
+
+        Functions\when('wp_verify_nonce')->justReturn(true);
+        Functions\when('wp_unslash')->returnArg();
+        Functions\when('get_transient')->justReturn(false);
+        Functions\when('carbon_get_theme_option')->alias(fn (string $cle) => match ($cle) {
+            'rdv_heures' => [['valeur' => '09h00']],
+            'rdv_modes_paiement' => [['valeur' => 'mobile_money', 'libelle' => 'Mobile Money']],
+            'moneroo_moment' => 'exige',
+            'moneroo_actif' => true,
+            'moneroo_devise' => 'XOF',
+            default => '',
+        });
+        Functions\when('carbon_get_post_meta')->justReturn('25000');
+        Functions\when('get_posts')->alias($this->getPostsExigeAlias(rdvRetrouvableParRef: true));
+        Functions\when('get_post_meta')->alias(fn ($id, $cle, $single) => [
+            \ProphetCore\PostTypes\RendezVous::metaKey('nom') => 'Doe',
+            \ProphetCore\PostTypes\RendezVous::metaKey('prenom') => 'Jane',
+            \ProphetCore\PostTypes\RendezVous::metaKey('email') => 'jane@example.test',
+            \ProphetCore\PostTypes\RendezVous::metaKey('telephone') => '+22890000000',
+            \ProphetCore\PostTypes\RendezVous::metaKey('pays') => 'Togo',
+            \ProphetCore\PostTypes\RendezVous::metaKey('date') => '2030-06-10',
+            \ProphetCore\PostTypes\RendezVous::metaKey('heure') => '09h00',
+            \ProphetCore\PostTypes\RendezVous::metaKey('type_consultation') => 'Mariage',
+            \ProphetCore\PostTypes\RendezVous::metaKey('mode_paiement') => 'mobile_money',
+            \ProphetCore\PostTypes\RendezVous::metaKey('message') => '',
+            \ProphetCore\PostTypes\RendezVous::metaKey('paiement_statut') => 'en_attente',
+        ][$cle] ?? '');
+        Functions\when('wp_generate_password')->justReturn('REF0123456789');
+        Functions\when('wp_insert_post')->justReturn(7);
+        Functions\when('is_wp_error')->justReturn(false);
+        Functions\when('sanitize_text_field')->returnArg();
+        Functions\when('sanitize_textarea_field')->returnArg();
+        Functions\when('sanitize_email')->returnArg();
+        Functions\when('update_post_meta')->justReturn(true);
+        Functions\when('set_transient')->justReturn(true);
+        Functions\when('add_action')->justReturn(null);
+        Functions\when('home_url')->alias(fn($chemin = '/') => 'https://exemple.test' . $chemin);
+        Functions\when('add_query_arg')->alias(
+            fn($args, $url) => $url . '?' . http_build_query($args),
+        );
+        Functions\when('wp_json_encode')->alias(fn ($v) => json_encode($v));
+        Functions\when('wp_remote_retrieve_response_code')->justReturn(200);
+        Functions\when('wp_remote_retrieve_body')->justReturn(json_encode([
+            'data' => ['id' => 'tx_1', 'checkout_url' => 'https://checkout.moneroo.io/tx_1'],
+        ]));
+        Functions\when('wp_remote_post')->justReturn([]);
+        Functions\when('wp_redirect')->alias(function ($url) use (&$redirectionMoneroo) {
+            $redirectionMoneroo = $url;
+        });
+        Functions\when('wp_safe_redirect')->alias(function ($url) use (&$redirectionSure) {
+            $redirectionSure = $url;
+        });
+        $_ENV['MONEROO_SECRET_KEY'] = 'cle_test';
+
+        $handler = new class extends SubmitHandler {
+            protected function terminer(): void {}
+        };
+        $handler->process($this->donneesValides(), '203.0.113.25');
+
+        $this->assertSame('https://checkout.moneroo.io/tx_1', $redirectionMoneroo);
+        $this->assertNull($redirectionSure, 'aucune redirection vers la confirmation ne doit avoir lieu');
+    }
+
+    public function test_en_mode_exige_un_echec_d_initialisation_retombe_sur_la_confirmation(): void
+    {
+        $redirection = null;
+
+        Functions\when('wp_verify_nonce')->justReturn(true);
+        Functions\when('wp_unslash')->returnArg();
+        Functions\when('get_transient')->justReturn(false);
+        Functions\when('carbon_get_theme_option')->alias(fn (string $cle) => match ($cle) {
+            'rdv_heures' => [['valeur' => '09h00']],
+            'rdv_modes_paiement' => [['valeur' => 'mobile_money', 'libelle' => 'Mobile Money']],
+            'moneroo_moment' => 'exige',
+            'moneroo_actif' => true,
+            'moneroo_devise' => 'XOF',
+            default => '',
+        });
+        Functions\when('carbon_get_post_meta')->justReturn('25000');
+        // La référence reste introuvable après la création : simule une
+        // initialisation impossible (rendez-vous déjà réglé, appel Moneroo en
+        // échec, etc. — la cause exacte importe peu, seule la retombée compte).
+        Functions\when('get_posts')->alias($this->getPostsExigeAlias(rdvRetrouvableParRef: false));
+        Functions\when('wp_generate_password')->justReturn('REF0123456789');
+        Functions\when('wp_insert_post')->justReturn(7);
+        Functions\when('is_wp_error')->justReturn(false);
+        Functions\when('sanitize_text_field')->returnArg();
+        Functions\when('sanitize_textarea_field')->returnArg();
+        Functions\when('sanitize_email')->returnArg();
+        Functions\when('update_post_meta')->justReturn(true);
+        Functions\when('set_transient')->justReturn(true);
+        Functions\when('add_action')->justReturn(null);
+        Functions\when('home_url')->alias(fn($chemin = '/') => 'https://exemple.test' . $chemin);
+        Functions\when('add_query_arg')->alias(
+            fn($args, $url) => $url . '?' . http_build_query($args),
+        );
+        Functions\when('wp_redirect')->justReturn(null);
+        Functions\when('wp_safe_redirect')->alias(function ($url) use (&$redirection) {
+            $redirection = $url;
+        });
+        Functions\when('error_log')->justReturn(true);
+        $_ENV['MONEROO_SECRET_KEY'] = 'cle_test';
+
+        $handler = new class extends SubmitHandler {
+            protected function terminer(): void {}
+        };
+        $handler->process($this->donneesValides(), '203.0.113.26');
+
+        $this->assertStringContainsString('/confirmation/?', (string) $redirection);
+        $this->assertStringContainsString('ref=REF0123456789', (string) $redirection);
+    }
 }
