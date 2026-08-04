@@ -13,6 +13,7 @@ declare(strict_types=1);
 use Carbon_Fields\Carbon_Fields;
 use ProphetCore\Cli\SeedCommand;
 use ProphetCore\Don\DonPayable;
+use ProphetCore\Don\DonSubmitHandler;
 use ProphetCore\Fields\ContenuOptions;
 use ProphetCore\Fields\DonFields;
 use ProphetCore\Fields\MotifPaiementFields;
@@ -84,6 +85,7 @@ add_action('init', static function (): void {
 
 add_action('init', static function (): void {
     SubmitHandler::register();
+    DonSubmitHandler::register();
     InitHandler::register();
 });
 
