@@ -19,6 +19,7 @@ use ProphetCore\Fields\RdvOptions;
 use ProphetCore\Fields\RendezVousFields;
 use ProphetCore\Fields\ServiceFields;
 use ProphetCore\Fields\TemoignageFields;
+use ProphetCore\Paiement\Abandon;
 use ProphetCore\Paiement\InitHandler;
 use ProphetCore\Paiement\Webhook;
 use ProphetCore\PostTypes\Photo;
@@ -65,6 +66,7 @@ add_action('init', static function (): void {
 });
 
 Webhook::register();
+Abandon::register();
 
 if (defined('WP_CLI') && WP_CLI) {
     \WP_CLI::add_command('prophet seed', SeedCommand::class);
