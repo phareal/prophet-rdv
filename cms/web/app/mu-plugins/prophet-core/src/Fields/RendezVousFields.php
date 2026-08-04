@@ -28,7 +28,13 @@ final class RendezVousFields
                     Field::make('textarea', 'rdv_message', 'Message'),
                     Field::make('text', 'rdv_ref', 'Référence')
                         ->set_attribute('readOnly', true),
-                    Field::make('select', 'paiement_statut', 'Statut du paiement')
+                    // Noms de champ préfixés « rdv_ », comme tous les champs ci-dessus :
+                    // Carbon Fields n'ajoute qu'un unique `_`, alors que
+                    // RendezVous::metaKey() exige `_rdv_`. Un champ nommé littéralement
+                    // « paiement_statut » écrirait dans `_paiement_statut`, une clé que
+                    // PaiementRepository ne lit jamais — le réglage à la main resterait
+                    // invisible du système de paiement.
+                    Field::make('select', 'rdv_paiement_statut', 'Statut du paiement')
                         ->set_options([
                             'non_requis' => 'Non requis',
                             'en_attente' => 'En attente',
@@ -41,13 +47,13 @@ final class RendezVousFields
                             . 'reçu hors ligne — le mobile money de la main à la '
                             . 'main reste courant.'
                         ),
-                    Field::make('text', 'paiement_montant', 'Montant')
+                    Field::make('text', 'rdv_paiement_montant', 'Montant')
                         ->set_attribute('readOnly', true),
-                    Field::make('text', 'paiement_devise', 'Devise')
+                    Field::make('text', 'rdv_paiement_devise', 'Devise')
                         ->set_attribute('readOnly', true),
-                    Field::make('text', 'paiement_methode', 'Moyen de paiement')
+                    Field::make('text', 'rdv_paiement_methode', 'Moyen de paiement')
                         ->set_attribute('readOnly', true),
-                    Field::make('text', 'paiement_id', 'Transaction Moneroo')
+                    Field::make('text', 'rdv_paiement_id', 'Transaction Moneroo')
                         ->set_attribute('readOnly', true),
                 ]);
         });
