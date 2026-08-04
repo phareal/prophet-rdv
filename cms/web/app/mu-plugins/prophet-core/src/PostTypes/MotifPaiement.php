@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace ProphetCore\PostTypes;
 
+use ProphetCore\Don\QrCode;
+
 final class MotifPaiement
 {
     public const SLUG = 'motif_paiement';
@@ -38,5 +40,39 @@ final class MotifPaiement
                 'rewrite' => ['slug' => 'don', 'with_front' => false],
             ]);
         });
+
+        add_filter('manage_' . self::SLUG . '_posts_columns', [self::class, 'adminColumns']);
+        add_action('manage_' . self::SLUG . '_posts_custom_column', [self::class, 'renderColumn'], 10, 2);
+    }
+
+    /**
+     * Ajoute une colonne au jeu par défaut (cb, titre, date…) : contrairement
+     * aux dons et rendez-vous, la liste des motifs n'a pas besoin d'être
+     * redéfinie entièrement.
+     */
+    public static function adminColumns(array $colonnes): array
+    {
+        $colonnes['motif_lien_qr'] = 'Lien et QR';
+
+        return $colonnes;
+    }
+
+    public static function renderColumn(string $colonne = '', int $postId = 0): void
+    {
+        if ($colonne !== 'motif_lien_qr') {
+            return;
+        }
+
+        $lien = (string) get_permalink($postId);
+        $png = QrCode::pour($postId, 'png');
+        $svg = QrCode::pour($postId, 'svg');
+
+        printf(
+            '<a href="%1$s" target="_blank" rel="noopener">%1$s</a><br>'
+            . '<a href="%2$s" download>Télécharger PNG</a> · <a href="%3$s" download>Télécharger SVG</a>',
+            esc_url($lien),
+            esc_url($png),
+            esc_url($svg)
+        );
     }
 }

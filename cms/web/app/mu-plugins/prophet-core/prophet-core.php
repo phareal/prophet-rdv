@@ -14,6 +14,7 @@ use Carbon_Fields\Carbon_Fields;
 use ProphetCore\Cli\SeedCommand;
 use ProphetCore\Don\DonPayable;
 use ProphetCore\Don\DonSubmitHandler;
+use ProphetCore\Don\ExportCsv;
 use ProphetCore\Fields\ContenuOptions;
 use ProphetCore\Fields\DonFields;
 use ProphetCore\Fields\MotifPaiementFields;
@@ -88,6 +89,8 @@ add_action('init', static function (): void {
     DonSubmitHandler::register();
     InitHandler::register();
 });
+
+ExportCsv::register();
 
 Webhook::register();
 Abandon::register();
