@@ -191,4 +191,46 @@
     font-size: 0.56rem; letter-spacing: 0.08em;
     color: #C4BAA0; text-align: center; margin-top: 1.5rem;
   }
+
+  /* Paiement */
+  .conf__paiement {
+    margin: var(--s5) 0 0;
+    padding: var(--s4);
+    border: 1px solid var(--gold-pale);
+    border-radius: var(--r4);
+    text-align: center;
+  }
+
+  .conf__paiement--regle {
+    border-color: var(--emerald);
+    color: var(--emerald);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s1);
+  }
+
+  .conf__paiement-montant {
+    margin-bottom: var(--s3);
+    font-family: var(--f-serif);
+  }
+
+  .conf__paiement-btn {
+    padding: var(--s2) var(--s5);
+    border-radius: var(--rpill);
+    background: var(--gold);
+    color: var(--ivory);
+    font-family: var(--f-display);
+    letter-spacing: 0.05em;
+    transition: background var(--t);
+  }
+
+  .conf__paiement-btn:hover {
+    background: var(--gold-light);
+  }
+
+  .conf__paiement-erreur {
+    color: hsl(var(--destructive, 0 84% 60%));
+    margin-bottom: var(--s3);
+  }
 }

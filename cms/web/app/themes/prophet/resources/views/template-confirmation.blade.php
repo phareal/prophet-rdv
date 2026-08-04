@@ -98,6 +98,38 @@
             </div>
           </div>
 
+          @if ($erreurPaiement)
+            <p class="conf__paiement-erreur" role="alert">
+              Le paiement n'a pas pu être lancé. Votre demande est bien enregistrée —
+              vous pouvez réessayer ou régler directement avec le prophète.
+            </p>
+          @endif
+
+          @if ($paiement['statut'] === 'paye')
+            <p class="conf__paiement conf__paiement--regle">
+              <x-icon name="check-circle-2" /> Paiement reçu —
+              {{ $paiement['montant'] }} {{ $paiement['devise'] }}
+            </p>
+          @elseif ($paiement['statut'] === 'en_attente' && $paiement['montant'] > 0)
+            <form method="get" action="{{ esc_url(admin_url('admin-post.php')) }}" class="conf__paiement">
+              <input type="hidden" name="action" value="{{ $actionPaiement }}">
+              <input type="hidden" name="ref" value="{{ $rdv['ref'] ?? '' }}">
+              <p class="conf__paiement-montant">
+                Montant à régler : <strong>{{ $paiement['montant'] }} {{ $paiement['devise'] }}</strong>
+              </p>
+              <button type="submit" class="conf__paiement-btn">{{ $texteBoutonPaiement }}</button>
+            </form>
+          @elseif (in_array($paiement['statut'], ['echoue', 'annule'], true))
+            <form method="get" action="{{ esc_url(admin_url('admin-post.php')) }}" class="conf__paiement">
+              <input type="hidden" name="action" value="{{ $actionPaiement }}">
+              <input type="hidden" name="ref" value="{{ $rdv['ref'] ?? '' }}">
+              <p class="conf__paiement-erreur">
+                Le règlement n'a pas abouti. Votre demande reste enregistrée.
+              </p>
+              <button type="submit" class="conf__paiement-btn">Réessayer le paiement</button>
+            </form>
+          @endif
+
           {{-- Info --}}
           <div class="conf__info">
             <p>Un email de confirmation vous a été envoyé avec tous les détails de votre rendez-vous.</p>
