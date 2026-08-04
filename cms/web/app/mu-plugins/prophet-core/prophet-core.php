@@ -13,6 +13,7 @@ declare(strict_types=1);
 use Carbon_Fields\Carbon_Fields;
 use ProphetCore\Cli\SeedCommand;
 use ProphetCore\Fields\ContenuOptions;
+use ProphetCore\Fields\PaiementOptions;
 use ProphetCore\Fields\PhotoFields;
 use ProphetCore\Fields\RdvOptions;
 use ProphetCore\Fields\RendezVousFields;
@@ -54,6 +55,7 @@ PhotoFields::register();
 RendezVousFields::register();
 ContenuOptions::register();
 RdvOptions::register();
+PaiementOptions::register();
 
 add_action('init', static function (): void {
     SubmitHandler::register();

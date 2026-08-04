@@ -21,6 +21,14 @@ final class ServiceFields
                         ->set_required(true),
                     Field::make('color', 'service_couleur', 'Couleur')
                         ->set_default_value('#B07A14'),
+                    Field::make('text', 'service_prix', 'Prix')
+                        ->set_attribute('type', 'number')
+                        ->set_help_text(
+                            'Montant en unités entières de la devise configurée '
+                            . '(pour le franc CFA, des francs sans décimale). '
+                            . 'Laisser vide pour ne pas proposer de paiement en '
+                            . 'ligne sur ce service.'
+                        ),
                 ]);
         });
     }

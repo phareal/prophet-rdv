@@ -74,6 +74,40 @@ final class Options
         return self::option($key) ?: $default;
     }
 
+    public static function paiementActif(): bool
+    {
+        return (bool) carbon_get_theme_option('moneroo_actif');
+    }
+
+    public static function devise(): string
+    {
+        return self::option('moneroo_devise') ?: 'XOF';
+    }
+
+    /**
+     * `facultatif` (défaut) ou `exige`. Toute autre valeur retombe sur le défaut :
+     * un réglage corrompu ne doit pas rendre le paiement obligatoire à l'insu du
+     * prophète.
+     */
+    public static function momentPaiement(): string
+    {
+        $moment = self::option('moneroo_moment');
+
+        return $moment === 'exige' ? 'exige' : 'facultatif';
+    }
+
+    public static function texteBoutonPaiement(): string
+    {
+        return self::option('moneroo_texte_bouton') ?: 'Régler ma consultation';
+    }
+
+    public static function delaiAbandon(): int
+    {
+        $minutes = (int) self::option('moneroo_delai_abandon');
+
+        return $minutes > 0 ? $minutes : 30;
+    }
+
     private static function option(string $key): string
     {
         $value = carbon_get_theme_option($key);
