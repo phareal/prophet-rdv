@@ -21,11 +21,13 @@ use ProphetCore\Fields\ServiceFields;
 use ProphetCore\Fields\TemoignageFields;
 use ProphetCore\Paiement\Abandon;
 use ProphetCore\Paiement\InitHandler;
+use ProphetCore\Paiement\ResolveurDeSujet;
 use ProphetCore\Paiement\Webhook;
 use ProphetCore\PostTypes\Photo;
 use ProphetCore\PostTypes\RendezVous;
 use ProphetCore\PostTypes\Service;
 use ProphetCore\PostTypes\Temoignage;
+use ProphetCore\Rdv\RendezVousPayable;
 use ProphetCore\Rdv\SubmitHandler;
 use ProphetCore\Services\SmtpConfigurator;
 
@@ -59,6 +61,13 @@ RendezVousFields::register();
 ContenuOptions::register();
 RdvOptions::register();
 PaiementOptions::register();
+
+add_action('init', static function (): void {
+    ResolveurDeSujet::enregistrer(
+        static fn (string $ref) => RendezVousPayable::parReference($ref),
+        static fn (string $id) => RendezVousPayable::parPaiementId($id),
+    );
+}, 5);
 
 add_action('init', static function (): void {
     SubmitHandler::register();

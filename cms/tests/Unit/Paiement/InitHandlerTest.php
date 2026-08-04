@@ -8,11 +8,20 @@ use Brain\Monkey\Functions;
 use DateTimeImmutable;
 use ProphetCore\Paiement\InitHandler;
 use ProphetCore\Paiement\MonerooException;
+use ProphetCore\Paiement\ResolveurDeSujet;
+use ProphetCore\Paiement\SujetPaiement;
+use ProphetCore\Rdv\RendezVousPayable;
 use ProphetCore\Tests\TestCase;
 
 final class InitHandlerTest extends TestCase
 {
     private array $charge = [];
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        ResolveurDeSujet::reinitialiser();
+    }
 
     private function contexte(string $statutExistant = 'non_requis', string $prix = '25000'): void
     {
@@ -122,19 +131,13 @@ final class InitHandlerTest extends TestCase
 
     private function handler(?array $rdv): InitHandler
     {
-        return new class ($rdv) extends InitHandler {
-            public function __construct(private readonly ?array $rdv)
-            {
-            }
+        ResolveurDeSujet::enregistrer(
+            static fn (string $ref): ?SujetPaiement => ($rdv !== null && $ref === 'REF123')
+                ? new RendezVousPayable($rdv)
+                : null,
+            static fn (string $id): ?SujetPaiement => null,
+        );
 
-            protected function chargerRendezVous(string $ref): ?array
-            {
-                return $this->rdv;
-            }
-
-            protected function terminer(): void
-            {
-            }
-        };
+        return new InitHandler();
     }
 }

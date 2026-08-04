@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace ProphetCore\Tests\Unit\Paiement;
 
 use Brain\Monkey\Functions;
+use ProphetCore\Paiement\ResolveurDeSujet;
 use ProphetCore\Paiement\Statut;
+use ProphetCore\Paiement\SujetPaiement;
 use ProphetCore\Paiement\Webhook;
 use ProphetCore\PostTypes\RendezVous;
+use ProphetCore\Rdv\RendezVousPayable;
 use ProphetCore\Tests\TestCase;
 
 final class WebhookTest extends TestCase
@@ -26,11 +29,18 @@ final class WebhookTest extends TestCase
 
             return true;
         });
-        Functions\when('get_posts')->justReturn($postId === null ? [] : [$postId]);
         Functions\when('sanitize_text_field')->returnArg();
         Functions\when('current_time')->justReturn('2026-08-03 10:00:00');
         Functions\when('error_log')->justReturn(true);
         $_ENV['MONEROO_WEBHOOK_SECRET'] = self::SECRET;
+
+        ResolveurDeSujet::reinitialiser();
+        ResolveurDeSujet::enregistrer(
+            static fn (string $ref): ?SujetPaiement => null,
+            static fn (string $id): ?SujetPaiement => ($postId !== null && $id === 'tx_1')
+                ? new RendezVousPayable(['post_id' => $postId])
+                : null,
+        );
     }
 
     private function corps(string $evenement = 'payment.success', string $statut = 'success'): string

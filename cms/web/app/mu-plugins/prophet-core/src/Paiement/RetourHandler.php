@@ -15,9 +15,9 @@ final class RetourHandler
      *
      * @return string le statut interne après vérification
      */
-    public function verifier(int $postId, string $paiementId): string
+    public function verifier(SujetPaiement $sujet, string $paiementId): string
     {
-        $paiements = new PaiementRepository();
+        $paiements = new PaiementRepository($sujet->metaKey(''), $sujet->typeDePublication());
 
         try {
             $transaction = (new Moneroo(Options::env('MONEROO_SECRET_KEY')))
@@ -25,17 +25,17 @@ final class RetourHandler
         } catch (Throwable $e) {
             error_log('[Paiement] vérification impossible (transaction ' . $paiementId . ') : ' . $e->getMessage());
 
-            return $paiements->statut($postId);
+            return $paiements->statut($sujet->postId());
         }
 
         $statut = Statut::depuisMoneroo((string) ($transaction['status'] ?? ''));
 
         $paiements->appliquerStatut(
-            $postId,
+            $sujet->postId(),
             $statut,
             (string) ($transaction['payment_method'] ?? ''),
         );
 
-        return $paiements->statut($postId);
+        return $paiements->statut($sujet->postId());
     }
 }

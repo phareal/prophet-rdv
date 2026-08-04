@@ -65,10 +65,9 @@ final class Webhook
         }
 
         $paiementId = (string) $charge['data']['id'];
-        $paiements = new PaiementRepository();
-        $postId = $paiements->trouverParPaiementId($paiementId);
+        $sujet = ResolveurDeSujet::parPaiementId($paiementId);
 
-        if ($postId === null) {
+        if ($sujet === null) {
             // Acquitté sans traitement : sans quoi Moneroo réessaierait trois
             // fois un événement qui ne nous concerne pas.
             error_log('[Paiement] webhook pour une transaction inconnue : ' . $paiementId);
@@ -76,8 +75,10 @@ final class Webhook
             return 200;
         }
 
+        $paiements = new PaiementRepository($sujet->metaKey(''), $sujet->typeDePublication());
+
         $paiements->appliquerStatut(
-            $postId,
+            $sujet->postId(),
             Statut::depuisMoneroo((string) ($charge['data']['status'] ?? '')),
             (string) ($charge['data']['payment_method'] ?? ''),
         );

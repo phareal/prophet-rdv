@@ -7,11 +7,17 @@ namespace ProphetCore\Tests\Unit\Paiement;
 use Brain\Monkey\Functions;
 use ProphetCore\Paiement\RetourHandler;
 use ProphetCore\Paiement\Statut;
+use ProphetCore\Rdv\RendezVousPayable;
 use ProphetCore\Tests\TestCase;
 
 final class RetourHandlerTest extends TestCase
 {
     private array $metas = [];
+
+    private function sujet(int $postId = 7): RendezVousPayable
+    {
+        return new RendezVousPayable(['post_id' => $postId]);
+    }
 
     private function transaction(string $statutMoneroo, string $methode = 'mtn_bj'): void
     {
@@ -43,7 +49,7 @@ final class RetourHandlerTest extends TestCase
     {
         $this->transaction('success');
 
-        $statut = (new RetourHandler())->verifier(7, 'tx_1');
+        $statut = (new RetourHandler())->verifier($this->sujet(), 'tx_1');
 
         $this->assertSame(Statut::PAYE, $statut);
     }
@@ -52,14 +58,14 @@ final class RetourHandlerTest extends TestCase
     {
         $this->transaction('failed');
 
-        $this->assertSame(Statut::ECHOUE, (new RetourHandler())->verifier(7, 'tx_1'));
+        $this->assertSame(Statut::ECHOUE, (new RetourHandler())->verifier($this->sujet(), 'tx_1'));
     }
 
     public function test_le_moyen_de_paiement_renvoye_est_conserve(): void
     {
         $this->transaction('success', 'orange_money_sn');
 
-        (new RetourHandler())->verifier(7, 'tx_1');
+        (new RetourHandler())->verifier($this->sujet(), 'tx_1');
 
         $this->assertSame(
             'orange_money_sn',
@@ -73,7 +79,7 @@ final class RetourHandlerTest extends TestCase
         Functions\when('is_wp_error')->justReturn(true);
         $this->metas[\ProphetCore\PostTypes\RendezVous::metaKey('paiement_statut')] = Statut::EN_ATTENTE;
 
-        $statut = (new RetourHandler())->verifier(7, 'tx_1');
+        $statut = (new RetourHandler())->verifier($this->sujet(), 'tx_1');
 
         $this->assertSame(Statut::EN_ATTENTE, $statut);
     }

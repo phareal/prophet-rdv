@@ -5,11 +5,19 @@ declare(strict_types=1);
 namespace ProphetCore\Tests\Unit\Rdv;
 
 use Brain\Monkey\Functions;
+use ProphetCore\Paiement\ResolveurDeSujet;
+use ProphetCore\Rdv\RendezVousPayable;
 use ProphetCore\Rdv\SubmitHandler;
 use ProphetCore\Tests\TestCase;
 
 final class SubmitHandlerTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        ResolveurDeSujet::reinitialiser();
+    }
+
     public function test_la_cle_de_limitation_depend_de_l_adresse_ip(): void
     {
         $this->assertSame(
@@ -311,6 +319,13 @@ final class SubmitHandlerTest extends TestCase
     {
         $redirectionMoneroo = null;
         $redirectionSure = null;
+
+        // Le rendez-vous ne se résout plus qu'à travers le résolveur de sujets
+        // payables — enregistrement identique à celui de prophet-core.php.
+        ResolveurDeSujet::enregistrer(
+            static fn (string $ref) => RendezVousPayable::parReference($ref),
+            static fn (string $id) => null,
+        );
 
         Functions\when('wp_verify_nonce')->justReturn(true);
         Functions\when('wp_unslash')->returnArg();

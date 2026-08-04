@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace ProphetCore\Paiement;
 
 use ProphetCore\Options;
-use ProphetCore\Rdv\Repository;
 
 class InitHandler
 {
@@ -46,57 +45,50 @@ class InitHandler
      */
     public function demarrer(string $ref): string
     {
-        $rdv = $this->chargerRendezVous($ref);
+        $sujet = ResolveurDeSujet::parReference($ref);
 
-        if ($rdv === null) {
-            throw new MonerooException('Référence de rendez-vous inconnue');
+        if ($sujet === null) {
+            throw new MonerooException('Référence inconnue');
         }
 
-        $postId = (int) $rdv['post_id'];
-        $paiements = new PaiementRepository();
+        $paiements = new PaiementRepository($sujet->metaKey(''), $sujet->typeDePublication());
 
-        if ($paiements->statut($postId) === Statut::PAYE) {
-            throw new MonerooException('Rendez-vous déjà réglé');
+        if ($paiements->statut($sujet->postId()) === Statut::PAYE) {
+            throw new MonerooException('Déjà réglé');
         }
 
-        $montant = Montant::pour((string) $rdv['type_consultation']);
+        $montant = $sujet->montant();
 
         if ($montant === null) {
-            throw new MonerooException('Aucun montant à régler pour ce rendez-vous');
+            throw new MonerooException('Aucun montant à régler');
         }
 
-        $client = new Moneroo(Options::env('MONEROO_SECRET_KEY'));
+        $client = $sujet->client();
 
-        $transaction = $client->initialiser([
+        $transaction = (new Moneroo(Options::env('MONEROO_SECRET_KEY')))->initialiser([
             'amount' => $montant['montant'],
             'currency' => $montant['devise'],
-            'description' => 'Consultation — ' . $rdv['type_consultation'],
+            'description' => $sujet->description(),
             'customer' => [
-                'email' => $rdv['email'],
-                'first_name' => $rdv['prenom'],
-                'last_name' => $rdv['nom'],
-                'phone' => $rdv['telephone'],
+                'email' => $client['email'],
+                'first_name' => $client['prenom'],
+                'last_name' => $client['nom'],
+                'phone' => $client['telephone'],
             ],
             // L'URL de retour ne porte que la référence : un identifiant de
             // publication y serait énumérable.
-            'return_url' => add_query_arg(['ref' => $ref], home_url('/confirmation/')),
+            'return_url' => $sujet->urlRetour(),
             'metadata' => ['ref' => $ref],
         ]);
 
         $paiements->enregistrerInitialisation(
-            $postId,
+            $sujet->postId(),
             $transaction['id'],
             $montant['montant'],
             $montant['devise'],
         );
 
         return $transaction['checkout_url'];
-    }
-
-    /** @return array<string, mixed>|null */
-    protected function chargerRendezVous(string $ref): ?array
-    {
-        return (new Repository())->findByRef($ref);
     }
 
     protected function terminer(): void

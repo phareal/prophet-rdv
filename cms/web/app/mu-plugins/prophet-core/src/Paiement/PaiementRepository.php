@@ -8,9 +8,20 @@ use ProphetCore\PostTypes\RendezVous;
 
 final class PaiementRepository
 {
+    public function __construct(
+        private readonly string $prefixe = RendezVous::META_PREFIX,
+        private readonly string $typeDePublication = RendezVous::SLUG,
+    ) {
+    }
+
+    private function metaKey(string $champ): string
+    {
+        return $this->prefixe . $champ;
+    }
+
     public function statut(int $postId): string
     {
-        $statut = (string) get_post_meta($postId, RendezVous::metaKey('paiement_statut'), true);
+        $statut = (string) get_post_meta($postId, $this->metaKey('paiement_statut'), true);
 
         return $statut !== '' ? $statut : Statut::NON_REQUIS;
     }
@@ -25,10 +36,10 @@ final class PaiementRepository
         int $montant,
         string $devise,
     ): void {
-        update_post_meta($postId, RendezVous::metaKey('paiement_id'), sanitize_text_field($paiementId));
-        update_post_meta($postId, RendezVous::metaKey('paiement_montant'), $montant);
-        update_post_meta($postId, RendezVous::metaKey('paiement_devise'), sanitize_text_field($devise));
-        update_post_meta($postId, RendezVous::metaKey('paiement_statut'), Statut::EN_ATTENTE);
+        update_post_meta($postId, $this->metaKey('paiement_id'), sanitize_text_field($paiementId));
+        update_post_meta($postId, $this->metaKey('paiement_montant'), $montant);
+        update_post_meta($postId, $this->metaKey('paiement_devise'), sanitize_text_field($devise));
+        update_post_meta($postId, $this->metaKey('paiement_statut'), Statut::EN_ATTENTE);
     }
 
     /**
@@ -43,13 +54,13 @@ final class PaiementRepository
             return false;
         }
 
-        update_post_meta($postId, RendezVous::metaKey('paiement_statut'), $statut);
+        update_post_meta($postId, $this->metaKey('paiement_statut'), $statut);
 
         if ($methode !== '') {
-            update_post_meta($postId, RendezVous::metaKey('paiement_methode'), sanitize_text_field($methode));
+            update_post_meta($postId, $this->metaKey('paiement_methode'), sanitize_text_field($methode));
         }
 
-        update_post_meta($postId, RendezVous::metaKey('paiement_verifie_le'), current_time('mysql'));
+        update_post_meta($postId, $this->metaKey('paiement_verifie_le'), current_time('mysql'));
 
         return true;
     }
@@ -57,13 +68,13 @@ final class PaiementRepository
     public function trouverParPaiementId(string $paiementId): ?int
     {
         $posts = get_posts([
-            'post_type' => RendezVous::SLUG,
+            'post_type' => $this->typeDePublication,
             'post_status' => 'any',
             'fields' => 'ids',
             'posts_per_page' => 1,
             'no_found_rows' => true,
             'meta_query' => [
-                ['key' => RendezVous::metaKey('paiement_id'), 'value' => $paiementId],
+                ['key' => $this->metaKey('paiement_id'), 'value' => $paiementId],
             ],
         ]);
 
@@ -73,9 +84,9 @@ final class PaiementRepository
     /** @return array{statut: string, id: string, montant: int, devise: string, methode: string} */
     public function donnees(int $postId): array
     {
-        $lire = static fn (string $champ): string => (string) get_post_meta(
+        $lire = fn (string $champ): string => (string) get_post_meta(
             $postId,
-            RendezVous::metaKey($champ),
+            $this->metaKey($champ),
             true
         );
 

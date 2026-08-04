@@ -11,6 +11,7 @@ use ProphetCore\Paiement\PaiementRepository;
 use ProphetCore\Paiement\RetourHandler;
 use ProphetCore\Paiement\Statut;
 use ProphetCore\Rdv\Repository;
+use ProphetCore\Rdv\RendezVousPayable;
 use ProphetCore\Services\Whatsapp;
 use ProphetCore\Support\Date;
 use Roots\Acorn\View\Composer;
@@ -35,7 +36,7 @@ class Confirmation extends Composer
         // paymentId déclenche une vérification serveur, seule source de vérité.
         if ($rdv !== null && isset($_GET['paymentId'])) {
             (new RetourHandler())->verifier(
-                (int) $rdv['post_id'],
+                new RendezVousPayable($rdv),
                 sanitize_text_field(wp_unslash($_GET['paymentId'])),
             );
         }
