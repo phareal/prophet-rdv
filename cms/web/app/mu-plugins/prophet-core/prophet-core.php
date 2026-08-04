@@ -20,6 +20,7 @@ use ProphetCore\Fields\RendezVousFields;
 use ProphetCore\Fields\ServiceFields;
 use ProphetCore\Fields\TemoignageFields;
 use ProphetCore\Paiement\InitHandler;
+use ProphetCore\Paiement\Webhook;
 use ProphetCore\PostTypes\Photo;
 use ProphetCore\PostTypes\RendezVous;
 use ProphetCore\PostTypes\Service;
@@ -62,6 +63,8 @@ add_action('init', static function (): void {
     SubmitHandler::register();
     InitHandler::register();
 });
+
+Webhook::register();
 
 if (defined('WP_CLI') && WP_CLI) {
     \WP_CLI::add_command('prophet seed', SeedCommand::class);
