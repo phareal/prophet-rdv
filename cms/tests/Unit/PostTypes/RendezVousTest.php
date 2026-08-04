@@ -21,7 +21,11 @@ final class RendezVousTest extends TestCase
         Functions\when('register_post_status')->alias(function ($slug) use (&$statuts) {
             $statuts[] = $slug;
         });
-        Functions\when('add_action')->alias(fn ($hook, $callback) => $callback());
+        Functions\when('add_action')->alias(function ($hook, $callback) {
+            if ($hook === 'init') {
+                $callback();
+            }
+        });
         Functions\when('add_filter')->justReturn(true);
         Functions\when('_n_noop')->returnArg();
 
@@ -42,9 +46,20 @@ final class RendezVousTest extends TestCase
         $colonnes = RendezVous::adminColumns([]);
 
         $this->assertSame(
-            ['cb', 'title', 'rdv_date', 'rdv_type', 'rdv_statut'],
+            ['cb', 'title', 'rdv_date', 'rdv_type', 'rdv_statut', 'rdv_paiement'],
             array_keys($colonnes)
         );
+    }
+
+    public function test_la_colonne_paiement_figure_dans_la_liste(): void
+    {
+        $colonnes = RendezVous::adminColumns([]);
+
+        $this->assertSame(
+            ['cb', 'title', 'rdv_date', 'rdv_type', 'rdv_statut', 'rdv_paiement'],
+            array_keys($colonnes)
+        );
+        $this->assertSame('Paiement', $colonnes['rdv_paiement']);
     }
 
     public function test_le_prefixe_de_meta_correspond_a_celui_impose_par_carbon_fields(): void

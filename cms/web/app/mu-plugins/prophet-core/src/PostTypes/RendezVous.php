@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace ProphetCore\PostTypes;
 
+use ProphetCore\Paiement\PaiementRepository;
+use ProphetCore\Paiement\Statut;
+
 final class RendezVous
 {
     public const SLUG = 'rendez_vous';
@@ -69,6 +72,42 @@ final class RendezVous
 
         add_filter('manage_' . self::SLUG . '_posts_columns', [self::class, 'adminColumns']);
         add_action('manage_' . self::SLUG . '_posts_custom_column', [self::class, 'renderColumn'], 10, 2);
+
+        add_action('restrict_manage_posts', static function (string $postType): void {
+            if ($postType !== self::SLUG) {
+                return;
+            }
+
+            $courant = isset($_GET['paiement']) ? sanitize_text_field(wp_unslash($_GET['paiement'])) : '';
+
+            echo '<select name="paiement"><option value="">Tous les paiements</option>';
+
+            foreach ([Statut::NON_REQUIS, Statut::EN_ATTENTE, Statut::PAYE, Statut::ECHOUE, Statut::ANNULE] as $statut) {
+                printf(
+                    '<option value="%s"%s>%s</option>',
+                    esc_attr($statut),
+                    selected($courant, $statut, false),
+                    esc_html(Statut::libelle($statut))
+                );
+            }
+
+            echo '</select>';
+        });
+
+        add_action('pre_get_posts', static function ($query): void {
+            if (! is_admin() || ! $query->is_main_query()) {
+                return;
+            }
+
+            if ($query->get('post_type') !== self::SLUG || empty($_GET['paiement'])) {
+                return;
+            }
+
+            $query->set('meta_query', [[
+                'key' => self::metaKey('paiement_statut'),
+                'value' => sanitize_text_field(wp_unslash($_GET['paiement'])),
+            ]]);
+        });
     }
 
     public static function adminColumns(array $colonnes): array
@@ -79,6 +118,7 @@ final class RendezVous
             'rdv_date' => 'Date et heure',
             'rdv_type' => 'Consultation',
             'rdv_statut' => 'Statut',
+            'rdv_paiement' => 'Paiement',
         ];
     }
 
@@ -96,6 +136,15 @@ final class RendezVous
                 break;
             case 'rdv_statut':
                 echo esc_html(self::STATUTS[get_post_status($postId)] ?? '—');
+                break;
+            case 'rdv_paiement':
+                $paiement = (new PaiementRepository())->donnees($postId);
+                echo esc_html(
+                    $paiement['montant'] > 0
+                        ? Statut::libelle($paiement['statut'])
+                            . ' — ' . $paiement['montant'] . ' ' . $paiement['devise']
+                        : Statut::libelle($paiement['statut'])
+                );
                 break;
         }
     }
