@@ -114,6 +114,7 @@ Ces variables alimentent l'environnement des conteneurs PHP via `env_file:`.
 | `PROPHET_PHONE_1`, `PROPHET_PHONE_2` | Numéros WhatsApp |
 | `GOOGLE_API_KEY`, `GOOGLE_CALENDAR_ID` | Agenda des événements |
 | `YOUTUBE_API_KEY`, `YOUTUBE_CHANNEL_ID` | Dernières vidéos |
+| `MONEROO_SECRET_KEY`, `MONEROO_WEBHOOK_SECRET` | Paiement en ligne — clés obtenues sur [app.moneroo.io](https://app.moneroo.io) |
 
 Sans clés Google ou YouTube, les sections Événements et Vidéos affichent des
 données de démonstration plutôt que de tomber en erreur.
@@ -153,6 +154,26 @@ Tout le contenu éditorial se gère depuis `wp-admin`, sans déploiement :
 
 Les événements viennent de Google Calendar et les vidéos de YouTube : ils ne
 s'éditent pas ici.
+
+---
+
+## Paiement en ligne
+
+Le paiement est **désactivé par défaut**. Pour l'activer :
+
+1. Renseigner `MONEROO_SECRET_KEY` et `MONEROO_WEBHOOK_SECRET` dans `cms/.env`.
+2. Dans `wp-admin` → **Paiement** : cocher l'activation, choisir la devise et le
+   moment du paiement.
+3. Dans **Services**, renseigner le prix de chaque consultation. Un service sans
+   prix ne propose pas de paiement.
+4. Déclarer l'URL de webhook sur le tableau de bord Moneroo :
+   `https://votre-domaine.com/wp-json/prophet/v1/moneroo/webhook`
+
+Le rendez-vous est enregistré avant toute redirection vers Moneroo : un paiement
+abandonné ou échoué laisse une demande exploitable, visible en administration.
+
+En mode **exigé**, une demande non réglée est annulée après le délai configuré et
+son créneau est libéré.
 
 ---
 
