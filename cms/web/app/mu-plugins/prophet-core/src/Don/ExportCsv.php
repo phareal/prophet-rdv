@@ -76,12 +76,9 @@ final class ExportCsv
     /**
      * Le dump contient noms, emails et téléphones des donateurs : capacité et
      * nonce sont non négociables, un visiteur non connecté ne doit jamais
-     * pouvoir l'atteindre.
-     */
-    /**
-     * manage_options, pas edit_posts : edit_posts est accordé aux
-     * Contributeurs par défaut, qui pourraient sinon télécharger la liste
-     * complète des donateurs (nom, email, téléphone).
+     * pouvoir l'atteindre. manage_options, pas edit_posts : ce dernier est
+     * accordé aux Contributeurs par défaut, qui pourraient sinon
+     * télécharger la liste complète des donateurs.
      */
     public static function telecharger(): void
     {
