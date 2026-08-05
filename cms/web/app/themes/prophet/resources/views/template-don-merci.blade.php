@@ -95,11 +95,7 @@
               @endif
             </div>
 
-            @if ($recu)
-              <div class="don-merci__info">
-                <p>Un reçu vous a été envoyé par email.</p>
-              </div>
-            @else
+            @unless ($recu)
               <form method="get" action="{{ esc_url(admin_url('admin-post.php')) }}" class="don-merci__actions">
                 <input type="hidden" name="action" value="{{ $actionPaiement }}">
                 <input type="hidden" name="ref" value="{{ $don['ref'] }}">
@@ -107,7 +103,7 @@
                   {{ $echoue ? 'Réessayer le paiement' : 'Procéder au paiement' }}
                 </button>
               </form>
-            @endif
+            @endunless
 
             <div class="don-merci__actions">
               <a href="{{ home_url('/don/') }}" class="don-merci__btn don-merci__btn--outline">
