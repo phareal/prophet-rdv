@@ -111,4 +111,80 @@ final class MotifPaiementTest extends TestCase
             $reglesAjoutees
         );
     }
+
+    /**
+     * /don/merci/ est réservée à la page de remerciement par la règle
+     * prioritaire ci-dessus : un motif slugué « merci » (ce que le titre
+     * « Merci » produit tout seul, via sanitize_title()) y serait
+     * définitivement masqué. wp_unique_post_slug() est le point où
+     * WordPress calcule le slug final, qu'il vienne d'une saisie manuelle ou
+     * d'un titre — le bon endroit pour intercepter ce cas précis.
+     */
+    public function test_un_slug_merci_est_renomme(): void
+    {
+        $filtres = [];
+
+        Functions\when('register_post_type')->justReturn(true);
+        Functions\when('add_rewrite_rule')->justReturn(true);
+        Functions\when('add_action')->alias(function ($hook, $callback) {
+            if ($hook === 'init') {
+                $callback();
+            }
+        });
+        Functions\when('add_filter')->alias(function ($hook, $callback) use (&$filtres) {
+            $filtres[$hook] = $callback;
+        });
+
+        MotifPaiement::register();
+
+        $this->assertArrayHasKey('wp_unique_post_slug', $filtres);
+
+        $callback = $filtres['wp_unique_post_slug'];
+
+        $this->assertSame('merci-motif', $callback('merci', 5, 'publish', MotifPaiement::SLUG, 0, 'merci'));
+    }
+
+    public function test_un_slug_ordinaire_n_est_pas_touche(): void
+    {
+        $filtres = [];
+
+        Functions\when('register_post_type')->justReturn(true);
+        Functions\when('add_rewrite_rule')->justReturn(true);
+        Functions\when('add_action')->alias(function ($hook, $callback) {
+            if ($hook === 'init') {
+                $callback();
+            }
+        });
+        Functions\when('add_filter')->alias(function ($hook, $callback) use (&$filtres) {
+            $filtres[$hook] = $callback;
+        });
+
+        MotifPaiement::register();
+
+        $callback = $filtres['wp_unique_post_slug'];
+
+        $this->assertSame('dimes', $callback('dimes', 5, 'publish', MotifPaiement::SLUG, 0, 'dimes'));
+    }
+
+    public function test_un_slug_merci_sur_un_autre_type_de_publication_n_est_pas_touche(): void
+    {
+        $filtres = [];
+
+        Functions\when('register_post_type')->justReturn(true);
+        Functions\when('add_rewrite_rule')->justReturn(true);
+        Functions\when('add_action')->alias(function ($hook, $callback) {
+            if ($hook === 'init') {
+                $callback();
+            }
+        });
+        Functions\when('add_filter')->alias(function ($hook, $callback) use (&$filtres) {
+            $filtres[$hook] = $callback;
+        });
+
+        MotifPaiement::register();
+
+        $callback = $filtres['wp_unique_post_slug'];
+
+        $this->assertSame('merci', $callback('merci', 5, 'publish', 'page', 0, 'merci'));
+    }
 }

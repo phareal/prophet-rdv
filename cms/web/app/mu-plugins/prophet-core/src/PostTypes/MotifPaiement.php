@@ -54,6 +54,31 @@ final class MotifPaiement
 
         add_filter('manage_' . self::SLUG . '_posts_columns', [self::class, 'adminColumns']);
         add_action('manage_' . self::SLUG . '_posts_custom_column', [self::class, 'renderColumn'], 10, 2);
+
+        add_filter('wp_unique_post_slug', [self::class, 'renommerSlugMerci'], 10, 6);
+    }
+
+    /**
+     * /don/merci/ est réservée à la page de remerciement par une règle de
+     * réécriture prioritaire (voir register()) : un motif slugué « merci »
+     * (ce que « Merci » comme titre produit tout seul) y serait
+     * définitivement invisible — son lien profond ne mènerait jamais qu'à la
+     * page de remerciement, jamais au motif. Renommer plutôt que de laisser
+     * ce piège à quiconque crée un motif appelé « Merci ».
+     */
+    public static function renommerSlugMerci(
+        string $slug,
+        int $postId,
+        string $postStatus,
+        string $postType,
+        int $postParent,
+        string $originalSlug
+    ): string {
+        if ($postType !== self::SLUG || $slug !== 'merci') {
+            return $slug;
+        }
+
+        return 'merci-motif';
     }
 
     /**
