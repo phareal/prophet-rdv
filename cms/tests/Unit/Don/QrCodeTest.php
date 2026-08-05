@@ -77,4 +77,46 @@ final class QrCodeTest extends TestCase
         $this->assertNotSame('', $svg);
         $this->assertStringContainsString('<svg', $svg);
     }
+
+    /**
+     * Migrer dev → production (ou changer l'identifiant à la main avant
+     * publication, cas que MotifPaiementFields::invalider() sur
+     * post_updated ne couvre pas) laisse le nom de fichier en cache
+     * dépendre, via son hachage, de l'URL encodée : une URL différente
+     * manque simplement le cache au lieu de continuer à servir un QR qui
+     * mène vers un domaine disparu.
+     */
+    public function test_un_changement_d_url_fait_manquer_le_cache_et_regenere(): void
+    {
+        QrCode::pour(3, 'png');
+        $ancienChemin = QrCode::chemin(3, 'png');
+        $this->assertFileExists($ancienChemin);
+
+        Functions\when('get_permalink')->justReturn('https://nouveau-domaine.test/don/dimes/');
+        $nouveauChemin = QrCode::chemin(3, 'png');
+
+        $this->assertNotSame($ancienChemin, $nouveauChemin);
+
+        $url = QrCode::pour(3, 'png');
+
+        $this->assertFileExists($nouveauChemin);
+        $this->assertStringContainsString(basename($nouveauChemin), $url);
+    }
+
+    /**
+     * Sans ce nettoyage, chaque changement d'URL laisserait un fichier
+     * orphelin derrière lui — jamais réclamé, jamais supprimé : l'annuaire
+     * uploads/qr grossirait indéfiniment au fil des migrations et des
+     * changements d'identifiant.
+     */
+    public function test_un_changement_d_url_nettoie_l_ancien_fichier(): void
+    {
+        QrCode::pour(3, 'png');
+        $ancienChemin = QrCode::chemin(3, 'png');
+
+        Functions\when('get_permalink')->justReturn('https://nouveau-domaine.test/don/dimes/');
+        QrCode::pour(3, 'png');
+
+        $this->assertFileDoesNotExist($ancienChemin);
+    }
 }

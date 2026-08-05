@@ -51,8 +51,17 @@ final class MotifPaiementTest extends TestCase
         $html = MotifPaiement::lienEtQrHtml(65);
 
         $this->assertStringContainsString('href="https://exemple.test/don/dimes/"', $html);
-        $this->assertStringContainsString('https://exemple.test/uploads/qr/motif-65.png', $html);
-        $this->assertStringContainsString('https://exemple.test/uploads/qr/motif-65.svg', $html);
+        // Le nom de fichier inclut un hachage court de l'URL encodée (voir
+        // QrCode::chemin()) : le nom exact n'est pas figé ici, seul le
+        // motif l'est — QrCodeTest couvre le hachage lui-même.
+        $this->assertMatchesRegularExpression(
+            '#https://exemple\.test/uploads/qr/motif-65-[0-9a-f]{8}\.png#',
+            $html
+        );
+        $this->assertMatchesRegularExpression(
+            '#https://exemple\.test/uploads/qr/motif-65-[0-9a-f]{8}\.svg#',
+            $html
+        );
         $this->assertStringContainsString('Télécharger PNG', $html);
         $this->assertStringContainsString('Télécharger SVG', $html);
     }
