@@ -393,6 +393,14 @@ final class SubmitHandlerTest extends TestCase
     {
         $redirection = null;
 
+        // Enregistrement identique à celui de prophet-core.php : la
+        // référence ne résout ici aucun rendez-vous (simulé plus bas), pas
+        // « aucun type n'a jamais été enregistré ».
+        ResolveurDeSujet::enregistrer(
+            static fn (string $ref) => RendezVousPayable::parReference($ref),
+            static fn (string $id) => null,
+        );
+
         Functions\when('wp_verify_nonce')->justReturn(true);
         Functions\when('wp_unslash')->returnArg();
         Functions\when('get_transient')->justReturn(false);

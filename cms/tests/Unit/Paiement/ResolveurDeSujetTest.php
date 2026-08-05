@@ -7,6 +7,7 @@ namespace ProphetCore\Tests\Unit\Paiement;
 use ProphetCore\Paiement\ResolveurDeSujet;
 use ProphetCore\Paiement\SujetPaiement;
 use ProphetCore\Tests\TestCase;
+use RuntimeException;
 
 final class ResolveurDeSujetTest extends TestCase
 {
@@ -113,5 +114,57 @@ final class ResolveurDeSujetTest extends TestCase
 
         $this->assertSame('REF1', ResolveurDeSujet::parPaiementId('tx_1')?->reference());
         $this->assertNull(ResolveurDeSujet::parPaiementId('tx_inconnue'));
+    }
+
+    /**
+     * Sans ce garde-fou, un résolveur jamais alimenté (erreur de câblage)
+     * renverrait silencieusement null pour toute référence : Webhook::traiter()
+     * prendrait ce null pour « transaction qui ne nous concerne pas » et
+     * répondrait 200 à tout événement — Moneroo ne réessaierait jamais un
+     * paiement qui, en réalité, n'a jamais été appliqué.
+     */
+    public function test_resoudre_par_reference_sans_aucun_type_enregistre_est_bruyant(): void
+    {
+        $this->expectException(RuntimeException::class);
+
+        ResolveurDeSujet::parReference('REF1');
+    }
+
+    public function test_resoudre_par_identifiant_de_transaction_sans_aucun_type_enregistre_est_bruyant(): void
+    {
+        $this->expectException(RuntimeException::class);
+
+        ResolveurDeSujet::parPaiementId('tx_1');
+    }
+
+    /**
+     * En pratique, l'enregistrement n'a lieu qu'une fois par requête (voir
+     * prophet-core.php) : un doublon est sans effet observable aujourd'hui.
+     * Il doit néanmoins être ignoré plutôt qu'empilé, pour ne pas résoudre
+     * deux fois le même sujet pour rien si ce jour venait à changer.
+     */
+    public function test_une_registration_identique_est_ignoree_plutot_qu_empilee(): void
+    {
+        $parReference = fn (string $ref): ?SujetPaiement => $ref === 'REF1' ? $this->sujetFactice('REF1') : null;
+        $parPaiementId = fn (string $id): ?SujetPaiement => null;
+
+        ResolveurDeSujet::enregistrer($parReference, $parPaiementId);
+        ResolveurDeSujet::enregistrer($parReference, $parPaiementId);
+
+        $this->assertSame(1, ResolveurDeSujet::nombreDeTypes());
+    }
+
+    public function test_deux_registrations_distinctes_sont_toutes_deux_conservees(): void
+    {
+        ResolveurDeSujet::enregistrer(
+            fn (string $ref): ?SujetPaiement => null,
+            fn (string $id): ?SujetPaiement => null,
+        );
+        ResolveurDeSujet::enregistrer(
+            fn (string $ref): ?SujetPaiement => null,
+            fn (string $id): ?SujetPaiement => null,
+        );
+
+        $this->assertSame(2, ResolveurDeSujet::nombreDeTypes());
     }
 }

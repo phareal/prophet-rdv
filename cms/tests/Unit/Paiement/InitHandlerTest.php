@@ -223,6 +223,13 @@ final class InitHandlerTest extends TestCase
     public function test_une_reference_qui_ne_resout_aucun_sujet_retombe_sur_confirmation(): void
     {
         $this->contexte();
+        // Un type est bien enregistré (comme en production) ; c'est cette
+        // référence précise qu'aucun type ne reconnaît — distinct du cas
+        // « aucun type n'a jamais été enregistré » (ResolveurDeSujetTest).
+        ResolveurDeSujet::enregistrer(
+            static fn (string $ref): ?SujetPaiement => null,
+            static fn (string $id): ?SujetPaiement => null,
+        );
         Functions\when('error_log')->justReturn(true);
         $_GET['ref'] = 'INCONNUE';
         $redirection = null;
