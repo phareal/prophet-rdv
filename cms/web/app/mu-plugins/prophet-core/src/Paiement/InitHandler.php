@@ -26,10 +26,7 @@ class InitHandler
             $url = $this->demarrer($ref);
         } catch (MonerooException $e) {
             error_log('[Paiement] initialisation impossible (réf. ' . $ref . ') : ' . $e->getMessage());
-            wp_safe_redirect(add_query_arg(
-                ['ref' => $ref, 'paiement' => 'erreur'],
-                home_url('/confirmation/')
-            ));
+            wp_safe_redirect($this->urlErreur($ref));
             $this->terminer();
 
             return;
@@ -37,6 +34,22 @@ class InitHandler
 
         wp_redirect($url);
         $this->terminer();
+    }
+
+    /**
+     * La page de remerciement du don propose « Réessayer le paiement » vers
+     * cette action : rediriger systématiquement vers /confirmation/ (la page
+     * du rendez-vous) y ferait atterrir un donateur sur une page qui ignore
+     * sa référence et affiche « lien invalide ». On ne retombe sur
+     * /confirmation/ que si la référence ne résout aucun sujet du tout.
+     */
+    private function urlErreur(string $ref): string
+    {
+        $sujet = ResolveurDeSujet::parReference($ref);
+
+        return $sujet !== null
+            ? add_query_arg(['paiement' => 'erreur'], $sujet->urlRetour())
+            : add_query_arg(['ref' => $ref, 'paiement' => 'erreur'], home_url('/confirmation/'));
     }
 
     /**
