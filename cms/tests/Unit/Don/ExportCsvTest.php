@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace ProphetCore\Tests\Unit\Don;
 
+use Brain\Monkey\Functions;
 use ProphetCore\Don\ExportCsv;
 use ProphetCore\Tests\TestCase;
+use RuntimeException;
 
 final class ExportCsvTest extends TestCase
 {
@@ -103,5 +105,23 @@ final class ExportCsvTest extends TestCase
         $lignes = ExportCsv::lignes([$this->don()]);
 
         $this->assertSame('Jane', $lignes[1][4]);
+    }
+
+    /**
+     * Le dump contient noms, emails et téléphones des donateurs. edit_posts
+     * est accordé aux Contributeurs par défaut sur WordPress : avec cette
+     * capacité, un Contributeur pouvait télécharger la liste de tous les
+     * donateurs. manage_options est réservé à l'Administrateur.
+     */
+    public function test_l_export_exige_manage_options_et_non_edit_posts(): void
+    {
+        Functions\expect('current_user_can')->once()->with('manage_options')->andReturn(false);
+        Functions\when('wp_die')->alias(function () {
+            throw new RuntimeException('halt');
+        });
+
+        $this->expectException(RuntimeException::class);
+
+        ExportCsv::telecharger();
     }
 }

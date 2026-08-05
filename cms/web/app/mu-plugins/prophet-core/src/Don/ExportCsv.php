@@ -78,9 +78,14 @@ final class ExportCsv
      * nonce sont non négociables, un visiteur non connecté ne doit jamais
      * pouvoir l'atteindre.
      */
+    /**
+     * manage_options, pas edit_posts : edit_posts est accordé aux
+     * Contributeurs par défaut, qui pourraient sinon télécharger la liste
+     * complète des donateurs (nom, email, téléphone).
+     */
     public static function telecharger(): void
     {
-        if (! current_user_can('edit_posts')) {
+        if (! current_user_can('manage_options')) {
             wp_die('Action non autorisée.', 'Accès refusé', ['response' => 403]);
         }
 

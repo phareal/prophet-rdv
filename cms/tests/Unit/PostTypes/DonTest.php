@@ -40,6 +40,39 @@ final class DonTest extends TestCase
     }
 
     /**
+     * edit_posts est accordé aux Contributeurs par défaut sur WordPress :
+     * sans capacités explicites dessus, la liste des dons (menu, écran
+     * edit.php?post_type=don) leur restait visible, avec les noms, emails et
+     * téléphones de tous les donateurs.
+     */
+    public function test_seul_manage_options_peut_lire_ou_gerer_les_dons(): void
+    {
+        $capture = [];
+        Functions\when('register_post_type')->alias(function ($slug, $args) use (&$capture) {
+            $capture = $args;
+        });
+        Functions\when('register_post_status')->justReturn(true);
+        Functions\when('add_action')->alias(function ($hook, $callback) {
+            if ($hook === 'init') {
+                $callback();
+            }
+        });
+        Functions\when('add_filter')->justReturn(true);
+        Functions\when('_n_noop')->returnArg();
+
+        Don::register();
+
+        $this->assertTrue($capture['map_meta_cap']);
+        foreach (['edit_posts', 'edit_others_posts', 'read_private_posts', 'edit_post', 'read_post', 'delete_post'] as $capacite) {
+            $this->assertSame(
+                'manage_options',
+                $capture['capabilities'][$capacite] ?? null,
+                "capacité attendue sur manage_options : $capacite"
+            );
+        }
+    }
+
+    /**
      * Simule le filtrage réel de WP_Query sur meta_query : seuls les dons
      * dont la meta correspond à chaque clause survivent. C'est ce filtrage,
      * pas une simple relecture des arguments, qui pince la régression.

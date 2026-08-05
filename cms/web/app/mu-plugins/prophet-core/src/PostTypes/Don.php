@@ -50,7 +50,21 @@ final class Don
                 'exclude_from_search' => true,
                 'menu_icon' => 'dashicons-heart',
                 'supports' => ['title'],
-                'capabilities' => ['create_posts' => 'do_not_allow'],
+                // edit_posts est accordé aux Contributeurs par défaut : sans
+                // ces capacités explicites, la liste des dons (nom, email,
+                // téléphone de chaque donateur) leur restait lisible.
+                // manage_options est réservé à l'Administrateur.
+                'capabilities' => [
+                    'create_posts' => 'do_not_allow',
+                    'edit_post' => 'manage_options',
+                    'read_post' => 'manage_options',
+                    'delete_post' => 'manage_options',
+                    'edit_posts' => 'manage_options',
+                    'edit_others_posts' => 'manage_options',
+                    'publish_posts' => 'manage_options',
+                    'read_private_posts' => 'manage_options',
+                    'delete_posts' => 'manage_options',
+                ],
                 'map_meta_cap' => true,
                 // register_post_type() active la réécriture par défaut (même
                 // quand public=false) avec le nom du type comme slug — ici
