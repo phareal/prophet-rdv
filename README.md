@@ -243,6 +243,16 @@ filtres actifs (motif, statut) et produit un fichier avec BOM UTF-8, pour que
 les accents s'affichent correctement à l'ouverture dans un tableur (Excel,
 Numbers…) plutôt qu'en caractères mal encodés.
 
+### Permaliens après un déploiement
+
+Les liens profonds `/don/<slug>/` et la page `/don/merci/` dépendent des
+règles de réécriture de WordPress. `ProphetCore\Support\RewriteFlusher` les
+régénère automatiquement (`flush_rewrite_rules()`) au premier chargement qui
+suit un changement de structure, via une version comparée à une option
+stockée en base — **il n'y a rien à faire manuellement** après un déploiement.
+Si un lien ou un QR fraîchement imprimé répond malgré tout en 404, ouvrir une
+fois Réglages → Permaliens force la même régénération.
+
 ---
 
 ## Structure

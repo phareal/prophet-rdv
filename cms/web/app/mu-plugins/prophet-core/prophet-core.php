@@ -37,6 +37,7 @@ use ProphetCore\PostTypes\Temoignage;
 use ProphetCore\Rdv\RendezVousPayable;
 use ProphetCore\Rdv\SubmitHandler;
 use ProphetCore\Services\SmtpConfigurator;
+use ProphetCore\Support\RewriteFlusher;
 
 add_action('plugins_loaded', static function (): void {
     SmtpConfigurator::register();
@@ -94,6 +95,7 @@ ExportCsv::register();
 
 Webhook::register();
 Abandon::register();
+RewriteFlusher::register();
 
 if (defined('WP_CLI') && WP_CLI) {
     \WP_CLI::add_command('prophet seed', SeedCommand::class);
