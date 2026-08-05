@@ -45,19 +45,32 @@ final class ExportCsv
         foreach ($dons as $don) {
             $lignes[] = [
                 (string) ($don['date'] ?? ''),
-                (string) ($don['motif_titre'] ?? ''),
+                self::protegerFormule((string) ($don['motif_titre'] ?? '')),
                 (int) ($don['montant'] ?? 0),
                 (string) ($don['devise'] ?? ''),
-                (string) ($don['prenom'] ?? ''),
-                (string) ($don['nom'] ?? ''),
-                (string) ($don['email'] ?? ''),
-                (string) ($don['telephone'] ?? ''),
+                self::protegerFormule((string) ($don['prenom'] ?? '')),
+                self::protegerFormule((string) ($don['nom'] ?? '')),
+                self::protegerFormule((string) ($don['email'] ?? '')),
+                self::protegerFormule((string) ($don['telephone'] ?? '')),
                 Statut::libelle((string) ($don['statut_paiement'] ?? '')),
                 (string) ($don['ref'] ?? ''),
             ];
         }
 
         return $lignes;
+    }
+
+    /**
+     * sanitize_text_field() laisse passer =, +, -, @ : un tableur qui ouvre
+     * le CSV interprète une cellule commençant par l'un de ces caractères
+     * (ou par une tabulation/un retour chariot, mêmes déclencheurs dans
+     * Excel) comme une formule. Un prénom `=HYPERLINK(...)` l'exécuterait
+     * chez le trésorier. Préfixer d'une apostrophe neutralise
+     * l'interprétation sans changer la valeur affichée.
+     */
+    private static function protegerFormule(string $valeur): string
+    {
+        return preg_match('/^[=+\-@\t\r]/', $valeur) === 1 ? "'" . $valeur : $valeur;
     }
 
     /**

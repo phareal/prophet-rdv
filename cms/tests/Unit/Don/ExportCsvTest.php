@@ -49,4 +49,59 @@ final class ExportCsvTest extends TestCase
 
         $this->assertSame('Réglé', $lignes[1][8]);
     }
+
+    /**
+     * sanitize_text_field() laisse passer =, +, -, @ : un tableur (Excel,
+     * LibreOffice…) qui ouvre le CSV interprète une cellule commençant par
+     * l'un de ces caractères comme une formule. Un prénom
+     * =HYPERLINK("http://…"&A1) l'exécuterait chez le trésorier. Préfixer
+     * d'une apostrophe neutralise l'interprétation sans changer la valeur
+     * affichée.
+     */
+    public function test_un_prenom_qui_ressemble_a_une_formule_est_protege(): void
+    {
+        $lignes = ExportCsv::lignes([array_merge($this->don(), [
+            'prenom' => '=HYPERLINK("http://malveillant.test","clic")',
+        ])]);
+
+        $this->assertSame(
+            '\'=HYPERLINK("http://malveillant.test","clic")',
+            $lignes[1][4]
+        );
+    }
+
+    public function test_un_nom_commencant_par_plus_est_protege(): void
+    {
+        $lignes = ExportCsv::lignes([array_merge($this->don(), ['nom' => '+cmd|"/c calc"!A1'])]);
+
+        $this->assertSame('\'+cmd|"/c calc"!A1', $lignes[1][5]);
+    }
+
+    public function test_un_motif_commencant_par_moins_est_protege(): void
+    {
+        $lignes = ExportCsv::lignes([array_merge($this->don(), ['motif_titre' => '-2+3'])]);
+
+        $this->assertSame('\'-2+3', $lignes[1][1]);
+    }
+
+    public function test_une_valeur_commencant_par_arobase_est_protegee(): void
+    {
+        $lignes = ExportCsv::lignes([array_merge($this->don(), ['prenom' => '@SUM(1+1)'])]);
+
+        $this->assertSame('\'@SUM(1+1)', $lignes[1][4]);
+    }
+
+    public function test_une_valeur_commencant_par_une_tabulation_est_protegee(): void
+    {
+        $lignes = ExportCsv::lignes([array_merge($this->don(), ['prenom' => "\t=2+2"])]);
+
+        $this->assertSame("'\t=2+2", $lignes[1][4]);
+    }
+
+    public function test_un_prenom_ordinaire_n_est_pas_modifie(): void
+    {
+        $lignes = ExportCsv::lignes([$this->don()]);
+
+        $this->assertSame('Jane', $lignes[1][4]);
+    }
 }
