@@ -46,6 +46,51 @@ final class MontantDonTest extends TestCase
         $this->assertSame(10000, $resultat['montant']);
     }
 
+    /**
+     * Le champ motif_montant_fixe n'a pas de valeur par défaut : un motif
+     * basculé en régime fixe sans être rempli renverrait 0, que Moneroo
+     * refuserait sans qu'aucun message n'explique au donateur pourquoi.
+     */
+    public function test_en_regime_fixe_un_montant_du_motif_a_zero_est_refuse(): void
+    {
+        $resultat = MontantDon::resoudre(
+            $this->motif(MotifPaiement::REGIME_FIXE, ['montant_fixe' => 0]),
+            '1'
+        );
+
+        $this->assertArrayHasKey('erreur', $resultat);
+    }
+
+    public function test_en_regime_fixe_un_montant_du_motif_negatif_est_refuse(): void
+    {
+        $resultat = MontantDon::resoudre(
+            $this->motif(MotifPaiement::REGIME_FIXE, ['montant_fixe' => -100]),
+            '1'
+        );
+
+        $this->assertArrayHasKey('erreur', $resultat);
+    }
+
+    public function test_en_regime_fixe_un_montant_du_motif_sous_le_minimum_est_refuse(): void
+    {
+        $resultat = MontantDon::resoudre(
+            $this->motif(MotifPaiement::REGIME_FIXE, ['montant_fixe' => 100, 'min' => 500]),
+            '1'
+        );
+
+        $this->assertArrayHasKey('erreur', $resultat);
+    }
+
+    public function test_en_regime_fixe_un_montant_du_motif_au_dessus_du_maximum_est_refuse(): void
+    {
+        $resultat = MontantDon::resoudre(
+            $this->motif(MotifPaiement::REGIME_FIXE, ['montant_fixe' => 9999999, 'max' => 5000000]),
+            '1'
+        );
+
+        $this->assertArrayHasKey('erreur', $resultat);
+    }
+
     public function test_en_regime_suggere_une_valeur_hors_palier_est_acceptee(): void
     {
         $resultat = MontantDon::resoudre($this->motif(MotifPaiement::REGIME_SUGGERE), '3000');

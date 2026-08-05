@@ -64,6 +64,49 @@ final class MotifRepositoryTest extends TestCase
         $this->assertSame([1000, 5000], MotifRepository::actifs()[0]['suggeres']);
     }
 
+    /**
+     * DonSubmitHandler::process() valide le motif soumis via parId() : sans
+     * ce filtre, un motif brouillon ou mis à la corbeille resterait payable
+     * (motif_actif défaut à vrai côté Carbon Fields tant que rien n'est
+     * réglé).
+     */
+    public function test_un_motif_non_publie_est_introuvable_par_id(): void
+    {
+        Functions\when('get_post')->justReturn((object) [
+            'ID' => 3,
+            'post_type' => MotifPaiement::SLUG,
+            'post_status' => 'draft',
+        ]);
+
+        $this->assertNull(MotifRepository::parId(3));
+    }
+
+    public function test_un_motif_a_la_corbeille_est_introuvable_par_id(): void
+    {
+        Functions\when('get_post')->justReturn((object) [
+            'ID' => 3,
+            'post_type' => MotifPaiement::SLUG,
+            'post_status' => 'trash',
+        ]);
+
+        $this->assertNull(MotifRepository::parId(3));
+    }
+
+    public function test_un_motif_publie_est_trouve_par_id(): void
+    {
+        Functions\when('get_post')->justReturn((object) [
+            'ID' => 3,
+            'post_title' => 'Dîmes',
+            'post_content' => 'Description',
+            'post_type' => MotifPaiement::SLUG,
+            'post_status' => 'publish',
+        ]);
+        Functions\when('carbon_get_post_meta')->justReturn('');
+        Functions\when('get_post_field')->justReturn('dimes');
+
+        $this->assertNotNull(MotifRepository::parId(3));
+    }
+
     public function test_la_requete_ne_demande_que_les_motifs_publies_dans_l_ordre_du_menu(): void
     {
         $capture = [];

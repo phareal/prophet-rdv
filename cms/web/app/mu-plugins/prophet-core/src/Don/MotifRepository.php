@@ -28,11 +28,17 @@ final class MotifRepository
         return array_values(array_filter($motifs, static fn (array $m): bool => $m['actif']));
     }
 
+    /**
+     * DonSubmitHandler::process() valide le motif soumis à travers cette
+     * méthode : sans le filtre sur post_status, un motif brouillon ou mis à
+     * la corbeille resterait payable — motif_actif défaut à vrai côté
+     * Carbon Fields tant que rien n'a été réglé explicitement.
+     */
     public static function parId(int $id): ?array
     {
         $post = get_post($id);
 
-        return ($post === null || $post->post_type !== MotifPaiement::SLUG)
+        return ($post === null || $post->post_type !== MotifPaiement::SLUG || $post->post_status !== 'publish')
             ? null
             : self::depuisPost($post);
     }

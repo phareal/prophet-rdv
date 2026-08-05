@@ -22,7 +22,24 @@ final class MontantDon
         $devise = Options::devise();
 
         if ($motif['regime'] === MotifPaiement::REGIME_FIXE) {
-            return ['montant' => (int) $motif['montant_fixe'], 'devise' => $devise];
+            $montantFixe = (int) $motif['montant_fixe'];
+
+            // Le champ n'a pas de défaut : un motif basculé en fixe sans
+            // être rempli renverrait 0, que Moneroo refuserait sans qu'aucun
+            // message n'explique au donateur pourquoi le paiement échoue.
+            if ($montantFixe <= 0) {
+                return ['erreur' => 'Ce motif n\'est pas correctement configuré, merci de réessayer plus tard'];
+            }
+
+            if ($montantFixe < (int) $motif['min']) {
+                return ['erreur' => sprintf('Le montant minimum est de %d %s', $motif['min'], $devise)];
+            }
+
+            if ($montantFixe > (int) $motif['max']) {
+                return ['erreur' => sprintf('Le montant maximum est de %d %s', $motif['max'], $devise)];
+            }
+
+            return ['montant' => $montantFixe, 'devise' => $devise];
         }
 
         // « 2 500 » est ce qu'un francophone tape ; les espaces fines et

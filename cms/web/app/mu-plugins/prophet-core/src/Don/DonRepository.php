@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ProphetCore\Don;
 
+use ProphetCore\Paiement\Statut;
 use ProphetCore\PostTypes\Don;
 use RuntimeException;
 
@@ -42,6 +43,11 @@ final class DonRepository
             'telephone' => sanitize_text_field((string) $donnees['telephone']),
             'message' => sanitize_textarea_field((string) $donnees['message']),
             'ref' => $ref,
+            // Sans cette méta, PaiementRepository::statut() retombe sur
+            // NON_REQUIS : la colonne d'administration afficherait « Non
+            // requis » pour un don qui attend justement d'être payé, et le
+            // filtre « En attente » le manquerait.
+            'paiement_statut' => Statut::EN_ATTENTE,
         ];
 
         foreach ($metas as $champ => $valeur) {

@@ -6,6 +6,7 @@ namespace ProphetCore\Tests\Unit\Don;
 
 use Brain\Monkey\Functions;
 use ProphetCore\Don\DonRepository;
+use ProphetCore\Paiement\Statut;
 use ProphetCore\PostTypes\Don;
 use ProphetCore\Tests\TestCase;
 
@@ -84,6 +85,20 @@ final class DonRepositoryTest extends TestCase
         $this->assertSame(Don::SLUG, $capture['post_type']);
         $this->assertSame(Don::STATUT_EN_ATTENTE, $capture['post_status']);
         $this->assertStringContainsString('Dîmes', $capture['post_title']);
+    }
+
+    /**
+     * Sans cette méta, PaiementRepository::statut() retombe sur
+     * NON_REQUIS : la colonne d'administration affiche « Non requis » pour
+     * un don en attente de paiement, et le filtre « En attente » le manque.
+     */
+    public function test_le_statut_de_paiement_nait_en_attente(): void
+    {
+        $this->base();
+
+        (new DonRepository())->creer($this->donnees());
+
+        $this->assertSame(Statut::EN_ATTENTE, $this->metas[Don::metaKey('paiement_statut')]);
     }
 
     public function test_une_reference_inconnue_renvoie_null(): void
