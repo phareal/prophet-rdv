@@ -39,6 +39,17 @@ final class MotifPaiement
                 'supports' => ['title', 'editor', 'page-attributes'],
                 'rewrite' => ['slug' => 'don', 'with_front' => false],
             ]);
+
+            // La page de remerciement du don (/don/merci/, voir
+            // DonPayable::urlRetour() et DonSubmitHandler) vit sous ce même
+            // préfixe /don/. Sans cette règle explicite en tête de table, la
+            // règle générique posée par le rewrite ci-dessus
+            // (don/([^/]+)/?$ → motif_paiement) intercepte /don/merci/ en
+            // premier : WordPress essaie de résoudre « merci » comme un
+            // motif, n'en trouve pas et répond 404 avant même d'envisager la
+            // page. add_rewrite_rule(..., 'top') fait matcher celle-ci
+            // d'abord, comme n'importe quelle règle statique prioritaire.
+            add_rewrite_rule('^don/merci/?$', 'index.php?pagename=don/merci', 'top');
         });
 
         add_filter('manage_' . self::SLUG . '_posts_columns', [self::class, 'adminColumns']);
