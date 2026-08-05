@@ -110,9 +110,17 @@ final class ExportCsv
      * Respecte les mêmes filtres motif / statut que la liste des dons : l'export
      * correspond à ce que le trésorier a sous les yeux, pas à la table entière.
      *
+     * fields => 'ids' ne remonte que ce dont on a besoin (pas la ligne
+     * wp_posts complète pour chaque don), mais court-circuite au passage
+     * l'amorçage automatique du cache de méta que WP_Query fait pour des
+     * objets complets — sans l'appel explicite ci-dessous, chacun des sept
+     * champs lus par ligne interrogerait la base séparément. Public, comme
+     * lignes() : c'est ce qui permet de pincer la régression dans un test
+     * sans passer par telecharger(), qui écrit sur la sortie et fait exit().
+     *
      * @return array<int, array<string, mixed>>
      */
-    private static function recupererDons(): array
+    public static function recupererDons(): array
     {
         $args = [
             'post_type' => Don::SLUG,
@@ -121,6 +129,7 @@ final class ExportCsv
             'no_found_rows' => true,
             'orderby' => 'date',
             'order' => 'DESC',
+            'fields' => 'ids',
         ];
 
         $metaQuery = Don::filtresMetaQuery();
@@ -129,10 +138,13 @@ final class ExportCsv
             $args['meta_query'] = $metaQuery;
         }
 
+        $ids = array_map('intval', get_posts($args));
+
+        _prime_post_caches($ids, false, true);
+
         $paiements = new PaiementRepository(Don::metaKey(''), Don::SLUG);
 
-        return array_map(static function ($post) use ($paiements): array {
-            $postId = (int) $post->ID;
+        return array_map(static function (int $postId) use ($paiements): array {
             $lire = static fn (string $champ): string => (string) get_post_meta($postId, Don::metaKey($champ), true);
 
             return [
@@ -147,6 +159,6 @@ final class ExportCsv
                 'statut_paiement' => $paiements->statut($postId),
                 'ref' => $lire('ref'),
             ];
-        }, get_posts($args));
+        }, $ids);
     }
 }

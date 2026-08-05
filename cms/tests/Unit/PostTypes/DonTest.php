@@ -106,6 +106,7 @@ final class DonTest extends TestCase
 
     public function test_le_total_n_additionne_que_les_dons_payes(): void
     {
+        Functions\when('_prime_post_caches')->justReturn(null);
         $this->simulerGetPosts([
             1 => [Don::metaKey('montant') => 1000, Don::metaKey('paiement_statut') => Statut::PAYE],
             2 => [Don::metaKey('montant') => 500, Don::metaKey('paiement_statut') => Statut::EN_ATTENTE],
@@ -117,6 +118,7 @@ final class DonTest extends TestCase
 
     public function test_plusieurs_dons_payes_sont_tous_additionnes(): void
     {
+        Functions\when('_prime_post_caches')->justReturn(null);
         $this->simulerGetPosts([
             1 => [Don::metaKey('montant') => 1000, Don::metaKey('paiement_statut') => Statut::PAYE],
             2 => [Don::metaKey('montant') => 3000, Don::metaKey('paiement_statut') => Statut::PAYE],
@@ -128,6 +130,7 @@ final class DonTest extends TestCase
 
     public function test_la_requete_impose_le_statut_paye_en_plus_des_filtres_actifs(): void
     {
+        Functions\when('_prime_post_caches')->justReturn(null);
         $_GET['motif'] = '3';
         $capture = [];
         Functions\when('get_posts')->alias(function (array $args) use (&$capture) {
@@ -149,6 +152,102 @@ final class DonTest extends TestCase
         $clauseStatut = $clauses[array_search(Don::metaKey('paiement_statut'), $cles, true)];
 
         $this->assertSame(Statut::PAYE, $clauseStatut['value']);
+    }
+
+    /**
+     * « Total encaissé par motif » (spec) : un trésorier qui reconcilie un
+     * mois veut distinguer les dîmes des offrandes, pas une seule somme
+     * opaque. Sans filtre motif actif, la répartition couvre tous les
+     * motifs représentés parmi les dons payés.
+     */
+    public function test_les_totaux_sont_regroupes_par_motif(): void
+    {
+        Functions\when('_prime_post_caches')->justReturn(null);
+        $this->simulerGetPosts([
+            1 => [
+                Don::metaKey('motif') => 10, Don::metaKey('motif_titre') => 'Dîmes',
+                Don::metaKey('montant') => 1000, Don::metaKey('paiement_statut') => Statut::PAYE,
+            ],
+            2 => [
+                Don::metaKey('motif') => 10, Don::metaKey('motif_titre') => 'Dîmes',
+                Don::metaKey('montant') => 500, Don::metaKey('paiement_statut') => Statut::PAYE,
+            ],
+            3 => [
+                Don::metaKey('motif') => 20, Don::metaKey('motif_titre') => 'Offrandes',
+                Don::metaKey('montant') => 2000, Don::metaKey('paiement_statut') => Statut::PAYE,
+            ],
+            4 => [
+                Don::metaKey('motif') => 20, Don::metaKey('motif_titre') => 'Offrandes',
+                Don::metaKey('montant') => 9999, Don::metaKey('paiement_statut') => Statut::EN_ATTENTE,
+            ],
+        ]);
+
+        $totaux = Don::totauxParMotif();
+
+        $parId = [];
+        foreach ($totaux as $ligne) {
+            $parId[$ligne['motif_id']] = $ligne;
+        }
+
+        $this->assertCount(2, $totaux);
+        $this->assertSame('Dîmes', $parId[10]['titre']);
+        $this->assertSame(1500, $parId[10]['total']);
+        $this->assertSame('Offrandes', $parId[20]['titre']);
+        $this->assertSame(2000, $parId[20]['total']);
+    }
+
+    /**
+     * Un filtre motif actif restreint naturellement la répartition à ce
+     * seul motif — c'est ce que renderTotalEtExport() affiche comme
+     * « le total de ce motif », pas une répartition à une seule ligne.
+     */
+    public function test_un_filtre_motif_restreint_la_repartition_a_ce_motif(): void
+    {
+        Functions\when('_prime_post_caches')->justReturn(null);
+        $_GET['motif'] = '10';
+        $this->simulerGetPosts([
+            1 => [
+                Don::metaKey('motif') => 10, Don::metaKey('motif_titre') => 'Dîmes',
+                Don::metaKey('montant') => 1000, Don::metaKey('paiement_statut') => Statut::PAYE,
+            ],
+            2 => [
+                Don::metaKey('motif') => 20, Don::metaKey('motif_titre') => 'Offrandes',
+                Don::metaKey('montant') => 2000, Don::metaKey('paiement_statut') => Statut::PAYE,
+            ],
+        ]);
+
+        $totaux = Don::totauxParMotif();
+
+        unset($_GET['motif']);
+
+        $this->assertCount(1, $totaux);
+        $this->assertSame(10, $totaux[0]['motif_id']);
+        $this->assertSame(1000, $totaux[0]['total']);
+    }
+
+    /**
+     * fields => 'ids' (nécessaire pour ne remonter que ce dont on a besoin)
+     * saute l'amorçage automatique du cache de méta que WP_Query fait pour
+     * des objets complets (_prime_post_caches() dans
+     * WP_Query::get_posts()) : sans l'appel explicite, chaque tour de la
+     * boucle de regroupement interrogerait la base séparément — invisible
+     * avec une poignée de dons, sensible à deux cents lors d'un culte, et
+     * cette liste tourne à chaque chargement de page admin.
+     */
+    public function test_le_cache_de_meta_est_amorce_explicitement(): void
+    {
+        $this->simulerGetPosts([
+            1 => [
+                Don::metaKey('motif') => 10, Don::metaKey('motif_titre') => 'Dîmes',
+                Don::metaKey('montant') => 1000, Don::metaKey('paiement_statut') => Statut::PAYE,
+            ],
+        ]);
+
+        Functions\expect('_prime_post_caches')->once()->with([1], false, true);
+
+        $totaux = Don::totauxParMotif();
+
+        $this->assertSame(1000, $totaux[0]['total']);
     }
 
     /**

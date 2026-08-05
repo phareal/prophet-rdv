@@ -234,12 +234,33 @@ final class Don
     }
 
     /**
-     * Somme des montants des dons correspondant aux filtres actifs — la
-     * période visible par le trésorier, pas la table entière — et
-     * effectivement encaissés. Un don en attente ou échoué n'est pas de
-     * l'argent reçu : le compter gonflerait un total censé être fiable.
+     * Somme des montants effectivement encaissés (paiement_statut = paye)
+     * dans le périmètre visible par le trésorier — les filtres actifs, pas
+     * la table entière. Un don en attente ou échoué n'est pas de l'argent
+     * reçu : le compter gonflerait un total censé être fiable.
      */
     public static function totalPeriodeVisible(): int
+    {
+        return array_sum(array_column(self::totauxParMotif(), 'total'));
+    }
+
+    /**
+     * Regroupe les dons payés par motif — « Total encaissé par motif »
+     * (spec) : un trésorier qui reconcilie un mois veut distinguer les
+     * dîmes des offrandes, pas une seule somme opaque. Un filtre motif actif
+     * restreint naturellement le résultat à ce seul motif.
+     *
+     * fields => 'ids' court-circuite l'amorçage automatique du cache de méta
+     * que WP_Query fait pour des objets complets (_prime_post_caches() dans
+     * WP_Query::get_posts(), sauté quand 'fields' vaut 'ids') : sans l'appel
+     * explicite ci-dessous, chaque tour de la boucle de regroupement
+     * interrogerait la base séparément pour lire motif/motif_titre/montant —
+     * invisible avec une poignée de dons, sensible à deux cents lors d'un
+     * culte, et cette liste tourne à chaque chargement de page admin.
+     *
+     * @return array<int, array{motif_id: int, titre: string, total: int}>
+     */
+    public static function totauxParMotif(): array
     {
         $args = [
             'post_type' => self::SLUG,
@@ -258,13 +279,25 @@ final class Don
 
         $args['meta_query'] = $metaQuery;
 
-        $total = 0;
+        $ids = array_map('intval', get_posts($args));
 
-        foreach (get_posts($args) as $postId) {
-            $total += (int) get_post_meta((int) $postId, self::metaKey('montant'), true);
+        _prime_post_caches($ids, false, true);
+
+        $totaux = [];
+
+        foreach ($ids as $id) {
+            $motifId = (int) get_post_meta($id, self::metaKey('motif'), true);
+            $titre = (string) get_post_meta($id, self::metaKey('motif_titre'), true);
+            $montant = (int) get_post_meta($id, self::metaKey('montant'), true);
+
+            if (! isset($totaux[$motifId])) {
+                $totaux[$motifId] = ['motif_id' => $motifId, 'titre' => $titre, 'total' => 0];
+            }
+
+            $totaux[$motifId]['total'] += $montant;
         }
 
-        return $total;
+        return array_values($totaux);
     }
 
     private static function renderFiltreMotif(): void
@@ -314,8 +347,6 @@ final class Don
 
     private static function renderTotalEtExport(): void
     {
-        $total = self::totalPeriodeVisible();
-
         $urlExport = wp_nonce_url(
             add_query_arg(
                 array_filter([
@@ -333,12 +364,53 @@ final class Don
 
         printf(
             '<div class="alignleft actions don-total-encaisse">'
-            . '<strong>Total encaissé (période visible) : %s %s</strong>'
+            . '<strong>%s</strong>'
             . ' — <a href="%s" class="button">Exporter en CSV</a>'
             . '</div>',
-            esc_html(number_format_i18n($total)),
-            esc_html(Options::devise()),
+            self::libelleTotal(),
             esc_url($urlExport)
         );
+    }
+
+    /**
+     * Filtre motif actif : le total de ce seul motif. Sinon : une
+     * répartition par motif, plus le total général — c'est la question du
+     * trésorier (« combien de dîmes ce mois-ci ? ») qui pilote l'affichage,
+     * pas une seule somme qui la noie.
+     */
+    private static function libelleTotal(): string
+    {
+        $totaux = self::totauxParMotif();
+        $devise = esc_html(Options::devise());
+
+        if (! empty($_GET['motif'])) {
+            $ligne = $totaux[0] ?? ['titre' => '', 'total' => 0];
+
+            return sprintf(
+                'Total encaissé — %s : %s %s',
+                esc_html($ligne['titre'] !== '' ? $ligne['titre'] : 'Motif'),
+                esc_html(number_format_i18n($ligne['total'])),
+                $devise
+            );
+        }
+
+        if ($totaux === []) {
+            return sprintf('Total encaissé (période visible) : %s %s', esc_html(number_format_i18n(0)), $devise);
+        }
+
+        $parties = array_map(
+            static fn (array $ligne): string => sprintf(
+                '%s : %s %s',
+                esc_html($ligne['titre'] !== '' ? $ligne['titre'] : 'Sans motif'),
+                esc_html(number_format_i18n($ligne['total'])),
+                $devise
+            ),
+            $totaux
+        );
+
+        $grandTotal = array_sum(array_column($totaux, 'total'));
+
+        return 'Total encaissé par motif — ' . implode(' · ', $parties)
+            . sprintf(' · Total général : %s %s', esc_html(number_format_i18n($grandTotal)), $devise);
     }
 }

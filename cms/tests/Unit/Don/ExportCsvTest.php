@@ -124,4 +124,53 @@ final class ExportCsvTest extends TestCase
 
         ExportCsv::telecharger();
     }
+
+    /**
+     * fields => 'ids' ne remonte que les identifiants (pas la ligne wp_posts
+     * complète), ce qui court-circuite l'amorçage automatique du cache de
+     * méta que WP_Query fait pour des objets complets : sans l'appel
+     * explicite à _prime_post_caches(), chacun des sept champs lus par ligne
+     * de l'export interrogerait la base séparément — invisible avec deux
+     * dons, sensible à deux cents lors d'un culte.
+     */
+    public function test_la_recuperation_amorce_le_cache_de_meta(): void
+    {
+        Functions\when('get_posts')->justReturn([5]);
+        Functions\when('get_post_meta')->justReturn('');
+        Functions\when('get_the_date')->justReturn('2026-08-05 10:00:00');
+
+        Functions\expect('_prime_post_caches')->once()->with([5], false, true);
+
+        $dons = ExportCsv::recupererDons();
+
+        $this->assertCount(1, $dons);
+    }
+
+    /**
+     * La récupération lit bien chaque champ attendu par lignes() — pas
+     * seulement qu'elle amorce le cache, mais qu'elle produit toujours les
+     * bonnes données une fois passée en fields => 'ids'.
+     */
+    public function test_la_recuperation_produit_les_champs_attendus(): void
+    {
+        Functions\when('get_posts')->justReturn([5]);
+        Functions\when('_prime_post_caches')->justReturn(null);
+        Functions\when('get_the_date')->justReturn('2026-08-05 10:00:00');
+        $metas = [
+            'motif_titre' => 'Dîmes', 'montant' => '2500', 'devise' => 'XOF',
+            'prenom' => 'Jane', 'nom' => 'Doe', 'email' => 'jane@example.test',
+            'telephone' => '+22890000000', 'ref' => 'REF123',
+        ];
+        Functions\when('get_post_meta')->alias(
+            static fn (int $id, string $cle) => $metas[str_replace('_don_', '', $cle)] ?? ''
+        );
+
+        $dons = ExportCsv::recupererDons();
+
+        $this->assertCount(1, $dons);
+        $this->assertSame('2026-08-05 10:00:00', $dons[0]['date']);
+        $this->assertSame('Dîmes', $dons[0]['motif_titre']);
+        $this->assertSame(2500, $dons[0]['montant']);
+        $this->assertSame('REF123', $dons[0]['ref']);
+    }
 }
