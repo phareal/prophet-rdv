@@ -19,11 +19,34 @@ final class RetourHandler
     {
         $paiements = new PaiementRepository($sujet->metaKey(''), $sujet->typeDePublication());
 
+        // La transaction enregistrée par InitHandler à l'initialisation fait
+        // foi : un identifiant différent fourni dans l'URL de retour
+        // appartient à un autre paiement, réel ou non, mais jamais à ce
+        // sujet-ci.
+        $paiementIdEnregistre = $paiements->donnees($sujet->postId())['id'];
+
+        if ($paiementIdEnregistre !== '' && $paiementIdEnregistre !== $paiementId) {
+            $this->refuser($sujet, $paiementId);
+
+            return $paiements->statut($sujet->postId());
+        }
+
         try {
             $transaction = (new Moneroo(Options::env('MONEROO_SECRET_KEY')))
                 ->recuperer($paiementId);
         } catch (Throwable $e) {
             error_log('[Paiement] vérification impossible (transaction ' . $paiementId . ') : ' . $e->getMessage());
+
+            return $paiements->statut($sujet->postId());
+        }
+
+        // Filet de sécurité si aucune transaction n'était encore enregistrée
+        // pour ce sujet : la référence portée en métadonnée par Moneroo (voir
+        // InitHandler::demarrer()) doit elle aussi correspondre.
+        $referenceTransaction = (string) ($transaction['metadata']['ref'] ?? '');
+
+        if ($referenceTransaction !== '' && $referenceTransaction !== $sujet->reference()) {
+            $this->refuser($sujet, $paiementId);
 
             return $paiements->statut($sujet->postId());
         }
@@ -37,5 +60,18 @@ final class RetourHandler
         );
 
         return $paiements->statut($sujet->postId());
+    }
+
+    /**
+     * Jamais de donnée personnelle dans les journaux : seules la référence du
+     * sujet et l'identifiant de transaction sont loggués.
+     */
+    private function refuser(SujetPaiement $sujet, string $paiementId): void
+    {
+        error_log(sprintf(
+            '[Paiement] transaction refusée : ne correspond pas au sujet (réf. %s, transaction %s)',
+            $sujet->reference(),
+            $paiementId
+        ));
     }
 }
