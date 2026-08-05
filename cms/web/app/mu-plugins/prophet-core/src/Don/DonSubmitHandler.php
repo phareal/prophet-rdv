@@ -7,6 +7,7 @@ namespace ProphetCore\Don;
 use ProphetCore\Paiement\InitHandler;
 use ProphetCore\Paiement\MonerooException;
 use ProphetCore\Rdv\FlashStore;
+use ProphetCore\Support\Journal;
 use Throwable;
 
 class DonSubmitHandler
@@ -109,7 +110,10 @@ class DonSubmitHandler
 
             return;
         } catch (MonerooException $e) {
-            error_log('[Don] paiement non initialisable (réf. ' . $ref . ') : ' . $e->getMessage());
+            error_log(
+                '[Don] paiement non initialisable (réf. ' . Journal::tronquerReference($ref) . '…) : '
+                . $e->getMessage()
+            );
         }
 
         wp_safe_redirect(add_query_arg(['ref' => $ref, 'paiement' => 'erreur'], home_url('/don/merci/')));

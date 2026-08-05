@@ -249,4 +249,42 @@ final class InitHandlerTest extends TestCase
         $this->assertStringContainsString('/confirmation/', (string) $redirection);
         $this->assertStringContainsString('ref=INCONNUE', (string) $redirection);
     }
+
+    /**
+     * La référence est le jeton qui ouvre /don/merci/?ref=…, pas une donnée
+     * personnelle — mais un jeton exploitable tout de même. Les journaux
+     * serveur sont déjà une surface sensible : huit caractères suffisent à
+     * corréler les lignes d'un même incident sans y faire figurer le jeton
+     * complet.
+     */
+    public function test_le_journal_ne_contient_que_les_huit_premiers_caracteres_de_la_reference(): void
+    {
+        $this->contexte();
+        ResolveurDeSujet::enregistrer(
+            static fn (string $ref): ?SujetPaiement => null,
+            static fn (string $id): ?SujetPaiement => null,
+        );
+        $ref = 'ABCDEFGH1234567890IJKLMNOPQRSTUV';
+        $_GET['ref'] = $ref;
+        $messages = [];
+        Functions\when('error_log')->alias(function ($message) use (&$messages) {
+            $messages[] = $message;
+
+            return true;
+        });
+        Functions\when('wp_safe_redirect')->justReturn(true);
+
+        $handler = new class extends InitHandler {
+            protected function terminer(): void
+            {
+            }
+        };
+        $handler->handle();
+
+        unset($_GET['ref']);
+
+        $this->assertNotEmpty($messages);
+        $this->assertStringContainsString(substr($ref, 0, 8), $messages[0]);
+        $this->assertStringNotContainsString(substr($ref, 8), $messages[0]);
+    }
 }

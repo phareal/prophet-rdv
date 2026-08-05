@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ProphetCore\Paiement;
 
 use ProphetCore\Options;
+use ProphetCore\Support\Journal;
 
 class InitHandler
 {
@@ -25,7 +26,10 @@ class InitHandler
         try {
             $url = $this->demarrer($ref);
         } catch (MonerooException $e) {
-            error_log('[Paiement] initialisation impossible (réf. ' . $ref . ') : ' . $e->getMessage());
+            error_log(
+                '[Paiement] initialisation impossible (réf. ' . Journal::tronquerReference($ref) . '…) : '
+                . $e->getMessage()
+            );
             wp_safe_redirect($this->urlErreur($ref));
             $this->terminer();
 
