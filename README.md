@@ -149,6 +149,8 @@ Tout le contenu éditorial se gère depuis `wp-admin`, sans déploiement :
 | Témoignages | Nom, initiales, pays, service concerné, étoiles, texte |
 | Photos | Galerie — image, légende, format (normal ou large) |
 | Rendez-vous | Demandes reçues, en lecture avec changement de statut |
+| Motifs de paiement | Dîmes, Offrandes, Alliance… — création, régime de montant, lien et QR |
+| Dons | Dons reçus, filtre par motif et par statut, export CSV |
 | Contenu du site | Textes du hero, à propos, chiffres clés, appel à l'action, pied de page |
 | Réglages RDV | Numéros WhatsApp, email de notification, créneaux horaires, modes de paiement |
 
@@ -174,6 +176,72 @@ abandonné ou échoué laisse une demande exploitable, visible en administration
 
 En mode **exigé**, une demande non réglée est annulée après le délai configuré et
 son créneau est libéré.
+
+---
+
+## Motifs de paiement et dons
+
+**« Mode » et « motif » sont deux notions distinctes, à ne jamais confondre :**
+
+| Terme | Sens | Où |
+|-------|------|----|
+| **Mode** de paiement | Le canal utilisé — Mobile Money, virement, PayPal, crypto | Champ existant du formulaire de rendez-vous, réglé dans **Réglages RDV** |
+| **Motif** de paiement | La raison du versement — Dîmes, Offrandes, Alliance… | Menu **Motifs de paiement**, décrit ci-dessous |
+
+Un don n'est pas une consultation : c'est un module autonome, sans créneau ni
+confirmation par le prophète. Il partage la même mécanique de paiement
+(Moneroo, vérification serveur, webhook signé) que le rendez-vous, mais vit à
+côté de lui.
+
+### Créer un motif
+
+Dans `wp-admin` → **Motifs de paiement** → Ajouter :
+
+1. **Titre et description** — ce que le visiteur voit sur `/don/` (« Dîmes »,
+   « Offrandes »…). Le titre donne aussi le lien profond du motif (`/don/dimes/`
+   pour un titre « Dîmes »).
+2. **Icône** (nom lucide, comme pour un service) et **couleur** de la pastille.
+3. **Régime de montant** — trois choix, qui changent ce que le visiteur peut
+   saisir :
+   - **Libre** : le donateur saisit ce qu'il veut, dans les bornes.
+   - **Fixe** : un montant unique et non modifiable (« Alliance »
+     convenue, par exemple). Le montant soumis dans la requête est **toujours
+     ignoré** — celui du motif fait foi, même si la requête est trafiquée.
+   - **Suggéré** : des paliers proposés en boutons, avec une saisie libre
+     toujours possible dans les bornes.
+4. **Montant minimum / maximum** — le garde-fou serveur (500 et 5 000 000 par
+   défaut). Ce sont ces bornes qui sont vérifiées à la réception du
+   formulaire ; les attributs `min`/`max` du champ HTML ne sont qu'un confort
+   d'affichage.
+5. **Motif actif** — décoché, le motif disparaît du sélecteur mais son lien
+   profond reste consultable (avec un message invitant à choisir un autre
+   motif) : un lien déjà imprimé ou partagé ne casse jamais.
+
+### Récupérer le lien et le QR
+
+La liste **Motifs de paiement** affiche, pour chaque motif, sa colonne
+« Lien et QR » : l'URL partageable (`/don/<motif>/`, motif présélectionné) et
+deux téléchargements — **PNG** et **SVG**. Le QR est généré côté serveur au
+premier affichage puis mis en cache dans `uploads/qr/` ; il est **régénéré
+automatiquement** si l'identifiant (slug) du motif change, pour ne jamais
+pointer vers une page disparue.
+
+C'est ce lien et ce QR qui se partagent en statut WhatsApp, se projettent
+pendant un culte ou s'impriment sur un flyer.
+
+### Retrouver les dons
+
+Menu **Dons** : un don par ligne (donateur, motif, montant, statut de
+paiement, date), avec un filtre par motif et par statut, et le **total
+encaissé** sur la période visible en tête de liste — seuls les dons
+effectivement réglés sont comptés.
+
+### Exporter le CSV
+
+Bouton « Exporter en CSV » en tête de la liste **Dons** : il respecte les
+filtres actifs (motif, statut) et produit un fichier avec BOM UTF-8, pour que
+les accents s'affichent correctement à l'ouverture dans un tableur (Excel,
+Numbers…) plutôt qu'en caractères mal encodés.
 
 ---
 
