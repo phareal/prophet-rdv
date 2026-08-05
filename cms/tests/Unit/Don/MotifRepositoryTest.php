@@ -107,6 +107,39 @@ final class MotifRepositoryTest extends TestCase
         $this->assertNotNull(MotifRepository::parId(3));
     }
 
+    /**
+     * DonComposer::motifPreselectionneId() s'appuie sur ce filtre : un motif
+     * désactivé entre la soumission et le réaffichage ne doit jamais rester
+     * présélectionné, sans quoi Alpine (app.js) n'a aucune entrée à résoudre
+     * pour cet id — aucun bloc montant ne s'affiche, et l'erreur de
+     * validation renvoyée n'a plus de champ à corriger.
+     */
+    public function test_un_id_present_dans_la_liste_est_conserve(): void
+    {
+        $motifs = [['id' => 10, 'titre' => 'Dîmes'], ['id' => 20, 'titre' => 'Offrandes']];
+
+        $this->assertSame(10, MotifRepository::idParmi($motifs, 10));
+    }
+
+    public function test_un_id_absent_de_la_liste_retombe_sur_aucune_preselection(): void
+    {
+        $motifs = [['id' => 10, 'titre' => 'Dîmes']];
+
+        $this->assertNull(MotifRepository::idParmi($motifs, 99));
+    }
+
+    public function test_un_id_nul_reste_nul(): void
+    {
+        $motifs = [['id' => 10, 'titre' => 'Dîmes']];
+
+        $this->assertNull(MotifRepository::idParmi($motifs, null));
+    }
+
+    public function test_une_liste_de_motifs_vide_ne_conserve_aucun_id(): void
+    {
+        $this->assertNull(MotifRepository::idParmi([], 10));
+    }
+
     public function test_la_requete_ne_demande_que_les_motifs_publies_dans_l_ordre_du_menu(): void
     {
         $capture = [];

@@ -31,10 +31,11 @@ class Don extends Composer
     {
         $flash = self::flash();
         $valeurs = $flash['values'] ?? [];
+        $motifs = MotifRepository::actifs();
 
         return [
-            'motifs' => MotifRepository::actifs(),
-            'motifPreselectionne' => $this->motifPreselectionneId($valeurs),
+            'motifs' => $motifs,
+            'motifPreselectionne' => $this->motifPreselectionneId($valeurs, $motifs),
             'motifIndisponible' => $this->motifIndisponible(),
             'erreurs' => $flash['errors'] ?? [],
             'valeurs' => $valeurs,
@@ -65,8 +66,15 @@ class Don extends Composer
      * n'est jamais renvoyé ici — motifIndisponible() porte ce cas séparément,
      * car il exige un message, pas une sélection dans une liste qui ne le
      * contient plus.
+     *
+     * L'id issu de FlashStore passe par MotifRepository::idParmi() : entre la
+     * soumission et ce réaffichage, le motif visé peut avoir été désactivé —
+     * sans ce filtre, Alpine (app.js) recevrait un id qu'il ne peut résoudre
+     * dans `motifs`, et aucun bloc montant ne s'afficherait.
+     *
+     * @param array<int, array<string, mixed>> $motifs
      */
-    private function motifPreselectionneId(array $valeurs): ?int
+    private function motifPreselectionneId(array $valeurs, array $motifs): ?int
     {
         $motifDuLien = $this->motifDuLienProfond();
 
@@ -74,7 +82,9 @@ class Don extends Composer
             return $motifDuLien['id'];
         }
 
-        return isset($valeurs['motif']) && $valeurs['motif'] !== '' ? (int) $valeurs['motif'] : null;
+        $id = isset($valeurs['motif']) && $valeurs['motif'] !== '' ? (int) $valeurs['motif'] : null;
+
+        return MotifRepository::idParmi($motifs, $id);
     }
 
     /** Titre du motif visé par un lien profond désactivé, sinon null. */

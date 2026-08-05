@@ -43,6 +43,31 @@ final class MotifRepository
             : self::depuisPost($post);
     }
 
+    /**
+     * Un id présélectionné (lien profond ou renvoi d'une soumission invalide)
+     * n'est fiable que s'il figure encore dans la liste des motifs affichés :
+     * un motif désactivé entre la soumission et le réaffichage laisserait
+     * Alpine (app.js) sans entrée à résoudre pour cet id — aucun bloc montant
+     * ne s'afficherait, et l'erreur de validation n'aurait plus de champ à
+     * corriger. Repli sur aucune présélection plutôt qu'un id orphelin.
+     *
+     * @param array<int, array<string, mixed>> $motifs
+     */
+    public static function idParmi(array $motifs, ?int $id): ?int
+    {
+        if ($id === null) {
+            return null;
+        }
+
+        foreach ($motifs as $motif) {
+            if (($motif['id'] ?? null) === $id) {
+                return $id;
+            }
+        }
+
+        return null;
+    }
+
     public static function parSlug(string $slug): ?array
     {
         $posts = get_posts([
