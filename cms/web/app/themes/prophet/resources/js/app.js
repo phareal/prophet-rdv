@@ -16,6 +16,26 @@ Alpine.data('rdvForm', (initial) => ({
   envoi: false,
 }))
 
+// Formulaire de don (tâche 8) : les trois régimes de montant (libre, fixe,
+// suggéré) sont tous rendus côté serveur dans partials/don-form.blade.php et
+// affichés selon le motif choisi — jamais de fetch, jamais de round-trip.
+// `motifId` démarre soit sur le motif du lien profond, soit sur celui de la
+// dernière soumission invalide (App\View\Composers\Don), jamais les deux à
+// la fois. `montantInitial` vient du même FlashStore : sans lui, un montant
+// refusé par le serveur (hors bornes, non entier…) reviendrait vide, alors
+// que les autres champs (prénom, email…) sont bien réaffichés — la
+// régression que le piège n°1 du projet met en garde de ne pas reproduire.
+Alpine.data('donForm', (motifs, preselection, devise, montantInitial) => ({
+  motifs,
+  motifId: preselection ?? '',
+  montant: montantInitial ? Number(montantInitial) : '',
+  devise,
+  envoi: false,
+  get motif() {
+    return this.motifs.find((m) => m.id === this.motifId) ?? null
+  },
+}))
+
 window.Alpine = Alpine
 Alpine.start()
 

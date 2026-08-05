@@ -52,6 +52,17 @@ final class Don
                 'supports' => ['title'],
                 'capabilities' => ['create_posts' => 'do_not_allow'],
                 'map_meta_cap' => true,
+                // register_post_type() active la réécriture par défaut (même
+                // quand public=false) avec le nom du type comme slug — ici
+                // « don », identique au slug explicite du CPT public
+                // motif_paiement (rewrite/URL partageable). Les deux généraient
+                // alors la même règle de réécriture, et celle posée en dernier
+                // (ce type-ci) écrasait silencieusement celle de
+                // motif_paiement dans la table fusionnée : le lien profond
+                // /don/<slug>/ ne résolvait plus le motif mais retombait sur
+                // la page d'accueil. Ce type n'a de toute façon aucune raison
+                // d'être visité par URL : privé, non interrogeable.
+                'rewrite' => false,
             ]);
 
             foreach (self::STATUTS as $slug => $libelle) {

@@ -12,6 +12,34 @@ use ProphetCore\Tests\TestCase;
 final class DonTest extends TestCase
 {
     /**
+     * register_post_type() active la réécriture par défaut même pour un type
+     * non public, avec le nom du type comme slug — ici « don », identique au
+     * slug explicite du CPT public motif_paiement. Sans rewrite=false, la
+     * règle de ce type (privé, jamais destiné à être visité par URL) écrase
+     * silencieusement celle de motif_paiement dans la table fusionnée, et le
+     * lien profond /don/<slug>/ ne résout plus le motif du tout.
+     */
+    public function test_le_type_n_a_pas_de_reecriture_pour_ne_pas_ecraser_celle_du_motif(): void
+    {
+        $capture = [];
+        Functions\when('register_post_type')->alias(function ($slug, $args) use (&$capture) {
+            $capture = $args;
+        });
+        Functions\when('register_post_status')->justReturn(true);
+        Functions\when('add_action')->alias(function ($hook, $callback) {
+            if ($hook === 'init') {
+                $callback();
+            }
+        });
+        Functions\when('add_filter')->justReturn(true);
+        Functions\when('_n_noop')->returnArg();
+
+        Don::register();
+
+        $this->assertFalse($capture['rewrite']);
+    }
+
+    /**
      * Simule le filtrage réel de WP_Query sur meta_query : seuls les dons
      * dont la meta correspond à chaque clause survivent. C'est ce filtrage,
      * pas une simple relecture des arguments, qui pince la régression.
