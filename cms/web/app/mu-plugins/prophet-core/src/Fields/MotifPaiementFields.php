@@ -47,6 +47,24 @@ final class MotifPaiementFields
                     Field::make('checkbox', 'motif_actif', 'Motif actif')
                         ->set_default_value(true)
                         ->set_help_text('Décoché, le motif disparaît du formulaire mais son lien reste consultable.'),
+                    // Défaut D2 de la recette du 2026-08-04 : le QR n'était
+                    // visible que dans la colonne de la liste, jamais sur
+                    // l'écran d'édition individuel — l'endroit où l'on
+                    // regarde avant de partager un motif. Champ `html` : pas
+                    // de valeur à stocker, juste le rendu partagé avec la
+                    // colonne (MotifPaiement::lienEtQrHtml()). Carbon Fields
+                    // n'expose pas l'ID du post au callback ; à l'écran
+                    // d'édition, WordPress le porte dans `$_GET['post']`
+                    // (c'est d'ailleurs ainsi que Post_Meta_Container résout
+                    // lui-même son propre object_id).
+                    Field::make('html', 'motif_qr', 'Lien et QR code')
+                        ->set_html(static function (): string {
+                            $postId = isset($_GET['post']) ? (int) $_GET['post'] : 0;
+
+                            return $postId > 0
+                                ? MotifPaiement::lienEtQrHtml($postId)
+                                : '<p>Enregistrez le motif pour générer son lien et son QR.</p>';
+                        }),
                 ]);
         });
 

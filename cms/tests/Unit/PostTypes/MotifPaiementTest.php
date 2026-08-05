@@ -10,6 +10,68 @@ use ProphetCore\Tests\TestCase;
 
 final class MotifPaiementTest extends TestCase
 {
+    private string $repertoire;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->repertoire = sys_get_temp_dir() . '/motif-qr-test-' . uniqid();
+        mkdir($this->repertoire . '/qr', 0777, true);
+
+        Functions\when('wp_upload_dir')->justReturn([
+            'basedir' => $this->repertoire,
+            'baseurl' => 'https://exemple.test/uploads',
+        ]);
+        Functions\when('get_permalink')->justReturn('https://exemple.test/don/dimes/');
+        Functions\when('wp_mkdir_p')->justReturn(true);
+        Functions\when('esc_url')->returnArg();
+    }
+
+    protected function tearDown(): void
+    {
+        foreach (glob($this->repertoire . '/qr/*') ?: [] as $fichier) {
+            unlink($fichier);
+        }
+
+        rmdir($this->repertoire . '/qr');
+        rmdir($this->repertoire);
+
+        parent::tearDown();
+    }
+
+    /**
+     * Le HTML est partagé entre la colonne de la liste et l'écran d'édition
+     * (défaut D2 de la recette : le QR n'était visible que dans la liste) :
+     * un seul point de génération garantit que les deux affichent strictement
+     * le même lien et les deux mêmes téléchargements.
+     */
+    public function test_le_html_contient_le_lien_et_les_deux_telechargements(): void
+    {
+        $html = MotifPaiement::lienEtQrHtml(65);
+
+        $this->assertStringContainsString('href="https://exemple.test/don/dimes/"', $html);
+        $this->assertStringContainsString('https://exemple.test/uploads/qr/motif-65.png', $html);
+        $this->assertStringContainsString('https://exemple.test/uploads/qr/motif-65.svg', $html);
+        $this->assertStringContainsString('Télécharger PNG', $html);
+        $this->assertStringContainsString('Télécharger SVG', $html);
+    }
+
+    /**
+     * La colonne « Lien et QR » de la liste des motifs (utile pour récupérer
+     * un lien vite fait) doit continuer à fonctionner exactement comme avant
+     * — ce n'est pas parce que le QR arrive sur l'écran d'édition qu'il doit
+     * disparaître de la liste.
+     */
+    public function test_la_colonne_de_liste_affiche_toujours_le_lien_et_le_qr(): void
+    {
+        ob_start();
+        MotifPaiement::renderColumn('motif_lien_qr', 65);
+        $sortie = ob_get_clean();
+
+        $this->assertSame(MotifPaiement::lienEtQrHtml(65), $sortie);
+    }
+
     /**
      * La page de remerciement du don (/don/merci/) vit sous le même préfixe
      * /don/ que le lien profond de chaque motif. La règle générique posée

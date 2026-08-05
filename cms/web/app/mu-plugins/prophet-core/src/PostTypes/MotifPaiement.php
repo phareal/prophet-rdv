@@ -74,11 +74,22 @@ final class MotifPaiement
             return;
         }
 
+        echo self::lienEtQrHtml($postId);
+    }
+
+    /**
+     * Lien partageable et deux téléchargements (PNG, SVG) : point de rendu
+     * unique partagé par la colonne « Lien et QR » de la liste des motifs et
+     * par le champ de l'écran d'édition (MotifPaiementFields) — les deux
+     * doivent toujours montrer strictement le même lien et le même QR.
+     */
+    public static function lienEtQrHtml(int $postId): string
+    {
         $lien = (string) get_permalink($postId);
         $png = QrCode::pour($postId, 'png');
         $svg = QrCode::pour($postId, 'svg');
 
-        printf(
+        return sprintf(
             '<a href="%1$s" target="_blank" rel="noopener">%1$s</a><br>'
             . '<a href="%2$s" download>Télécharger PNG</a> · <a href="%3$s" download>Télécharger SVG</a>',
             esc_url($lien),
