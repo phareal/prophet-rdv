@@ -117,4 +117,151 @@ final class DonTest extends TestCase
 
         $this->assertSame(Statut::PAYE, $clauseStatut['value']);
     }
+
+    /**
+     * Les trois chemins qui peuvent régler un paiement (retour navigateur,
+     * webhook, changement manuel dans l'admin) écrivent tous la méta
+     * `_don_paiement_statut` via update_post_meta()/update_metadata() — c'est
+     * ce point d'écriture unique, pas chacun des trois chemins, que ce
+     * gestionnaire observe.
+     */
+    public function test_un_paiement_regle_fait_passer_le_don_a_recu(): void
+    {
+        Functions\when('get_post_type')->justReturn(Don::SLUG);
+        Functions\when('get_post_status')->justReturn(Don::STATUT_EN_ATTENTE);
+        $appels = [];
+        Functions\when('wp_update_post')->alias(function ($args) use (&$appels) {
+            $appels[] = $args;
+
+            return (int) $args['ID'];
+        });
+
+        Don::synchroniserStatutDepuisPaiement(1, 42, Don::metaKey('paiement_statut'), Statut::PAYE);
+
+        $this->assertSame([['ID' => 42, 'post_status' => Don::STATUT_RECU]], $appels);
+    }
+
+    public function test_un_paiement_echoue_fait_passer_le_don_a_echoue(): void
+    {
+        Functions\when('get_post_type')->justReturn(Don::SLUG);
+        Functions\when('get_post_status')->justReturn(Don::STATUT_EN_ATTENTE);
+        $appels = [];
+        Functions\when('wp_update_post')->alias(function ($args) use (&$appels) {
+            $appels[] = $args;
+
+            return (int) $args['ID'];
+        });
+
+        Don::synchroniserStatutDepuisPaiement(1, 42, Don::metaKey('paiement_statut'), Statut::ECHOUE);
+
+        $this->assertSame([['ID' => 42, 'post_status' => Don::STATUT_ECHOUE]], $appels);
+    }
+
+    public function test_un_paiement_annule_fait_aussi_passer_le_don_a_echoue(): void
+    {
+        Functions\when('get_post_type')->justReturn(Don::SLUG);
+        Functions\when('get_post_status')->justReturn(Don::STATUT_EN_ATTENTE);
+        $appels = [];
+        Functions\when('wp_update_post')->alias(function ($args) use (&$appels) {
+            $appels[] = $args;
+
+            return (int) $args['ID'];
+        });
+
+        Don::synchroniserStatutDepuisPaiement(1, 42, Don::metaKey('paiement_statut'), Statut::ANNULE);
+
+        $this->assertSame([['ID' => 42, 'post_status' => Don::STATUT_ECHOUE]], $appels);
+    }
+
+    public function test_un_paiement_en_attente_ne_change_pas_le_statut_du_don(): void
+    {
+        Functions\when('get_post_type')->justReturn(Don::SLUG);
+        Functions\when('get_post_status')->justReturn(Don::STATUT_EN_ATTENTE);
+        $appels = [];
+        Functions\when('wp_update_post')->alias(function ($args) use (&$appels) {
+            $appels[] = $args;
+
+            return (int) $args['ID'];
+        });
+
+        Don::synchroniserStatutDepuisPaiement(1, 42, Don::metaKey('paiement_statut'), Statut::EN_ATTENTE);
+
+        $this->assertSame([], $appels);
+    }
+
+    /**
+     * Pas d'effet de bord si le statut natif reflète déjà la cible : couvre
+     * le cas où appliquerStatut() a déjà été refusé (statut final) mais où le
+     * hook serait quand même invoqué, et le cas d'une ré-application manuelle
+     * du même statut par le prophète dans l'admin.
+     */
+    public function test_aucun_second_effet_si_le_statut_natif_reflete_deja_la_cible(): void
+    {
+        Functions\when('get_post_type')->justReturn(Don::SLUG);
+        Functions\when('get_post_status')->justReturn(Don::STATUT_RECU);
+        $appels = [];
+        Functions\when('wp_update_post')->alias(function ($args) use (&$appels) {
+            $appels[] = $args;
+
+            return (int) $args['ID'];
+        });
+
+        Don::synchroniserStatutDepuisPaiement(1, 42, Don::metaKey('paiement_statut'), Statut::PAYE);
+
+        $this->assertSame([], $appels);
+    }
+
+    public function test_une_meta_qui_n_est_pas_le_statut_de_paiement_est_ignoree(): void
+    {
+        Functions\when('get_post_type')->justReturn(Don::SLUG);
+        $appels = [];
+        Functions\when('wp_update_post')->alias(function ($args) use (&$appels) {
+            $appels[] = $args;
+
+            return (int) $args['ID'];
+        });
+
+        Don::synchroniserStatutDepuisPaiement(1, 42, Don::metaKey('montant'), Statut::PAYE);
+
+        $this->assertSame([], $appels);
+    }
+
+    public function test_une_meta_sur_un_autre_type_de_publication_est_ignoree(): void
+    {
+        Functions\when('get_post_type')->justReturn('rendez_vous');
+        $appels = [];
+        Functions\when('wp_update_post')->alias(function ($args) use (&$appels) {
+            $appels[] = $args;
+
+            return (int) $args['ID'];
+        });
+
+        Don::synchroniserStatutDepuisPaiement(1, 42, Don::metaKey('paiement_statut'), Statut::PAYE);
+
+        $this->assertSame([], $appels);
+    }
+
+    /**
+     * Le gestionnaire est bien câblé sur les deux actions WordPress qui
+     * suivent une écriture de méta post (ajout ou mise à jour) : une méta qui
+     * n'existait pas encore (première écriture après webhook/retour) déclenche
+     * `added_post_meta`, une méta déjà présente (ré-écriture manuelle par le
+     * prophète) déclenche `updated_post_meta`.
+     */
+    public function test_le_gestionnaire_est_cable_sur_l_ajout_et_la_mise_a_jour_de_meta(): void
+    {
+        $hooksEnregistres = [];
+        Functions\when('register_post_type')->justReturn(true);
+        Functions\when('register_post_status')->justReturn(true);
+        Functions\when('add_action')->alias(function ($hook, $callback) use (&$hooksEnregistres) {
+            $hooksEnregistres[] = $hook;
+        });
+        Functions\when('add_filter')->justReturn(true);
+        Functions\when('_n_noop')->returnArg();
+
+        Don::register();
+
+        $this->assertContains('updated_post_meta', $hooksEnregistres);
+        $this->assertContains('added_post_meta', $hooksEnregistres);
+    }
 }

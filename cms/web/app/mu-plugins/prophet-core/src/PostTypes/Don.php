@@ -111,6 +111,53 @@ final class Don
 
             self::renderTotalEtExport();
         });
+
+        // Les trois chemins qui règlent un paiement (retour navigateur,
+        // webhook, changement manuel dans l'admin) écrivent tous la méta
+        // `_don_paiement_statut` par le même appel WordPress
+        // (update_post_meta()/carbon_set_post_meta() finissent tous deux dans
+        // update_metadata()) : observer ce point d'écriture unique, plutôt que
+        // de dupliquer la synchronisation dans chacun des trois appelants,
+        // garantit qu'aucun chemin ne peut l'oublier. `added_post_meta` couvre
+        // la toute première écriture (après initialisation du paiement),
+        // `updated_post_meta` couvre les suivantes.
+        add_action('updated_post_meta', [self::class, 'synchroniserStatutDepuisPaiement'], 10, 4);
+        add_action('added_post_meta', [self::class, 'synchroniserStatutDepuisPaiement'], 10, 4);
+    }
+
+    /**
+     * Fait suivre au `post_status` natif le statut de paiement, pour que les
+     * compteurs natifs WordPress (« Reçu (n) », « Échoué (n) ») en haut de la
+     * liste reflètent enfin la réalité — jusqu'ici seule la colonne
+     * personnalisée (méta) la reflétait.
+     *
+     * Idempotent par construction : si le statut natif porte déjà la cible,
+     * aucun appel à wp_update_post() n'est fait. Combiné au fait que
+     * PaiementRepository::appliquerStatut() n'écrit la méta que lorsque le
+     * statut n'est pas déjà final, un statut déjà réglé ne redéclenche jamais
+     * cette transition — la garantie « idempotent et monotone » du paiement
+     * n'est donc jamais contournée ici.
+     *
+     * @param int|string $metaId  fourni par les hooks WordPress, non utilisé
+     * @param mixed      $metaValue
+     */
+    public static function synchroniserStatutDepuisPaiement($metaId, int $postId, string $metaKey, $metaValue): void
+    {
+        if ($metaKey !== self::metaKey('paiement_statut') || get_post_type($postId) !== self::SLUG) {
+            return;
+        }
+
+        $cible = match ((string) $metaValue) {
+            Statut::PAYE => self::STATUT_RECU,
+            Statut::ECHOUE, Statut::ANNULE => self::STATUT_ECHOUE,
+            default => null,
+        };
+
+        if ($cible === null || get_post_status($postId) === $cible) {
+            return;
+        }
+
+        wp_update_post(['ID' => $postId, 'post_status' => $cible]);
     }
 
     public static function adminColumns(array $colonnes): array
