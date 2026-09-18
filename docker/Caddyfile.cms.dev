@@ -1,0 +1,16 @@
+:8080 {
+	root * /srv/web
+	encode zstd gzip
+
+	# Carbon Fields ships its compiled JS/CSS under the Composer vendor dir,
+	# which sits outside the document root in this Bedrock layout. Serve it
+	# directly so Carbon_Fields\URL (set in prophet-core.php) resolves to
+	# reachable assets instead of 404ing.
+	handle_path /cf-vendor/carbon-fields/* {
+		root * /srv/vendor/htmlburger/carbon-fields
+		file_server
+	}
+
+	php_fastcgi app:9000
+	file_server
+}

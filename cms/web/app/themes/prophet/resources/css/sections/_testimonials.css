@@ -1,0 +1,183 @@
+/*
+ * Port de components/TestimonialsSection.vue <style scoped> (tâche 18).
+ * L'audit de la tâche 4 a établi que TestimonialsSection.vue rend sa propre
+ * balise <article class="tcard"> inline et ne monte jamais
+ * TestimonialCard.vue (mort, jamais référencé hors des types auto-générés
+ * par Nuxt). Le CSS `.tcard*` ci-dessous vient donc bien du bloc <style
+ * scoped> de TestimonialsSection.vue, pas de TestimonialCard.vue — dont le
+ * CSS (`--r3`, `--sh-sm/md`, badges verts) n'est pas repris.
+ *
+ * Autre constat de lecture de la source : TestimonialsSection.vue ne
+ * contient aucun carrousel. `<script setup>` ne déclare ni ref ni index ;
+ * `.testimonials__grid` est une simple grille CSS (3 colonnes desktop,
+ * 2 en dessous de 1024px, 1 en dessous de 640px) qui affiche tous les
+ * témoignages simultanément. sections/testimonials.blade.php reproduit donc
+ * cette grille statique sans x-data ni x-show — un carrousel Alpine y
+ * introduirait un comportement absent de la source.
+ */
+.sec-testimonials {
+  &.testimonials {
+    background: #fff;
+    padding: 8rem 2.5rem;
+    position: relative;
+  }
+
+  &.testimonials::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent 0%, rgba(176,122,20,0.3) 30%, rgba(176,122,20,0.3) 70%, transparent 100%);
+  }
+
+  .testimonials__inner { max-width: 1200px; margin: 0 auto; }
+
+  .testimonials__header {
+    text-align: center;
+    max-width: 580px;
+    margin: 0 auto 4.5rem;
+  }
+
+  .testimonials__label {
+    display: inline-block;
+    font-family: var(--f-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #B07A14;
+    margin-bottom: 1rem;
+  }
+
+  .testimonials__title {
+    font-family: var(--f-display);
+    font-weight: 400;
+    font-size: clamp(2.2rem, 4vw, 3.2rem);
+    line-height: 1.1;
+    letter-spacing: 0.04em;
+    color: #0C1528;
+    margin-bottom: 1.25rem;
+  }
+
+  .testimonials__title em {
+    font-family: var(--f-serif);
+    font-style: italic;
+    color: #B07A14;
+  }
+
+  .testimonials__desc {
+    font-family: var(--f-serif);
+    font-size: 1.1rem;
+    line-height: 1.75;
+    color: #5C5752;
+  }
+
+  /* Grid */
+  .testimonials__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 4rem;
+  }
+
+  .tcard {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    padding: 2rem;
+    background: #FDFCF9;
+    border: 1px solid #EAE7E0;
+    border-radius: 8px;
+    transition: background var(--t), border-color var(--t), box-shadow var(--t), transform var(--t);
+  }
+
+  .tcard:hover {
+    background: #fff;
+    border-color: rgba(176,122,20,0.25);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+    transform: translateY(-4px);
+  }
+
+  .tcard__top { display: flex; align-items: center; justify-content: space-between; }
+  .tcard__quote-icon { color: rgba(176, 122, 20, 0.25); }
+  .tcard__stars { display: flex; gap: 0.1rem; }
+  .tcard__star { color: #B07A14; font-size: 0.8rem; }
+
+  .tcard__text {
+    font-family: var(--f-serif);
+    font-style: italic;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: #4B4540;
+    flex: 1;
+  }
+
+  .tcard__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid #EAE7E0;
+  }
+
+  .tcard__author { display: flex; align-items: center; gap: 0.75rem; }
+
+  .tcard__avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--f-display);
+    font-size: 0.65rem; font-weight: 700;
+    color: white; flex-shrink: 0;
+  }
+
+  .tcard__meta { display: flex; flex-direction: column; gap: 0.08rem; }
+
+  .tcard__name {
+    font-family: var(--f-display);
+    font-size: 0.7rem; font-weight: 600;
+    letter-spacing: 0.06em; color: #1A1714;
+  }
+
+  .tcard__country {
+    font-family: var(--f-mono);
+    font-size: 0.6rem; color: #5C5752; letter-spacing: 0.06em;
+  }
+
+  .tcard__tag {
+    font-family: var(--f-mono);
+    font-size: 0.58rem;
+    padding: 0.25rem 0.7rem;
+    border: 1px solid rgba(10, 144, 96, 0.25);
+    color: #0A9060;
+    border-radius: 2px;
+    white-space: nowrap;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: rgba(10, 144, 96, 0.04);
+  }
+
+  .testimonials__cta-wrap {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 1rem; text-align: center;
+  }
+
+  .testimonials__cta-text {
+    font-family: var(--f-serif);
+    font-style: italic; font-size: 1.2rem; color: #5C5752;
+  }
+
+  .testimonials__cta {
+    font-family: var(--f-display);
+    font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: #0C1528; text-decoration: none;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid #0C1528;
+    transition: color var(--t), border-color var(--t);
+  }
+
+  .testimonials__cta:hover { color: #B07A14; border-color: #B07A14; }
+
+  @media (max-width: 1024px) { .testimonials__grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px) { .testimonials__grid { grid-template-columns: 1fr; } &.testimonials { padding: 6rem 1.75rem; } }
+}

@@ -1,0 +1,121 @@
+name: prophet_cms
+
+x-app-image: &app-image
+  build:
+    context: .
+    dockerfile: docker/php/Dockerfile.prod
+  image: prophet_cms/app:latest
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: prophet_cms_caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./docker/Caddyfile.cms:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      # Code applicatif : copié depuis l'image app au démarrage par le
+      # service `app-assets` (voir plus bas), jamais un bind mount de la
+      # source. Caddy et php-fpm doivent voir l'application au même chemin
+      # absolu (/srv/web, /srv/vendor) puisque SCRIPT_FILENAME est résolu
+      # côté FPM à partir de la racine que Caddy annonce.
+      - cms_app:/srv:ro
+      - cms_uploads:/srv/web/app/uploads:ro
+    depends_on:
+      app-assets:
+        condition: service_completed_successfully
+      app:
+        condition: service_started
+    networks: [cms_net]
+
+  # Conteneur d'initialisation : copie le code déjà construit dans l'image
+  # `app` (thème Vite compilé, vendor Composer complet, config Bedrock) vers
+  # le volume nommé que Caddy et `wpcli` montent en lecture seule. Ni Caddy
+  # ni la prod ne montent jamais l'arborescence source de l'hôte — l'image
+  # reste l'unique livrable. L'image ne contient déjà pas cms/.env (voir
+  # .dockerignore), donc copier tout /srv ne fait fuiter aucun secret.
+  app-assets:
+    <<: *app-image
+    container_name: prophet_cms_app_assets
+    restart: "no"
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        set -e
+        rm -rf /mnt/dest/*
+        cp -a /srv/. /mnt/dest/
+    volumes:
+      - cms_app:/mnt/dest
+    networks: [cms_net]
+
+  app:
+    <<: *app-image
+    container_name: prophet_cms_app
+    restart: unless-stopped
+    env_file: ./cms/.env
+    volumes:
+      - cms_uploads:/srv/web/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [cms_net]
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+  # wp-cli n'est pas embarqué dans l'image app (pas une dépendance Composer) ;
+  # on réutilise l'image officielle, comme en développement. Le code vient du
+  # même volume que Caddy — jamais d'un bind mount — donc wp-cli voit
+  # exactement ce qui est déployé.
+  wpcli:
+    image: wordpress:cli-php8.2
+    container_name: prophet_cms_wpcli
+    restart: unless-stopped
+    user: "33:33"
+    env_file: ./cms/.env
+    volumes:
+      - cms_app:/srv:ro
+      - cms_uploads:/srv/web/app/uploads:ro
+    working_dir: /srv/web/wp
+    entrypoint: ["tail", "-f", "/dev/null"]
+    depends_on:
+      app-assets:
+        condition: service_completed_successfully
+    networks: [cms_net]
+
+  db:
+    image: mysql:8
+    container_name: prophet_cms_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - cms_mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [cms_net]
+
+volumes:
+  cms_mysql:
+  cms_uploads:
+  cms_app:         # code applicatif copié depuis l'image, servi par Caddy
+  caddy_data:      # certificats Let's Encrypt : ne jamais supprimer en production
+  caddy_config:
+
+networks:
+  cms_net:
+    driver: bridge

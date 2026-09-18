@@ -1,0 +1,36 @@
+# Application
+web/app/plugins/*
+!web/app/plugins/.gitkeep
+web/app/mu-plugins/*/
+# Exception : le code métier du projet vit dans mu-plugins/prophet-core/
+# (voir le plan de migration) — on le suit en versioning malgré la règle
+# Bedrock ci-dessus qui ignore par défaut tout sous-dossier de mu-plugins.
+!web/app/mu-plugins/prophet-core/
+!web/app/mu-plugins/prophet-core/**
+web/app/themes/twentytwentyfive/
+web/app/upgrade
+web/app/uploads/*
+!web/app/uploads/.gitkeep
+web/app/cache/*
+
+# WordPress
+web/wp
+web/.htaccess
+
+# Logs
+*.log
+
+# Dotenv
+.env
+.env.*
+!.env.example
+
+# Composer
+/vendor
+auth.json
+
+# WP-CLI
+wp-cli.local.yml
+
+# PHPUnit
+.phpunit.result.cache

@@ -1,230 +1,288 @@
 # Prophète Jeremiah Nahoum — Application de Prise de Rendez-vous
 
-Application web complète de prise de rendez-vous pour le **Prophète Jeremiah Nahoum**, "Le Conseiller des Rois".
+Site et prise de rendez-vous en ligne pour le **Prophète Jeremiah Nahoum**,
+« Le Conseiller des Rois ». Le contenu est éditable depuis l'administration
+WordPress ; aucune modification de texte ne demande de déploiement.
 
-## Stack Technique
+## Stack technique
 
 | Couche | Technologie |
 |--------|-------------|
-| Framework | Nuxt 3 (SSR, TypeScript strict) |
-| UI | shadcn-vue + Tailwind CSS v3 |
-| Icônes | lucide-vue-next |
-| Validation | vee-validate + zod |
-| Base de données | MongoDB via Mongoose |
-| Email | Nodemailer (SMTP) |
-| WhatsApp | Lien wa.me généré côté client |
-| Conteneur | Docker multi-stage + docker-compose |
-| Reverse proxy | Nginx (SSL ready) |
+| CMS | WordPress sur Bedrock 1.28 (PHP 8.2) |
+| Thème | Sage 11 (Blade, Vite) — `cms/web/app/themes/prophet` |
+| Métier | mu-plugin `prophet-core`, namespace `ProphetCore\` |
+| Champs personnalisés | Carbon Fields |
+| Base de données | MySQL 8 |
+| Interactivité | Alpine.js + flatpickr |
+| Email | SMTP via `wp_mail` |
+| WhatsApp | Lien `wa.me` construit côté serveur |
+| Conteneurs | Docker multi-étages (PHP-FPM) + Docker Compose |
+| Reverse proxy | Caddy 2 (HTTPS automatique) |
 
 ---
 
 ## Démarrage rapide
 
 ### Prérequis
-- Node.js 20+
-- npm 10+
-- Docker + Docker Compose (pour la prod)
+
+- Docker et Docker Compose
+- Node.js 20+ et npm 10+ (pour construire le thème)
 
 ### Développement local
 
 ```bash
-# 1. Installer les dépendances
-npm install
+# 1. Variables d'environnement
+cp cms/.env.example cms/.env
+# Éditer cms/.env : secrets WordPress, SMTP, clés Google, PROPHET_EMAIL
 
-# 2. Copier et configurer les variables d'environnement
+# 2. Pile de développement (Caddy, PHP-FPM, MySQL, WP-CLI)
+docker compose -f docker-compose.cms.dev.yml up -d
+
+# 3. Installation de WordPress (une seule fois)
+./cms/scripts/install-wp.sh
+
+# 4. Contenu réel du site (idempotent, rejouable)
+docker compose -f docker-compose.cms.dev.yml exec -T wpcli wp prophet seed
+
+# 5. Thème : construction, ou serveur de développement avec rechargement à chaud
+cd cms/web/app/themes/prophet && npm install && npm run build
+```
+
+Site sur `http://localhost:8080`, administration sur `http://localhost:8080/wp/wp-admin`.
+
+### Tests
+
+```bash
+docker compose -f docker-compose.cms.dev.yml run --rm app \
+  sh -c "cd /srv && vendor/bin/phpunit"
+```
+
+### Production
+
+```bash
+# 1. Variables lues par Docker Compose lui-même (${DOMAIN}, ${DB_NAME}...)
 cp .env.example .env
-# Éditer .env avec vos valeurs
+# Éditer .env : DOMAIN, ACME_EMAIL, DB_NAME, DB_USER, DB_PASSWORD, DB_ROOT_PASSWORD
 
-# 3. Démarrer MongoDB localement (ou via Docker)
-docker run -d -p 27017:27017 --name mongo mongo:7
+# 2. Variables applicatives de WordPress, comme en développement
+cp cms/.env.example cms/.env
+# Éditer cms/.env : WP_ENV=production, WP_HOME=https://votre-domaine.com,
+# secrets réels, DB_* (mêmes valeurs que dans .env), SMTP, clés Google/YouTube
 
-# 4. Lancer le serveur de développement
-npm run dev
+# 3. Construction et démarrage
+docker compose -f docker-compose.cms.yml up -d --build
 ```
 
-L'application sera disponible sur `http://localhost:3000`
+Caddy obtient et renouvelle les certificats HTTPS via Let's Encrypt. Le volume
+`caddy_data` porte ces certificats : ne jamais le supprimer en production.
 
----
+La pile de production embarque désormais aussi un service `wpcli` (image
+officielle `wordpress:cli-php8.2`, comme en développement) : wp-cli n'est pas
+une dépendance Composer de l'application, donc l'image `app` ne le fournit
+pas. Ce service lit le code depuis le même volume que Caddy — jamais un bind
+mount — il voit donc exactement ce qui est déployé.
 
-## Configuration (.env)
-
-| Variable | Description | Exemple |
-|----------|-------------|---------|
-| `MONGODB_URI` | URI de connexion MongoDB | `mongodb://localhost:27017/prophetrdv` |
-| `SMTP_HOST` | Serveur SMTP | `smtp.gmail.com` |
-| `SMTP_PORT` | Port SMTP | `587` |
-| `SMTP_USER` | Email expéditeur | `votre@gmail.com` |
-| `SMTP_PASS` | Mot de passe d'application | Voir note Gmail |
-| `PROPHET_EMAIL` | Email de notification | `prophet@exemple.com` |
-| `PROPHET_PHONE_1` | Numéro WhatsApp principal | `+22897169090` |
-| `PROPHET_PHONE_2` | Numéro WhatsApp secondaire | `+2348119265483` |
-| `NUXT_PUBLIC_SITE_URL` | URL publique du site | `https://votre-domaine.com` |
-
-**Note Gmail :** Activez l'authentification 2 facteurs sur votre compte Google, puis créez un "App Password" sur [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords).
-
----
-
-## Ajouter les photos
-
-Placez vos photos dans `/public/images/` :
-
-| Fichier | Utilisation | Dimensions |
-|---------|-------------|------------|
-| `prophet-main.jpg` | Colonne gauche (hero) | 400 × 500 px |
-| `gallery-1.jpg` | Galerie photo 1 | 800 × 600 px |
-| `gallery-2.jpg` | Galerie photo 2 | 800 × 600 px |
-| `gallery-3.jpg` | Galerie photo 3 | 800 × 600 px |
-| `gallery-4.jpg` | Galerie photo 4 | 800 × 600 px |
-| `gallery-5.jpg` | Galerie photo 5 | 800 × 600 px |
-| `gallery-6.jpg` | Galerie photo 6 | 800 × 600 px |
-
-Après ajout, remplacez les placeholders dans :
-- `components/HeroLeft.vue` (ligne ~55) : décommentez la balise `<img>`
-- `components/GallerySection.vue` : remplacez les `<div>` placeholder par des `<img>`
-
----
-
-## Production avec Docker
+**À vérifier après le premier déploiement :**
 
 ```bash
-# Construire et démarrer
-make build && make up
+# Le site doit être indexable — ce réglage vit en base et suit une copie de base
+docker compose -f docker-compose.cms.yml exec -T wpcli wp option get blog_public   # attendu : 1
 
-# Voir les logs
-make logs
+# Les assets de Carbon Fields, servis hors racine web
+curl -sS -o /dev/null -w '%{http_code}\n' \
+  "https://${DOMAIN}/cf-vendor/carbon-fields/build/classic/core.js"                 # attendu : 200
 
-# Redémarrer l'app après modif .env
-make restart
-
-# Accès MongoDB
-make mongo
+# La locale française, qui dépend des données ICU complètes
+docker compose -f docker-compose.cms.yml run --rm app php -r \
+  'echo (new IntlDateFormatter("fr_FR",0,0,"UTC",1,"EEEE d MMMM y"))
+     ->format(new DateTimeImmutable("2026-07-30")), PHP_EOL;'                       # attendu : jeudi 30 juillet 2026
 ```
 
 ---
 
-## Déploiement sur VPS (Ubuntu/Debian)
+## Configuration (`cms/.env`)
 
-```bash
-# 1. Modifier l'URL du repo dans scripts/deploy.sh
-#    REPO_URL="https://github.com/TON_USER/prophet-rdv.git"
+Ces variables alimentent l'environnement des conteneurs PHP via `env_file:`.
 
-# 2. Lancer le déploiement (depuis votre machine locale ou le VPS)
-chmod +x scripts/deploy.sh
-./scripts/deploy.sh main
+| Variable | Description |
+|----------|-------------|
+| `WP_ENV`, `WP_HOME`, `WP_SITEURL` | Environnement et URLs |
+| `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST` | Base MySQL |
+| `AUTH_KEY` … `NONCE_SALT` | Secrets WordPress |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS` | Envoi d'emails |
+| `PROPHET_EMAIL` | Destinataire des notifications de rendez-vous |
+| `PROPHET_PHONE_1`, `PROPHET_PHONE_2` | Numéros WhatsApp |
+| `GOOGLE_API_KEY`, `GOOGLE_CALENDAR_ID` | Agenda des événements |
+| `YOUTUBE_API_KEY`, `YOUTUBE_CHANNEL_ID` | Dernières vidéos |
+| `MONEROO_SECRET_KEY`, `MONEROO_WEBHOOK_SECRET` | Paiement en ligne — clés obtenues sur [app.moneroo.io](https://app.moneroo.io) |
 
-# Le script :
-# ✓ Vérifie les prérequis (Docker, Git)
-# ✓ Clone ou met à jour le repo
-# ✓ Vérifie la présence du .env (le crée depuis .env.example si absent)
-# ✓ Build l'image Docker sans cache
-# ✓ Remplace les anciens conteneurs
-# ✓ Vérifie la santé de l'application
-# ✓ Nettoie les images inutilisées
-# ✓ Loggue le déploiement dans /var/log/prophet-rdv-deploy.log
-```
+Sans clés Google ou YouTube, les sections Événements et Vidéos affichent des
+données de démonstration plutôt que de tomber en erreur.
 
----
+**Note Gmail :** activer l'authentification à deux facteurs, puis créer un
+« App Password » sur [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords).
 
-## Activer HTTPS (SSL)
+## Configuration (`.env`, racine du dépôt)
 
-```bash
-# 1. Installer Certbot sur le VPS
-apt-get install certbot
+Ces variables ne sont lues que par Docker Compose, pour interpoler
+`${VARIABLE}` dans `docker-compose.cms.yml` — jamais transmises aux
+conteneurs. `DB_NAME`/`DB_USER`/`DB_PASSWORD` doivent avoir les mêmes valeurs
+que dans `cms/.env`, puisque MySQL est provisionné à partir d'ici alors que
+WordPress s'y connecte à partir de là.
 
-# 2. Obtenir les certificats (arrêtez Nginx temporairement)
-docker compose stop nginx
-certbot certonly --standalone -d votre-domaine.com
-
-# 3. Copier les certificats
-cp /etc/letsencrypt/live/votre-domaine.com/fullchain.pem /opt/prophet-rdv/nginx/ssl/
-cp /etc/letsencrypt/live/votre-domaine.com/privkey.pem /opt/prophet-rdv/nginx/ssl/
-
-# 4. Décommenter le bloc HTTPS dans nginx/default.conf
-#    et activer la redirection HTTP→HTTPS
-
-# 5. Redémarrer Nginx
-docker compose restart nginx
-```
+| Variable | Description |
+|----------|-------------|
+| `DOMAIN` | Nom de domaine servi par Caddy en production |
+| `ACME_EMAIL` | Contact Let's Encrypt |
+| `DB_NAME`, `DB_USER`, `DB_PASSWORD` | Provisionnement MySQL |
+| `DB_ROOT_PASSWORD` | Mot de passe root MySQL |
 
 ---
 
-## Structure des fichiers
+## Administration du contenu
+
+Tout le contenu éditorial se gère depuis `wp-admin`, sans déploiement :
+
+| Menu | Contenu |
+|------|---------|
+| Services | Les 12 types de consultation — titre, description, icône, couleur. Alimente aussi le formulaire de rendez-vous. |
+| Témoignages | Nom, initiales, pays, service concerné, étoiles, texte |
+| Photos | Galerie — image, légende, format (normal ou large) |
+| Rendez-vous | Demandes reçues, en lecture avec changement de statut |
+| Motifs de paiement | Dîmes, Offrandes, Alliance… — création, régime de montant, lien et QR |
+| Dons | Dons reçus, filtre par motif et par statut, export CSV |
+| Contenu du site | Textes du hero, à propos, chiffres clés, appel à l'action, pied de page |
+| Réglages RDV | Numéros WhatsApp, email de notification, créneaux horaires, modes de paiement |
+
+Les événements viennent de Google Calendar et les vidéos de YouTube : ils ne
+s'éditent pas ici.
+
+---
+
+## Paiement en ligne
+
+Le paiement est **désactivé par défaut**. Pour l'activer :
+
+1. Renseigner `MONEROO_SECRET_KEY` et `MONEROO_WEBHOOK_SECRET` dans `cms/.env`.
+2. Dans `wp-admin` → **Paiement** : cocher l'activation, choisir la devise et le
+   moment du paiement.
+3. Dans **Services**, renseigner le prix de chaque consultation. Un service sans
+   prix ne propose pas de paiement.
+4. Déclarer l'URL de webhook sur le tableau de bord Moneroo :
+   `https://votre-domaine.com/wp-json/prophet/v1/moneroo/webhook`
+
+Le rendez-vous est enregistré avant toute redirection vers Moneroo : un paiement
+abandonné ou échoué laisse une demande exploitable, visible en administration.
+
+En mode **exigé**, une demande non réglée est annulée après le délai configuré et
+son créneau est libéré.
+
+---
+
+## Motifs de paiement et dons
+
+**« Mode » et « motif » sont deux notions distinctes, à ne jamais confondre :**
+
+| Terme | Sens | Où |
+|-------|------|----|
+| **Mode** de paiement | Le canal utilisé — Mobile Money, virement, PayPal, crypto | Champ existant du formulaire de rendez-vous, réglé dans **Réglages RDV** |
+| **Motif** de paiement | La raison du versement — Dîmes, Offrandes, Alliance… | Menu **Motifs de paiement**, décrit ci-dessous |
+
+Un don n'est pas une consultation : c'est un module autonome, sans créneau ni
+confirmation par le prophète. Il partage la même mécanique de paiement
+(Moneroo, vérification serveur, webhook signé) que le rendez-vous, mais vit à
+côté de lui.
+
+### Créer un motif
+
+Dans `wp-admin` → **Motifs de paiement** → Ajouter :
+
+1. **Titre et description** — ce que le visiteur voit sur `/don/` (« Dîmes »,
+   « Offrandes »…). Le titre donne aussi le lien profond du motif (`/don/dimes/`
+   pour un titre « Dîmes »).
+2. **Icône** (nom lucide, comme pour un service) et **couleur** de la pastille.
+3. **Régime de montant** — trois choix, qui changent ce que le visiteur peut
+   saisir :
+   - **Libre** : le donateur saisit ce qu'il veut, dans les bornes.
+   - **Fixe** : un montant unique et non modifiable (« Alliance »
+     convenue, par exemple). Le montant soumis dans la requête est **toujours
+     ignoré** — celui du motif fait foi, même si la requête est trafiquée.
+   - **Suggéré** : des paliers proposés en boutons, avec une saisie libre
+     toujours possible dans les bornes.
+4. **Montant minimum / maximum** — le garde-fou serveur (500 et 5 000 000 par
+   défaut). Ce sont ces bornes qui sont vérifiées à la réception du
+   formulaire ; les attributs `min`/`max` du champ HTML ne sont qu'un confort
+   d'affichage.
+5. **Motif actif** — décoché, le motif disparaît du sélecteur mais son lien
+   profond reste consultable (avec un message invitant à choisir un autre
+   motif) : un lien déjà imprimé ou partagé ne casse jamais.
+
+### Récupérer le lien et le QR
+
+La liste **Motifs de paiement** affiche, pour chaque motif, sa colonne
+« Lien et QR » : l'URL partageable (`/don/<motif>/`, motif présélectionné) et
+deux téléchargements — **PNG** et **SVG**. Le QR est généré côté serveur au
+premier affichage puis mis en cache dans `uploads/qr/` ; il est **régénéré
+automatiquement** si l'identifiant (slug) du motif change, pour ne jamais
+pointer vers une page disparue.
+
+C'est ce lien et ce QR qui se partagent en statut WhatsApp, se projettent
+pendant un culte ou s'impriment sur un flyer.
+
+### Retrouver les dons
+
+Menu **Dons** : un don par ligne (donateur, motif, montant, statut de
+paiement, date), avec un filtre par motif et par statut, et le **total
+encaissé** sur la période visible en tête de liste — seuls les dons
+effectivement réglés sont comptés.
+
+### Exporter le CSV
+
+Bouton « Exporter en CSV » en tête de la liste **Dons** : il respecte les
+filtres actifs (motif, statut) et produit un fichier avec BOM UTF-8, pour que
+les accents s'affichent correctement à l'ouverture dans un tableur (Excel,
+Numbers…) plutôt qu'en caractères mal encodés.
+
+### Permaliens après un déploiement
+
+Les liens profonds `/don/<slug>/` et la page `/don/merci/` dépendent des
+règles de réécriture de WordPress. `ProphetCore\Support\RewriteFlusher` les
+régénère automatiquement (`flush_rewrite_rules()`) au premier chargement qui
+suit un changement de structure, via une version comparée à une option
+stockée en base — **il n'y a rien à faire manuellement** après un déploiement.
+Si un lien ou un QR fraîchement imprimé répond malgré tout en 404, ouvrir une
+fois Réglages → Permaliens force la même régénération.
+
+---
+
+## Structure
 
 ```
 prophet-rdv/
-├── pages/
-│   ├── index.vue              # Page principale (3 sections)
-│   └── confirmation.vue       # Page de confirmation post-RDV
-├── components/
-│   ├── HeroLeft.vue           # Colonne gauche (branding + photo)
-│   ├── RdvForm.vue            # Formulaire de rendez-vous
-│   ├── ConsultationPicker.vue # Sélecteur de 12 types de consultation
-│   ├── GallerySection.vue     # Section galerie photos
-│   ├── TestimonialsSection.vue# Section témoignages
-│   ├── TestimonialCard.vue    # Carte témoignage individuelle
-│   ├── AppFooter.vue          # Pied de page
-│   └── ui/                    # Composants shadcn-vue
-├── server/
-│   ├── api/rdv.post.ts        # Route POST /api/rdv
-│   ├── models/Appointment.ts  # Modèle Mongoose
-│   └── utils/
-│       ├── mailer.ts          # Envoi d'emails (Nodemailer)
-│       └── whatsapp.ts        # Construction URLs WhatsApp
-├── lib/
-│   ├── validations.ts         # Schéma Zod + constantes
-│   └── utils.ts               # Utilitaires (cn, formatDate, wa)
-├── public/images/             # Photos (à ajouter)
-├── nginx/default.conf         # Configuration Nginx
-├── scripts/deploy.sh          # Script de déploiement VPS
-├── Dockerfile                 # Build multi-stage
-├── docker-compose.yml         # Orchestration services
-├── Makefile                   # Raccourcis de commandes
-└── .env.example               # Template variables d'environnement
+├── cms/                                    # Bedrock
+│   ├── tests/                              # PHPUnit
+│   └── web/app/
+│       ├── mu-plugins/prophet-core/        # tout le métier
+│       │   └── src/{PostTypes,Fields,Services,Rdv,Support,Cli}
+│       └── themes/prophet/                 # Sage — présentation seule
+│           ├── app/View/Composers/
+│           └── resources/{views,css,js,images}
+├── docker/                                 # Dockerfiles et Caddyfiles
+├── docs/superpowers/                       # spécification, plan, notes de recette
+├── .env.example                            # variables interpolées par Docker Compose
+├── docker-compose.cms.dev.yml
+└── docker-compose.cms.yml
 ```
+
+La séparation est volontaire : le mu-plugin porte les données et les règles, le
+thème ne fait que du rendu. Changer de thème ne fait perdre ni le contenu ni les
+rendez-vous.
 
 ---
 
-## Personnalisation
+## Historique
 
-### Changer les couleurs
-Dans `tailwind.config.ts` → `theme.extend.colors.prophet` :
-```ts
-prophet: {
-  green: '#1D9E75',   // Couleur principale
-  dark:  '#0F172A',   // Fond colonne gauche
-  gold:  '#BA7517',   // Accents dorés
-  light: '#E1F5EE',   // Fond clair vert
-}
-```
-
-### Changer les numéros WhatsApp
-Dans `.env` :
-```
-PROPHET_PHONE_1=+33600000000
-PROPHET_PHONE_2=+33611111111
-```
-
-### Ajouter un type de consultation
-Dans `lib/validations.ts` → `CONSULTATION_TYPES`
-Dans `components/ConsultationPicker.vue` → tableau `consultations`
-
-### Modifier les horaires disponibles
-Dans `lib/validations.ts` → `HEURES`
-
----
-
-## Commandes utiles
-
-```bash
-make help           # Afficher toutes les commandes
-make dev            # Mode développement
-make build          # Build Docker
-make up             # Démarrer en prod
-make down           # Arrêter
-make logs           # Logs en direct
-make restart        # Redémarrer l'app
-make deploy         # Déployer sur VPS
-make shell          # Shell dans le conteneur
-make mongo          # MongoDB shell
-make clean          # Tout supprimer
-```
+Ce site était une application Nuxt 3 avec MongoDB et un service Node séparé pour
+Google Calendar et YouTube. La migration vers WordPress a conservé le design à
+l'identique et rendu le contenu éditable. La spécification, le plan de migration
+et la recette sont dans `docs/superpowers/`.
